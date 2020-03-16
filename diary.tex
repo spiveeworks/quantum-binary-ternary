@@ -1,6 +1,7 @@
 \documentclass[]{article}
 
 \usepackage{amsmath}
+\usepackage{amssymb}
 
 \renewcommand\thesection{}
 \renewcommand\thesubsection{}
@@ -12,6 +13,113 @@
 
 \begin{document}
 \maketitle
+
+\section{Notation}
+
+In this diary unless explicitly stated within a section, I have been using the notation specified by Nielsen and Chuang, with the following additions:
+\begin{itemize}
+	\item Implicit quantifiers for index variables such as $i, j, k$. (Nielson and Chuang seem to do this actually, perhaps dropping more than I do)
+	\begin{itemize}
+		\item $\{x_i\} = \{x_i\ |\ i \in I\}$, $\{|x_i\rangle\} = \{|x_i\rangle\ |\ i \in I\}$ etc.
+		\item $(x_i) = (x_1, x_2, \ldots, x_n)$
+		\item $\sum_i$ in place of $\sum_{i \in I}$
+		\item $\forall i$ in place of $\forall i \in I$
+	\end{itemize}
+\end{itemize}
+
+\section{March 16}
+
+\subsection{Exercise 2.3}
+\[
+A: V \to W
+\]\[
+B: W \to X
+\]\[
+V = span\{|v_i\rangle\}\ \textit{etc.}
+\]
+
+At this point we are already identifying $A$, $B$ with their matrix representations. We would like to show equality between the function composition $B \circ A$ and the matrix product of the corresponding matrix representations, $B \times A$.
+Once we have done this we will be able to identify both of these concepts as simply the expression $BA$, but for now we will use the explicit operators
+% weird $\text{}$ layering to avoid soft-wrap putting \times on its own line
+$\circ\ \text{and}\ \times$.
+
+Our goal then is to show that the matrix representation of $B \circ A$ is $B \times A$.
+
+\begin{align*}
+&\sum_i (B \circ A)_{ij} |x_i\rangle &\text{(arbitrary column of matrix $B \circ A$)}\\
+=\ &(B \circ A)|v_j\rangle &\text{(Definition of matrix representation)}\\
+=\ &B(A|v_j\rangle) &\text{(Definition of composition)}\\
+=\ &B\left(\sum_k A_{kj} |w_k\rangle\right) &\text{(Matrix representation)}\\
+=\ &\sum_k A_{kj} (B |w_k\rangle) &\text{(Linearity of B)}\\
+=\ &\sum_k A_{kj} \left( \sum_i B_{ik} |x_i\rangle \right) &\text{(Matrix representation)}\\
+=\ &\sum_i \left(\sum_k B_{ik} A_{kj}\right) |x_i\rangle &\text{(distribution)}\\
+=\ &\sum_i (B \times A)_{ij} |x_i\rangle &\text{(matrix product)}
+\end{align*}
+So by linear independence of $|x_i\rangle$ we know that $(B \circ A)_{ij} = (B \times A)_{ij}$ for arbitrary $i, j$, i.e. the matrix representation of $B \circ A$ is the matrix product $B \times A$.
+
+\subsection{Exercise 2.4}
+
+\[I: V \to V\]
+\[I|x_i\rangle = |x_i\rangle\]
+
+We would like to show that $I_{ij} = \delta_{ij}$.
+
+\begin{align*}
+&\sum_i I_{ij} |x_i\rangle \\
+= &I|x_j\rangle \\
+= &|x_j\rangle \\
+= &\sum_i \delta_{ij}|x_i\rangle
+\end{align*}
+
+Again by linear independence of $\{|x_i\rangle\}$ we have $I_{ij} = \delta_{ij}$.
+
+\subsection{Exercise 2.5}
+
+\[((y_i), (z_i)) = \sum_i y_i^*z_i\]
+
+We need to prove 3 properties. First linearity, taking $|v\rangle = (v_j) = (v_1, v_2, \ldots, v_n)$ and $|w_i\rangle = (w_{ij}) = (w_{i1}, w_{i2}, \ldots, w_{in})$.
+
+For this we define
+\[|z\rangle = (z_j) = \sum_i\lambda_i|w_i\rangle\]
+Then by the definitions of sum and scalar product in $\mathbb{C}^n$ we observe
+\begin{align*}
+   &z_j \\
+=\ &\left(\sum_i\lambda_i|w_i\rangle\right)_j \\
+=\ &\sum_i\left(\lambda_i|w_i\rangle\right)_j \\
+=\ &\sum_i\lambda_iw_{ij}
+\end{align*}
+With this linearity falls out.
+\begin{align*}
+   &\left(|v\rangle, |z\rangle\right) \\
+=\ &\left((v_j), (z_j)\right) \\
+=\ &\sum_j y_j^*z_j \\
+=\ &\sum_j y_j^*\left(\sum_i\lambda_iw_{ij}\right) \\
+=\ &\sum_i\lambda_i\left(\sum_jv_j^*w_{ij}\right) \\
+=\ &\sum_i\lambda_i\left((v_j), (w_{ij})\right) \\
+=\ &\sum_i\lambda_i\left(|v\rangle, |w_i\rangle\right)
+\end{align*}
+
+Next we prove conjugate symmetry.
+\begin{align*}
+   &(|w\rangle, |v\rangle)^* \\
+=\ &((w_i), (v_i))^* \\
+=\ &\left(\sum_iw_i^*v_i\right)^* \\
+=\ &\sum_iw_i^{**}v_i^* \\
+=\ &\sum_iv_i^*w_i \\
+=\ &((v_i), (w_i)) \\
+=\ &(|v\rangle, |w\rangle)
+\end{align*}
+
+Finally positivity:
+\begin{align*}
+   &(|v\rangle, |v\rangle) \\
+=\ &((v_i), (v_i)) \\
+=\ &\sum_iv_i^*v_i \\
+=\ &\sum_i|v_i|^2
+\end{align*}
+Clearly this expression is at least 0, with equality when $v_i = 0\ \forall i$, i.e. when $|v\rangle = (0, 0, \ldots, 0)$.
+
+Therefore the operator $(\cdot, \cdot)$ is an inner product on the vector space $\mathbb{C}^n$.
 
 \section{March 13}
 
