@@ -159,4 +159,36 @@ Clearly this expression is at least 0, with equality when $v_i = 0\ \forall i$, 
 
 Therefore the operator $(\cdot, \cdot)$ is an inner product on the vector space $\mathbb{C}^n$.
 
+\section{March 23}
+
+\subsection{Exercise 2.6}
+
+Combines second argument linearity with conjugate symmetry, as you would expect.
+\begin{align*}
+\left(\sum_i\lambda_i|w_i\rangle, |v\rangle\right)
+&= 
+\left(|v\rangle, \sum_i\lambda_i|w_i\rangle\right)^* \\
+&= \left(\sum_i\lambda_i\left(|v\rangle, |w_i\rangle\right)\right)^* \\
+&= \sum_i\lambda_i^*\left(|v\rangle, |w_i\rangle\right)^* \\
+&= \sum_i\lambda_i^*\left(|w_i\rangle, |v\rangle\right)
+\end{align*}
+
+\subsection{Exercise 2.7}
+
+\[\langle w|v\rangle = (1)(1)+(1)(-1) = 0\]
+\[|w\rangle, |v\rangle = \left(\frac{1}{\sqrt{2}}, \pm\frac{1}{\sqrt{2}}\right)\]
+
+\subsection{Exercise 2.8}
+
+Suppose that $j < k$, and that the first $k-1$ vectors are orthonormal,
+\begin{align*}
+\langle v_j| v_k\rangle
+&= \langle v_j|w_k\rangle - \sum_i^{k-1}\langle v_i | w_k\rangle \langle v_j|v_i\rangle \\
+&= \langle v_j|w_k\rangle - \langle v_j | w_k\rangle \langle v_j|v_j\rangle \\
+&= \langle v_j|w_k\rangle - \langle v_j | w_k\rangle \langle v_j|v_j\rangle \\
+&= 0
+\end{align*}
+
+Obviously $|v_i\rangle$ are explicitly normalized so we are done.
+
 \end{document}          
