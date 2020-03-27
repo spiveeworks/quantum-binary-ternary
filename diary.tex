@@ -191,4 +191,105 @@ Suppose that $j < k$, and that the first $k-1$ vectors are orthonormal,
 
 Obviously $|v_i\rangle$ are explicitly normalized so we are done.
 
+\section{March 27}
+
+Feel like generalizing Ex 2.9 based on Ex 2.10.
+
+\subsection{Exercise 2.10}
+
+Suppose $|v_i\rangle$ is an orthonormal basis for an inner product space $V$.What is the matrix representation for the operator $|v_j\rangle\langle v_k|$, with respect to the $|v_i\rangle$ basis?
+
+Let $A = |v_j\rangle\langle v_k|$, and $A|v_n\rangle = A_{mn}|v_m\rangle$, then
+\begin{align*}
+A_{mn}|v_m\rangle
+&= |v_j\rangle \langle v_k|v_n\rangle \\
+&= \delta_{kn}|v_j\rangle \\
+\implies A_{mn}
+&= \begin{cases}
+\delta_{kn} & m = j \\
+0 & else
+\end{cases} \\
+&= \begin{cases}
+1 & m = j, n = k \\
+0 & else
+\end{cases}
+\end{align*}
+
+e.g. in a 2d space,
+\[|0\rangle\langle 1| = \left[\begin{matrix}
+0 & 1 \\
+0 & 0
+\end{matrix}\right]\]
+
+\subsection{Exercise 2.9}
+
+From 2.10 it becomes clear that
+\[
+I = \left[\begin{matrix}
+1 & 0 \\
+0 & 1
+\end{matrix}\right] = |0\rangle\langle 0| + |1\rangle\langle 1|
+\]
+\[
+X = \left[\begin{matrix}
+0 & 1 \\
+1 & 0
+\end{matrix}\right] = |0\rangle\langle 1| + |1\rangle\langle 0|
+\]
+\[
+Y = \left[\begin{matrix}
+0 & -i \\
+i & 0
+\end{matrix}\right] = i|1\rangle\langle 0| -i|0\rangle\langle 1|
+\]
+\[
+Z = \left[\begin{matrix}
+1 & 0 \\
+0 & -1
+\end{matrix}\right] = |0\rangle\langle 0| - |1\rangle\langle 1|
+\]
+
+\subsection{Matrix Reps and Outer Products}
+
+Visually one can see that we can use $|v_i\rangle \langle v_j|$ as a basis for describing linear maps directly in terms of their matrix representation, e.g.
+
+\[\left[\begin{matrix}a&b\\c&d\end{matrix}\right] = a|0\rangle\langle 0| + b|0\rangle\langle 1| + c|1\rangle\langle 0| + d|1\rangle\langle 1|\]
+
+Stated more generally
+
+\[A = \sum_{ij} A_{ij}|v_i\rangle\langle v_j|\]
+
+Which connects to equation 2.25 via the equality
+
+\[\langle v_j| A | v_i\rangle = A_{ij}\]
+
+Each of these things can be shown, especially once linear maps are themselves understood as a vector space, but I shall take these statements as given.
+
+\subsection{Exercise 2.11}
+Find the eigenvectors, eigenvalues, and diagonal representations of the Pauli matrices $X$, $Y$, and $Z$.
+
+Z is already diagonal.
+
+X has the familiar and intuitive eigenvectors $|+\rangle$ and $|-\rangle$:
+\begin{align*}
+X|+\rangle = |+\rangle \\
+X|-\rangle = -|-\rangle
+\end{align*}
+Diagonal representation then is $X = |+\rangle\langle+|\ -\ |-\rangle\langle-|$
+
+$Y$ has the same shape as $X$ so we could guess the eigenvectors are the same, but $Y|+\rangle = -i|-\rangle$.
+
+Solving properly we get $c(\lambda) = \lambda^2 - 1 = 0$, with eigenvectors in the null-spaces of:
+\[
+\left[\begin{matrix}-1&-i\\i&-1\end{matrix}\right]
+\left[\begin{matrix}a\\b\end{matrix}\right]
+=\left[\begin{matrix}0\\0\end{matrix}
+\right]
+\]
+Second row is $-i$ times first row:
+\[Y(|0\rangle -i |1\rangle) = -|0\rangle +i|1\rangle\]
+Taking the conjugate we unsurprisingly get
+\[Y(|0\rangle +i |1\rangle) = |0\rangle +i|1\rangle\]
+Their diagonal representation would be just what you'd expect, $|v_0\rangle\langle v_0| - |v_1\rangle\langle v_1|$ where $|v_0\rangle = 2^{-\frac{1}{2}}\left(|0\rangle + i|1\rangle\right)$, $|v_1\rangle = 2^{-\frac{1}{2}}\left(|0\rangle - i|1\rangle\right)$.
+
 \end{document}          
