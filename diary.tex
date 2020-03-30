@@ -292,4 +292,94 @@ Taking the conjugate we unsurprisingly get
 \[Y(|0\rangle +i |1\rangle) = |0\rangle +i|1\rangle\]
 Their diagonal representation would be just what you'd expect, $|v_0\rangle\langle v_0| - |v_1\rangle\langle v_1|$ where $|v_0\rangle = 2^{-\frac{1}{2}}\left(|0\rangle + i|1\rangle\right)$, $|v_1\rangle = 2^{-\frac{1}{2}}\left(|0\rangle - i|1\rangle\right)$.
 
-\end{document}          
+\section{March 30}
+\subsection{Exercise 2.12}
+Prove that the matrix
+\[\left[\begin{matrix}1&1\\1&0\end{matrix}\right]\]
+is not diagonalizable.
+
+The equation $c(\lambda) = (1-\lambda)^2 = 0$ has repeated root $\lambda = 1$, so it either has one eigenvector, or a eigenspace of 2 degenerate eigenvectors.
+
+Clearly if it had 2 degenerate eigenvectors it would simply be the identity operation, mapping all vectors to themselves (scaled by the eigenvalue 1), so we know there is no eigenvector basis, let alone the weaker result that there is no orthonormal eigenvector basis.
+
+To apply the formal structure of QM we can prove this weaker result explicitly: If $M$ above is diagonalizable, then $M = |v_1\rangle\langle v_1| + |v_2\rangle\langle v_2|$ which by the completeness relation 2.22 gives $M = I$, therefore $M$ is not diagonalizable.
+
+\subsection{Exercise 2.13}
+
+If $|w\rangle$ and $|v\rangle$ are any two vectors, show that $(|w\rangle\langle v|)^\dagger = |v\rangle\langle w|$.
+
+Since we are told that the adjoint is unique, it is sufficient to show equation 2.32:
+\[(|v'\rangle, |w\rangle\langle v|w'\rangle) = (|v\rangle\langle w|v'\rangle, |w'\rangle)\]
+
+Then by linearity of the inner product this is equivalent to
+\[\langle v|w'\rangle(|v'\rangle, |w\rangle) = \langle w|v'\rangle^*(|v\rangle, |w'\rangle)\]
+Apply conjugate symmetry and note that $\langle v|w'\rangle = (|v\rangle, |w'\rangle)$ by definition, and the result clearly follows.
+
+\subsection{Exercise 2.14}
+
+Show that the adjoint operation is anti-linear
+
+Straight forward, again by uniqueness we simply need equation 2.32 to hold, which after linearity becomes:
+\[\sum_i a_i(|v\rangle, A_i|w\rangle) = \sum_i a_i^{**}(A_i^\dagger|v\rangle, |w\rangle)\]
+By double-conjugate elimination and the adjointness property, this is clearly true.
+
+\subsection{Exercise 2.15}
+
+Show that $(A^\dagger)^\dagger = A$.
+
+\begin{align*}
+(|v\rangle, A^\dagger|w\rangle)
+&= (A^\dagger|w\rangle, |v\rangle)^* \\
+&= (|w\rangle, A|v\rangle)^* \\
+&= (A|v\rangle, |w\rangle)
+\end{align*}
+So $A$ is the adjoint of $A^\dagger$, i.e. by uniqueness of adjoints $(A^\dagger)^\dagger = A$.
+
+\subsection{Equation 2.16}
+
+Show that any projector $P$ satisfies the equation $P^2 = P$.
+
+\begin{align*}
+(\sum_i |i\rangle\langle i|)^2
+&= \sum_{ij} |i\rangle\langle i|j\rangle\langle j|
+&= \sum_{ij} \delta_{ij}|i\rangle\langle j|
+&= \sum_i |i\rangle\langle i|
+\end{align*}
+
+\subsection{Exercise 2.17}
+Show that a normal matrix is Hermitian if and only if it has real eigenvalues.
+
+First show that a hermitian matrix has real eigenvalues, i.e. if $A|v\rangle = v|v\rangle$ then $v$ is real.
+
+Consider $\langle v|A|v\rangle$:
+\begin{align*}
+\langle v|A|v\rangle
+&= (|v\rangle, A|v\rangle) \\
+&= (|v\rangle, v|v\rangle) \\
+&= v(|v\rangle, |v\rangle) \\
+&= v\langle v|v\rangle
+\end{align*}
+But by adjointness this can also be shown for $v^*$:
+\begin{align*}
+\langle v|A|v\rangle
+&= (|v\rangle, A|v\rangle) \\
+&= (A|v\rangle, |v\rangle) \\
+&= (v|v\rangle, |v\rangle) \\
+&= v^*(|v\rangle, |v\rangle) \\
+&= v^*\langle v|v\rangle
+\end{align*}
+So $v = v^*$, and necessarily $v$ is real.
+
+Next show that if $A$ is normal and has all real eigenvalues, then $A$ is hermitian.
+
+By spectral decomposition:
+\[A = \sum_i v_i|v_i\rangle\langle v_i|\]
+Then taking the adjoint the result becomes obvious:
+\begin{align*}
+A^\dagger
+&= \sum_i v_i^* |v_i\rangle\langle v_i| \\
+&= \sum_i v_i |v_i\rangle\langle v_i| \\
+&= A
+\end{align*}
+
+\end{document}
