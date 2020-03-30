@@ -6,6 +6,10 @@
 \renewcommand\thesection{}
 \renewcommand\thesubsection{}
 
+\newcommand{\bra}[1]{\langle #1 |}
+\newcommand{\ket}[1]{| #1 \rangle}
+\newcommand{\braket}[2]{\langle #1 | #2 \rangle}
+
 % Title Page
 \title{Honours Diary 2020}
 \author{Jarvis Carroll}
@@ -20,7 +24,7 @@ In this diary unless explicitly stated within a section, I have been using the n
 \begin{itemize}
 	\item Implicit quantifiers for index variables such as $i, j, k$. (Nielson and Chuang seem to do this actually, perhaps dropping more than I do)
 	\begin{itemize}
-		\item $\{x_i\} = \{x_i\ |\ i \in I\}$, $\{|x_i\rangle\} = \{|x_i\rangle\ |\ i \in I\}$ etc.
+		\item $\{x_i\} = \{x_i\ |\ i \in I\}$, $\{\ket{x_i}\} = \{\ket{x_i}\ |\ i \in I\}$ etc.
 		\item $(x_i) = (x_1, x_2, \ldots, x_n)$
 		\item $\sum_i$ in place of $\sum_{i \in I}$
 		\item $\forall i$ in place of $\forall i \in I$
@@ -41,18 +45,22 @@ Linear Dependence, show that $(1,-1)$, $(1,2)$ and $(2,1)$ are linearly dependen
 \end{align*}
 
 \subsection{Exercise 2.2}
-Matrix representations: Suppose $V$ is a vector space with basis vectors $|0\rangle$ and $|1\rangle$, and $A$ is a linear operator from $V$ to $V$ such that $A|0\rangle=|1\rangle$ and $A|1\rangle=|0\rangle$. Give a matrix representation for $A$, with respect to the input basis $|0\rangle$, $|1\rangle$, and the output basis $|0\rangle$, $|1\rangle$. Find input and output bases which give rise to a different matrix representation of $A$.
+Matrix representations: Suppose $V$ is a vector space with basis vectors
+$\ket{0}$ and $\ket{1}$, and $A$ is a linear operator from $V$ to $V$ such that
+$A\ket{0}=\ket{1}$ and $A\ket{1}=\ket{0}$. Give a matrix representation for
+$A$, with respect to the input basis $\ket{0}$, $\ket{1}$, and the output basis
+$\ket{0}$, $\ket{1}$. Find input and output bases which give rise to a different matrix representation of $A$.
 
 Equation 2.12 gives us the defining property of matrix representations:
-\[A|v_j\rangle=\sum_i A_{ij}|w_i\rangle\]
+\[A\ket{v_j}=\sum_i A_{ij}\ket{w_i}\]
 This gives us a pair of vector equations:
 \[
-|1\rangle = A|0\rangle = A_{00}|0\rangle + A_{10}|1\rangle
+	\ket{1} = A\ket{0} = A_{00}\ket{0} + A_{10}\ket{1}
 \]
 \[
-|0\rangle = A|1\rangle = A_{01}|0\rangle + A_{11}|1\rangle
+	\ket{0} = A\ket{1} = A_{01}\ket{0} + A_{11}\ket{1}
 \]
-By linear independence of $|0\rangle$, $|1\rangle$, it follows that
+By linear independence of $\ket{0}$, $\ket{1}$, it follows that
 \begin{align*}
 A_{00} &= 0 & A_{01} &= 1 \\
 A_{10} &= 1 & A_{11} &= 0
@@ -73,7 +81,7 @@ A: V \to W
 \]\[
 B: W \to X
 \]\[
-V = span\{|v_i\rangle\}\ \textit{etc.}
+	V = span\{\ket{v_i}\}\ \textit{etc.}
 \]
 
 At this point we are already identifying $A$, $B$ with their matrix representations. We would like to show equality between the function composition $B \circ A$ and the matrix product of the corresponding matrix representations, $B \times A$.
@@ -84,78 +92,80 @@ $\circ\ \text{and}\ \times$.
 Our goal then is to show that the matrix representation of $B \circ A$ is $B \times A$.
 
 \begin{align*}
-&\sum_i (B \circ A)_{ij} |x_i\rangle &\text{(arbitrary column of matrix $B \circ A$)}\\
-=\ &(B \circ A)|v_j\rangle &\text{(Definition of matrix representation)}\\
-=\ &B(A|v_j\rangle) &\text{(Definition of composition)}\\
-=\ &B\left(\sum_k A_{kj} |w_k\rangle\right) &\text{(Matrix representation)}\\
-=\ &\sum_k A_{kj} (B |w_k\rangle) &\text{(Linearity of B)}\\
-=\ &\sum_k A_{kj} \left( \sum_i B_{ik} |x_i\rangle \right) &\text{(Matrix representation)}\\
-=\ &\sum_i \left(\sum_k B_{ik} A_{kj}\right) |x_i\rangle &\text{(distribution)}\\
-=\ &\sum_i (B \times A)_{ij} |x_i\rangle &\text{(matrix product)}
+	&\sum_i {(B \circ A)}_{ij} \ket{x_i} &\text{(arbitrary column of matrix $B \circ A$)}\\
+	=\ &(B \circ A)\ket{v_j} &\text{(Definition of matrix representation)}\\
+	=\ &B(A\ket{v_j}) &\text{(Definition of composition)}\\
+	=\ &B\left(\sum_k A_{kj} \ket{w_k}\right) &\text{(Matrix representation)}\\
+	=\ &\sum_k A_{kj} (B \ket{w_k}) &\text{(Linearity of B)}\\
+	=\ &\sum_k A_{kj} \left( \sum_i B_{ik} \ket{x_i} \right) &\text{(Matrix representation)}\\
+	=\ &\sum_i \left(\sum_k B_{ik} A_{kj}\right) \ket{x_i} &\text{(distribution)}\\
+	=\ &\sum_i {(B \times A)}_{ij} \ket{x_i} &\text{(matrix product)}
 \end{align*}
-So by linear independence of $|x_i\rangle$ we know that $(B \circ A)_{ij} = (B \times A)_{ij}$ for arbitrary $i, j$, i.e. the matrix representation of $B \circ A$ is the matrix product $B \times A$.
+So by linear independence of $\ket{x_i}$ we know that ${(B \circ A)}_{ij} = {(B \times A)}_{ij}$ for arbitrary $i, j$, i.e.\ the matrix representation of $B \circ A$ is the matrix product $B \times A$.
 
 \subsection{Exercise 2.4}
 
 \[I: V \to V\]
-\[I|x_i\rangle = |x_i\rangle\]
+\[I\ket{x_i} = \ket{x_i}\]
 
 We would like to show that $I_{ij} = \delta_{ij}$.
 
 \begin{align*}
-&\sum_i I_{ij} |x_i\rangle \\
-= &I|x_j\rangle \\
-= &|x_j\rangle \\
-= &\sum_i \delta_{ij}|x_i\rangle
+	&\sum_i I_{ij} \ket{x_i} \\
+	= &I\ket{x_j} \\
+	= &\ket{x_j} \\
+	= &\sum_i \delta_{ij}\ket{x_i}
 \end{align*}
 
-Again by linear independence of $\{|x_i\rangle\}$ we have $I_{ij} = \delta_{ij}$.
+Again by linear independence of $\{\ket{x_i}\}$ we have $I_{ij} = \delta_{ij}$.
 
 \subsection{Exercise 2.5}
 
 \[((y_i), (z_i)) = \sum_i y_i^*z_i\]
 
-We need to prove 3 properties. First linearity, taking $|v\rangle = (v_j) = (v_1, v_2, \ldots, v_n)$ and $|w_i\rangle = (w_{ij}) = (w_{i1}, w_{i2}, \ldots, w_{in})$.
+We need to prove 3 properties. First linearity, taking $\ket{v} = (v_j) = (v_1,
+v_2, \ldots, v_n)$ and $\ket{w_i} = (w_{ij}) = (w_{i1}, w_{i2}, \ldots, w_{in})$.
 
 For this we define
-\[|z\rangle = (z_j) = \sum_i\lambda_i|w_i\rangle\]
+\[\ket{z} = (z_j) = \sum_i\lambda_i\ket{w_i}\]
 Then by the definitions of sum and scalar product in $\mathbb{C}^n$ we observe
 \begin{align*}
 &z_j \\
-=\ &\left(\sum_i\lambda_i|w_i\rangle\right)_j \\
-=\ &\sum_i\left(\lambda_i|w_i\rangle\right)_j \\
-=\ &\sum_i\lambda_iw_{ij}
+	=\ &{\left(\sum_i\lambda_i\ket{w_i}\right)}_j \\
+	=\ &\sum_i{\left(\lambda_i\ket{w_i}\right)}_j \\
+	=\ &\sum_i\lambda_i w_{ij}
 \end{align*}
 With this linearity falls out.
 \begin{align*}
-&\left(|v\rangle, |z\rangle\right) \\
+	&\left(\ket{v}, \ket{z}\right) \\
 =\ &\left((v_j), (z_j)\right) \\
 =\ &\sum_j y_j^*z_j \\
-=\ &\sum_j y_j^*\left(\sum_i\lambda_iw_{ij}\right) \\
-=\ &\sum_i\lambda_i\left(\sum_jv_j^*w_{ij}\right) \\
+=\ &\sum_j y_j^*\left(\sum_i\lambda_i w_{ij}\right) \\
+=\ &\sum_i\lambda_i\left(\sum_j v_j^*w_{ij}\right) \\
 =\ &\sum_i\lambda_i\left((v_j), (w_{ij})\right) \\
-=\ &\sum_i\lambda_i\left(|v\rangle, |w_i\rangle\right)
+	=\ &\sum_i\lambda_i\left(\ket{v}, \ket{w_i}\right)
 \end{align*}
 
 Next we prove conjugate symmetry.
 \begin{align*}
-&(|w\rangle, |v\rangle)^* \\
-=\ &((w_i), (v_i))^* \\
-=\ &\left(\sum_iw_i^*v_i\right)^* \\
-=\ &\sum_iw_i^{**}v_i^* \\
-=\ &\sum_iv_i^*w_i \\
-=\ &((v_i), (w_i)) \\
-=\ &(|v\rangle, |w\rangle)
+	&{(\ket{w}, \ket{v})}^* \\
+	=\ &{((w_i), (v_i))}^* \\
+	=\ &{\left(\sum_i w_i^* v_i\right)}^* \\
+	=\ &\sum_i w_i^{**}v_i^* \\
+	=\ &\sum_i v_i^*w_i \\
+	=\ &((v_i), (w_i)) \\
+	=\ &(\ket{v}, \ket{w})
 \end{align*}
 
 Finally positivity:
 \begin{align*}
-&(|v\rangle, |v\rangle) \\
+	&(\ket{v}, \ket{v}) \\
 =\ &((v_i), (v_i)) \\
-=\ &\sum_iv_i^*v_i \\
+=\ &\sum_i v_i^*v_i \\
 =\ &\sum_i|v_i|^2
 \end{align*}
-Clearly this expression is at least 0, with equality when $v_i = 0\ \forall i$, i.e. when $|v\rangle = (0, 0, \ldots, 0)$.
+Clearly this expression is at least 0, with equality when $v_i = 0\ \forall i$,
+i.e.\ when $\ket{v} = (0, 0, \ldots, 0)$.
 
 Therefore the operator $(\cdot, \cdot)$ is an inner product on the vector space $\mathbb{C}^n$.
 
@@ -165,31 +175,30 @@ Therefore the operator $(\cdot, \cdot)$ is an inner product on the vector space 
 
 Combines second argument linearity with conjugate symmetry, as you would expect.
 \begin{align*}
-\left(\sum_i\lambda_i|w_i\rangle, |v\rangle\right)
-&= 
-\left(|v\rangle, \sum_i\lambda_i|w_i\rangle\right)^* \\
-&= \left(\sum_i\lambda_i\left(|v\rangle, |w_i\rangle\right)\right)^* \\
-&= \sum_i\lambda_i^*\left(|v\rangle, |w_i\rangle\right)^* \\
-&= \sum_i\lambda_i^*\left(|w_i\rangle, |v\rangle\right)
+	\left(\sum_i\lambda_i\ket{w_i}, \ket{v}\right)
+	&= {\left(\ket{v}, \sum_i\lambda_i\ket{w_i}\right)}^* \\
+	&= {\left(\sum_i\lambda_i\left(\ket{v}, \ket{w_i}\right)\right)}^* \\
+	&= \sum_i\lambda_i^*{\left(\ket{v}, \ket{w_i}\right)}^* \\
+	&= \sum_i\lambda_i^*{\left(\ket{w_i}, \ket{v}\right)}
 \end{align*}
 
 \subsection{Exercise 2.7}
 
-\[\langle w|v\rangle = (1)(1)+(1)(-1) = 0\]
-\[|w\rangle, |v\rangle = \left(\frac{1}{\sqrt{2}}, \pm\frac{1}{\sqrt{2}}\right)\]
+\[\braket{w}{v} = (1)(1)+(1)(-1) = 0\]
+\[\ket{w}, \ket{v} = \left(\frac{1}{\sqrt{2}}, \pm\frac{1}{\sqrt{2}}\right)\]
 
 \subsection{Exercise 2.8}
 
 Suppose that $j < k$, and that the first $k-1$ vectors are orthonormal,
 \begin{align*}
-\langle v_j| v_k\rangle
-&= \langle v_j|w_k\rangle - \sum_i^{k-1}\langle v_i | w_k\rangle \langle v_j|v_i\rangle \\
-&= \langle v_j|w_k\rangle - \langle v_j | w_k\rangle \langle v_j|v_j\rangle \\
-&= \langle v_j|w_k\rangle - \langle v_j | w_k\rangle \langle v_j|v_j\rangle \\
+	\braket{v_j}{v_k}
+	&= \braket{v_j}{w_k} - \sum_i^{k-1}\braket{v_i}{w_k}\braket{v_j}{v_i} \\
+	&= \braket{v_j}{w_k} - \braket{v_j}{w_k} \braket{v_j}{v_j} \\
+	&= \braket{v_j}{w_k} - \braket{v_j }{ w_k} \braket{v_j}{v_j} \\
 &= 0
 \end{align*}
 
-Obviously $|v_i\rangle$ are explicitly normalized so we are done.
+Obviously $\ket{v_i}$ are explicitly normalized so we are done.
 
 \section{March 27}
 
@@ -197,13 +206,15 @@ Feel like generalizing Ex 2.9 based on Ex 2.10.
 
 \subsection{Exercise 2.10}
 
-Suppose $|v_i\rangle$ is an orthonormal basis for an inner product space $V$.What is the matrix representation for the operator $|v_j\rangle\langle v_k|$, with respect to the $|v_i\rangle$ basis?
+Suppose $\ket{v_i}$ is an orthonormal basis for an inner product space
+$V$.What is the matrix representation for the operator
+$\ket{v_j}\bra{v_k}$, with respect to the $\ket{v_i}$ basis?
 
-Let $A = |v_j\rangle\langle v_k|$, and $A|v_n\rangle = A_{mn}|v_m\rangle$, then
+Let $A = \ket{v_j}\bra{v_k}$, and $A\ket{v_n} = A_{mn}\ket{v_m}$, then
 \begin{align*}
-A_{mn}|v_m\rangle
-&= |v_j\rangle \langle v_k|v_n\rangle \\
-&= \delta_{kn}|v_j\rangle \\
+	A_{mn}\ket{v_m}
+	&= \ket{v_j} \braket{v_k}{v_n} \\
+	&= \delta_{kn}\ket{v_j} \\
 \implies A_{mn}
 &= \begin{cases}
 \delta_{kn} & m = j \\
@@ -216,7 +227,7 @@ A_{mn}|v_m\rangle
 \end{align*}
 
 e.g. in a 2d space,
-\[|0\rangle\langle 1| = \left[\begin{matrix}
+\[\ket{0}\bra{1} = \left[\begin{matrix}
 0 & 1 \\
 0 & 0
 \end{matrix}\right]\]
@@ -228,40 +239,41 @@ From 2.10 it becomes clear that
 I = \left[\begin{matrix}
 1 & 0 \\
 0 & 1
-\end{matrix}\right] = |0\rangle\langle 0| + |1\rangle\langle 1|
+\end{matrix}\right] = \ket{0}\bra{0} + \ket{1}\bra{1}
 \]
 \[
 X = \left[\begin{matrix}
 0 & 1 \\
 1 & 0
-\end{matrix}\right] = |0\rangle\langle 1| + |1\rangle\langle 0|
+\end{matrix}\right] = \ket{0}\bra{1} + \ket{1}\bra{0}
 \]
 \[
 Y = \left[\begin{matrix}
 0 & -i \\
 i & 0
-\end{matrix}\right] = i|1\rangle\langle 0| -i|0\rangle\langle 1|
+\end{matrix}\right] = i\ket{1}\bra{0} -i\ket{0}\bra{1}
 \]
 \[
 Z = \left[\begin{matrix}
 1 & 0 \\
 0 & -1
-\end{matrix}\right] = |0\rangle\langle 0| - |1\rangle\langle 1|
+\end{matrix}\right] = \ket{0}\bra{0} - \ket{1}\bra{1}
 \]
 
 \subsection{Matrix Reps and Outer Products}
 
-Visually one can see that we can use $|v_i\rangle \langle v_j|$ as a basis for describing linear maps directly in terms of their matrix representation, e.g.
+Visually one can see that we can use $\ket{v_i} \bra{v_j}$ as a basis for describing linear maps directly in terms of their matrix representation, e.g.
 
-\[\left[\begin{matrix}a&b\\c&d\end{matrix}\right] = a|0\rangle\langle 0| + b|0\rangle\langle 1| + c|1\rangle\langle 0| + d|1\rangle\langle 1|\]
+\[\left[\begin{matrix}a&b\\c&d\end{matrix}\right] = a\ket{0}\bra{0} +
+	b\ket{0}\bra{1} + c\ket{1}\bra{0} + d\ket{1}\bra{1}\]
 
 Stated more generally
 
-\[A = \sum_{ij} A_{ij}|v_i\rangle\langle v_j|\]
+\[A = \sum_{ij} A_{ij}\ket{v_i}\bra{v_j}\]
 
 Which connects to equation 2.25 via the equality
 
-\[\langle v_j| A | v_i\rangle = A_{ij}\]
+\[\bra{v_j} A \ket{ v_i} = A_{ij}\]
 
 Each of these things can be shown, especially once linear maps are themselves understood as a vector space, but I shall take these statements as given.
 
@@ -270,14 +282,15 @@ Find the eigenvectors, eigenvalues, and diagonal representations of the Pauli ma
 
 Z is already diagonal.
 
-X has the familiar and intuitive eigenvectors $|+\rangle$ and $|-\rangle$:
+X has the familiar and intuitive eigenvectors $\ket{+}$ and $\ket{-}$:
 \begin{align*}
-X|+\rangle = |+\rangle \\
-X|-\rangle = -|-\rangle
+	X\ket{+} = \ket{+} \\
+	X\ket{-} = -\ket{-}
 \end{align*}
-Diagonal representation then is $X = |+\rangle\langle+|\ -\ |-\rangle\langle-|$
+Diagonal representation then is $X = \ket{+}\bra{+}\ -\ \ket{-}\bra{-}$
 
-$Y$ has the same shape as $X$ so we could guess the eigenvectors are the same, but $Y|+\rangle = -i|-\rangle$.
+$Y$ has the same shape as $X$ so we could guess the eigenvectors are the same,
+but $Y\ket{+} = -i\ket{-}$.
 
 Solving properly we get $c(\lambda) = \lambda^2 - 1 = 0$, with eigenvectors in the null-spaces of:
 \[
@@ -287,10 +300,13 @@ Solving properly we get $c(\lambda) = \lambda^2 - 1 = 0$, with eigenvectors in t
 \right]
 \]
 Second row is $-i$ times first row:
-\[Y(|0\rangle -i |1\rangle) = -|0\rangle +i|1\rangle\]
+\[Y(\ket{0} -i \ket{1}) = -\ket{0} +i\ket{1}\]
 Taking the conjugate we unsurprisingly get
-\[Y(|0\rangle +i |1\rangle) = |0\rangle +i|1\rangle\]
-Their diagonal representation would be just what you'd expect, $|v_0\rangle\langle v_0| - |v_1\rangle\langle v_1|$ where $|v_0\rangle = 2^{-\frac{1}{2}}\left(|0\rangle + i|1\rangle\right)$, $|v_1\rangle = 2^{-\frac{1}{2}}\left(|0\rangle - i|1\rangle\right)$.
+\[Y(\ket{0} +i \ket{1}) = \ket{0} +i\ket{1}\]
+Their diagonal representation would be just what you'd expect,
+$\ket{v_0}\bra{v_0} - \ket{v_1}\bra{v_1}$ where $\ket{v_0} =
+2^{-\frac{1}{2}}\left(\ket{0} + i\ket{1}\right)$, $\ket{v_1}
+= 2^{-\frac{1}{2}}\left(\ket{0} - i\ket{1}\right)$.
 
 \section{March 30}
 \subsection{Exercise 2.12}
@@ -302,25 +318,31 @@ The equation $c(\lambda) = (1-\lambda)^2 = 0$ has repeated root $\lambda = 1$, s
 
 Clearly if it had 2 degenerate eigenvectors it would simply be the identity operation, mapping all vectors to themselves (scaled by the eigenvalue 1), so we know there is no eigenvector basis, let alone the weaker result that there is no orthonormal eigenvector basis.
 
-To apply the formal structure of QM we can prove this weaker result explicitly: If $M$ above is diagonalizable, then $M = |v_1\rangle\langle v_1| + |v_2\rangle\langle v_2|$ which by the completeness relation 2.22 gives $M = I$, therefore $M$ is not diagonalizable.
+To apply the formal structure of QM we can prove this weaker result explicitly:
+If $M$ above is diagonalizable, then $M = \ket{v_1}\bra{v_1} + \ket{v_2}\bra{v_2}$ which by the completeness relation 2.22 gives $M = I$, therefore $M$ is not diagonalizable.
 
 \subsection{Exercise 2.13}
 
-If $|w\rangle$ and $|v\rangle$ are any two vectors, show that $(|w\rangle\langle v|)^\dagger = |v\rangle\langle w|$.
+If $\ket{w}$ and $\ket{v}$ are any two vectors, show that
+$(\ket{w}\bra{v})^\dagger = \ket{v}\bra{w}$.
 
 Since we are told that the adjoint is unique, it is sufficient to show equation 2.32:
-\[(|v'\rangle, |w\rangle\langle v|w'\rangle) = (|v\rangle\langle w|v'\rangle, |w'\rangle)\]
+\[(\ket{v'}, \ket{w}\braket{v}{w'}) =
+(\ket{v}\braket{w}{v'}, \ket{w'})\]
 
 Then by linearity of the inner product this is equivalent to
-\[\langle v|w'\rangle(|v'\rangle, |w\rangle) = \langle w|v'\rangle^*(|v\rangle, |w'\rangle)\]
-Apply conjugate symmetry and note that $\langle v|w'\rangle = (|v\rangle, |w'\rangle)$ by definition, and the result clearly follows.
+\[\braket{v}{w'}(\ket{v'}, \ket{w}) =
+\braket{w}{v'}^*(\ket{v}, \ket{w'})\]
+Apply conjugate symmetry and note that $\braket{v}{w'} = (\ket{v},
+\ket{w'})$ by definition, and the result clearly follows.
 
 \subsection{Exercise 2.14}
 
 Show that the adjoint operation is anti-linear
 
 Straight forward, again by uniqueness we simply need equation 2.32 to hold, which after linearity becomes:
-\[\sum_i a_i(|v\rangle, A_i|w\rangle) = \sum_i a_i^{**}(A_i^\dagger|v\rangle, |w\rangle)\]
+\[\sum_i a_i(\ket{v}, A_i\ket{w}) = \sum_i
+a_i^{**}(A_i^\dagger\ket{v}, \ket{w})\]
 By double-conjugate elimination and the adjointness property, this is clearly true.
 
 \subsection{Exercise 2.15}
@@ -328,10 +350,10 @@ By double-conjugate elimination and the adjointness property, this is clearly tr
 Show that $(A^\dagger)^\dagger = A$.
 
 \begin{align*}
-(|v\rangle, A^\dagger|w\rangle)
-&= (A^\dagger|w\rangle, |v\rangle)^* \\
-&= (|w\rangle, A|v\rangle)^* \\
-&= (A|v\rangle, |w\rangle)
+	(\ket{v}, A^\dagger\ket{w})
+	&= (A^\dagger\ket{w}, \ket{v})^* \\
+	&= (\ket{w}, A\ket{v})^* \\
+	&= (A\ket{v}, \ket{w})
 \end{align*}
 So $A$ is the adjoint of $A^\dagger$, i.e. by uniqueness of adjoints $(A^\dagger)^\dagger = A$.
 
@@ -340,45 +362,46 @@ So $A$ is the adjoint of $A^\dagger$, i.e. by uniqueness of adjoints $(A^\dagger
 Show that any projector $P$ satisfies the equation $P^2 = P$.
 
 \begin{align*}
-(\sum_i |i\rangle\langle i|)^2
-&= \sum_{ij} |i\rangle\langle i|j\rangle\langle j|
-&= \sum_{ij} \delta_{ij}|i\rangle\langle j|
-&= \sum_i |i\rangle\langle i|
+	(\sum_i \ket{i}\bra{i})^2
+	&= \sum_{ij} \ket{i}\braket{i}{j}\bra{j}
+	&= \sum_{ij} \delta_{ij}\ket{i}\bra{j}
+	&= \sum_i \ket{i}\bra{i}
 \end{align*}
 
 \subsection{Exercise 2.17}
 Show that a normal matrix is Hermitian if and only if it has real eigenvalues.
 
-First show that a hermitian matrix has real eigenvalues, i.e. if $A|v\rangle = v|v\rangle$ then $v$ is real.
+First show that a hermitian matrix has real eigenvalues, i.e. if
+$A\ket{v} = v\ket{v}$ then $v$ is real.
 
-Consider $\langle v|A|v\rangle$:
+Consider $\bra{v}A\ket{v}$:
 \begin{align*}
-\langle v|A|v\rangle
-&= (|v\rangle, A|v\rangle) \\
-&= (|v\rangle, v|v\rangle) \\
-&= v(|v\rangle, |v\rangle) \\
-&= v\langle v|v\rangle
+	\bra{v}A\ket{v}
+	&= (\ket{v}, A\ket{v}) \\
+	&= (\ket{v}, v\ket{v}) \\
+	&= v(\ket{v}, \ket{v}) \\
+&= v\braket{v}{v}
 \end{align*}
 But by adjointness this can also be shown for $v^*$:
 \begin{align*}
-\langle v|A|v\rangle
-&= (|v\rangle, A|v\rangle) \\
-&= (A|v\rangle, |v\rangle) \\
-&= (v|v\rangle, |v\rangle) \\
-&= v^*(|v\rangle, |v\rangle) \\
-&= v^*\langle v|v\rangle
+	\bra{v}A\ket{v}
+	&= (\ket{v}, A\ket{v}) \\
+	&= (A\ket{v}, \ket{v}) \\
+	&= (v\ket{v}, \ket{v}) \\
+	&= v^*(\ket{v}, \ket{v}) \\
+&= v^*\braket{v}{v}
 \end{align*}
 So $v = v^*$, and necessarily $v$ is real.
 
 Next show that if $A$ is normal and has all real eigenvalues, then $A$ is hermitian.
 
 By spectral decomposition:
-\[A = \sum_i v_i|v_i\rangle\langle v_i|\]
+\[A = \sum_i v_i\ket{v_i}\bra{v_i}\]
 Then taking the adjoint the result becomes obvious:
 \begin{align*}
 A^\dagger
-&= \sum_i v_i^* |v_i\rangle\langle v_i| \\
-&= \sum_i v_i |v_i\rangle\langle v_i| \\
+	&= \sum_i v_i^* \ket{v_i}\bra{v_i} \\
+	&= \sum_i v_i \ket{v_i}\bra{v_i} \\
 &= A
 \end{align*}
 
