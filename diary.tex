@@ -10,6 +10,9 @@
 \newcommand{\ket}[1]{| #1 \rangle}
 \newcommand{\braket}[2]{\langle #1 | #2 \rangle}
 
+\newcommand{\ord}[1]{\left| #1 \right|}
+\newcommand{\norm}[1]{\left\Vert #1 \right\Vert}
+
 % Title Page
 \title{Honours Diary 2020}
 \author{Jarvis Carroll}
@@ -404,5 +407,49 @@ A^\dagger
 	&= \sum_i v_i \ket{v_i}\bra{v_i} \\
 &= A
 \end{align*}
+
+\subsection{Exercise 2.18}
+Show that all eigenvalues of a unitary matrix have modulus 1, that is, can be written in the form $e^{i\theta}$ for some real $\theta$.
+
+Suppose that $U\ket{v} = v\ket{v}$, then take the squared norm of both sides
+
+\begin{align*}
+&\bra{v}U^\dagger U\ket{v} = \bra{v} v^*v \ket{v} \\
+\implies &\braket{v}{v} = \ord{v}^2\braket{v}{v} \\
+\implies &\ord{v} = 1
+\end{align*}
+
+\subsection{Exercise 2.19}
+Show that the Pauli matrices are Hermitian and unitary.
+
+A matrix is hermitian \textit{and} unitary precisely when $U^\dagger = U$. $I$, $X$, and $Z$ are real symmetric matrices, so this is clearly true, and $Y$ has $i$ opposite $-i$ in its matrix representation, so it will satisfy this as well.
+
+\subsection{Exercise 2.20}
+
+Suppose $A'$ and $A''$ are matrix representations of an operator $A$ on a vector space $V$ with respect to two different orthonormal bases, $\ket{v_i}$ and $\ket{w_i}$. Then the elements of $A'$ and $A''$ are $A'_{ij} = \bra{v_i}A\ket{v_j}$ and $A''_{ij} = \bra{w_i}A\ket{w_j}$. Characterize the relationship between $A'$ and $A''$.
+
+Change of basis takes the form of a similarity/conjugation, and we have an intuition that orthonormal bases are related somehow to unitary operators, so a guess would be that $A'' = U^{-1}A'U$ for some unitary $U$. Take the $ij$th entry:
+
+\[A'_{ij} = \sum_{lm} U^{-1}_{il}A''_{lm}U^{-1}_{mj}\]
+
+At the same time we know that $A'$ and $A''$ represent the same operator, i.e.
+\begin{equation}
+\sum_{ij} A'_{ij}\ket{v_i}\bra{v_j} = \sum_{ij} A''_{ij}\ket{w_i}\bra{w_j}
+\end{equation}
+
+Combine these 
+
+\[\sum_{ilmj} U^{-1}_{il}A''_{lm}U^{-1}_{mj}\ket{v_i}\bra{v_j} = \sum_{ij} A''_{ij}\ket{w_i}\bra{w_j}\]
+
+
+Didn't work, apply both sides of (1) to $\ket{v_k}$
+
+\[\sum_{ij} A'_{ij}\ket{v_i}\braket{v_j}{v_k} = \sum_{ij} A''_{ij}\ket{w_i}\braket{w_j}{v_k}\]
+\[\sum_{i} A'_{ik}\ket{v_i} = \sum_{ij} A''_{ij}\ket{w_i}\braket{w_j}{v_k}\]
+
+Didn't work, apply $\bra{v_l}\cdot\ket{m}$ to both sides of (1):
+\[A'_{lm} = \sum_{ij} A''_{ij}\braket{v_l}{w_i}\braket{w_j}{v_m}\]
+
+stumped... can't get any $\delta_{ij}$ magic to happen, the indices just keep growing!
 
 \end{document}
