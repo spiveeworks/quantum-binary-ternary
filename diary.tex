@@ -408,6 +408,8 @@ A^\dagger
 &= A
 \end{align*}
 
+\section{April 3}
+
 \subsection{Exercise 2.18}
 Show that all eigenvalues of a unitary matrix have modulus 1, that is, can be written in the form $e^{i\theta}$ for some real $\theta$.
 
@@ -451,5 +453,78 @@ Didn't work, apply $\bra{v_l}\cdot\ket{m}$ to both sides of (1):
 \[A'_{lm} = \sum_{ij} A''_{ij}\braket{v_l}{w_i}\braket{w_j}{v_m}\]
 
 stumped... can't get any $\delta_{ij}$ magic to happen, the indices just keep growing!
+
+\section{April 6}
+
+\subsection{Exercise 2.21}
+Repeat the proof of the spectral decomposition in Box 2.2 for the case when $M$ is Hermitian, simplifying the proof wherever possible
+
+Let $P$ be a projector onto the $\lambda$ eigenspace of a hermitian matrix $M$.
+
+Then $M=(P+Q)M(P+Q)=PMP+PMQ+QMP+QMQ$.
+
+Note $MP = \lambda P$ and hence $PMP = \lambda P^2 = \lambda P$.
+
+Then $QMP=(1-P)MP=MP-PMP=\lambda P - \lambda P = 0$.
+
+Next $PMQ=(QM^\dagger P)^\dagger=(QMP)^\dagger=0^\dagger=0$.
+
+Thus $M = PMP + QMQ$.
+
+Next $QMQ$ is obviously hermitian since $(QMQ)^\dagger=QM^\dagger Q=QMQ$, so by induction is diagonalizable, so it follows that $M$ is diagonalizable.
+
+\subsection{Exercise 2.22}
+Prove that two eigenvectors of a Hermitian operator with different eigenvalues are necessarily orthogonal.
+
+$M=M^\dagger$, $M\ket{v_1}=\lambda_1\ket{v_1}$, $M\ket{v_2}=\lambda_2\ket{v_2}$.
+
+Observe the following equality:
+\begin{align*}
+\lambda_2\braket{v_1}{v_2}
+&= \bra{v_1}\left(M\ket{v_2}\right) \\
+&= \left(\bra{v_1}M^\dagger\right)\ket{v_2} \\
+&= \lambda_1\braket{v_1}{v_2}
+\end{align*}
+\[\implies (\lambda_2-\lambda_1)\braket{v_1}{v_2} = 0\]
+\[\implies \lambda_1 = \lambda_2 \text{\ or\ } \braket{v_1}{v_2} = 0\]
+
+So if the eigenvalues of $\ket{v_1}$ and $\ket{v_2}$ are different, then $\ket{v_1}$ and $\ket{v_2}$ must be orthogonal.
+
+\subsection{Exercise 2.23}
+
+Show that the eigenvalues of a projector are all either 0 or 1.
+
+Suppose $P\ket{w} = \lambda\ket{w}$, then by Ex. 2.16, $P^2=P$, so
+
+\[\lambda\ket{w}=P\ket{w}=P^2\ket{w}=\lambda^2\ket{w}\]
+\[\implies \lambda(1-\lambda)\ket{w}=0\]
+So $\lambda$ is either 0 or 1.
+
+\subsection{Exercise 2.24}
+Show that a positive operator is necessarily Hermitian. (Hint: Show that an arbitrary operator $A$ can be written $A=B+iC$ where $B$ and $C$ are Hermitian.)
+
+Similar to the matrix as a sum of symmetric and antisymmetric matrices, it's easy to see:
+\begin{align*}
+A &= \frac{A+A^\dagger}{2} + \frac{A-A^\dagger}{2} \\
+&= \frac{A+A^\dagger}{2} + i\frac{iA^\dagger-iA}{2} \\
+&= B + iC
+\end{align*}
+
+Then suppose $A$ is positive, i.e. $\bra{v}A\ket{v} \geq 0$.
+\begin{align*}
+\bra{v}A\ket{v}
+&= \bra{v}(B + iC)\ket{v} \\
+&= \bra{v}B\ket{v} + i\bra{v}C\ket{v}
+\end{align*}
+
+Note that since $B$ and $C$ are Hermitian, they are diagonalizable, with real eigenvalues, so $\bra{v}B\ket{v}$ must be real, and thus $\bra{v}C\ket{v} = 0$. Since $v$ is arbitrary, we have $C = 0$, so $A = B$ and therefore $A = A^\dagger$.
+
+Note we don't require positivity, it is enough that $\bra{v}A\ket{v}$ is always real. This means that we have effectively generalized Ex 2.17 to the third equivalent condition that $\bra{v}A\ket{v}$ is always real.
+
+\subsection{Exercise 2.25}
+
+Show that for any operator $A$, $A^\dagger A$ is positive.
+
+$\bra{v}A^\dagger A\ket{v} = (A\ket{v}, A\ket{v}) \geq 0$.
 
 \end{document}
