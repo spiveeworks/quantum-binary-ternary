@@ -75,4 +75,21 @@ Apparently $\tau_2 = -i$, so the equation is actually $Y = \tau_2 Q_2 P_2$
 
 Then the centralizer is just the set of scalars $\{\tau^i\}$, and since $Q_N$ and $P_N$ commute, up to phase shift $\omega_N$, quotienting by the centralizer gives the abelian group $\mathbb{Z}_N^2$. Easy.
 
+Next we move on to the clifford group.
+Indeed the clifford group is the set of terms against which $H(N)$ is closed under conjugation. Since $H(N)$ is finitely generated, and $\tau_N$, $\omega_N$ are scalar, we can simply check $XQ_NX^{-1} \in H(N)$ and $XP_NX^{-1} \in H(N)$.
+
+Apparently these "Clifford operations" are one-step evolutions of "Clifford Gates", which makes sense.
+
+I don't follow what the $1 \to$ and $\to 1$ have to do with the statement of how $H(N)$ maps into the clifford group and quotient group, seems like it has significance in generalized abstract nonsense world. (not meant in a derogatory way)
+
+We don't quotient clifford by $H(N)$, however, though we could. We quotient by $U(1)$ to get a simpler space without phase factors.
+
+Lemma: $XAX^{-1} = YAY^{-1} \iff X \propto Y$
+
+The proof is an application of "Schur's Lemma" which I will intuit as related to the observation before that the centralizer of $H(N)$ is exactly the set of scalars. Here $Y^{-1}X$ is in the centralizer of the clifford group, and turns out to be a scalar, so $X \propto Y$.
+
+The next paragraph at least, is very representation heavy, so I will try to understand the significance of this in my own terms first.
+
+Two matrices conjugate any element of $H(N)$ the same way if and only if they are proportional to eachother. Since the clifford algebra is exactly the set of actions that conjugate $H(N)$ to other elements of $H(N)$, this statement can be refined to the statement that the conjugation action on $H(N)$, that is the automorphism $A \mapsto XAX^{-1}$, is equal only to the actions of scalar multiples of $X$. So then if we quotient the clifford group, we will end up with some group of automorphisms on $H(N)$. Wonderful.
+
 \end{document}
