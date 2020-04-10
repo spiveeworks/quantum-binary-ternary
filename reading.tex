@@ -1,0 +1,78 @@
+\documentclass[]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\renewcommand\thesection{}
+\renewcommand\thesubsection{}
+
+\newcommand{\bra}[1]{\langle #1 |}
+\newcommand{\ket}[1]{| #1 \rangle}
+\newcommand{\braket}[2]{\langle #1 | #2 \rangle}
+
+\newcommand{\ord}[1]{\left| #1 \right|}
+\newcommand{\norm}[1]{\left\Vert #1 \right\Vert}
+
+\begin{document}
+
+\section{April 10}
+
+Reading J Tolar, "On Clifford groups in quantum computing"
+
+An $N$ state system corresponds to a hilbert space $\mathbb{C}^N$.
+
+"Generalized Pauli Matrices" generate a group, "Weyl-Heisenberg group", semantics.
+
+The "normalizer" of this is called the Clifford group. So I guess WH is not normal in U(N), but in Clifford group it is. That's surprising to me, but I guess it makes sense given the normal property becomes weaker the less group elements you are conjugating against. So Clifford group is the set $\{g\ |\ g^{-1}Xg \in \textit{WH}, \forall x \in \textit{WH}\}$.
+
+"Clifford quotient group" sounds like Clifford group without scalar multiplication, which sounds good to me. $U(N)$ seems so redundant/free I will take every quotient I can get.
+
+"Symmetries of Pauli gradings" of an algebra apparently describe some detail of clifford quotient groups, and this paper will describe something more detailed than that? No idea what a Pauli grading is.
+
+$Q_N\ket{j} = \omega_N^j\ket{j}$, $P_N\ket{j} = \ket{j + 1}$, so in 2d:
+
+\begin{align*}
+Q_2 &= \left[\begin{matrix}
+1 & 0 \\
+0 & -1
+\end{matrix}\right] = Z
+\\P_2 &= \left[\begin{matrix}
+0 & 1 \\
+1 & 0
+\end{matrix}\right] = X
+\end{align*}
+
+These elements along with $\omega_N$ are order $N$, and are nearly commutative.
+\[\Pi_N = \{\omega_N^i P_N^j Q_N^k\}\]
+
+This is not $H(N)$ apparently? Do we need a generalized version of $Y$ before this becomes the Weyl Heisenberg group? Or am I missing something.
+
+$\omega_N$ and $Q_N$ clearly have computational basis as their eigenvectors, being diagonal, and $P_N$ will have $\ket{v_i} = \sum_j \omega_N^{ij}\ket{j}$ as eigenvectors, eigenvalues $\omega_N^i$.... transforming into this basis is the discrete fourier transform! Aha! Ok back to the text. I don't know what a configuration space is or what "eigenvector of position means".
+
+Ah yes $\tau_N = \omega_N^{\frac{1}{2}}$ lets us define $Y$.
+
+\[\tau_2P_2Q_2 = i
+\left[\begin{matrix}
+0 & 1 \\
+1 & 0
+\end{matrix}\right]
+\left[\begin{matrix}
+1 & 0 \\
+0 & -1
+\end{matrix}\right]
+=
+\left[\begin{matrix}
+	0 & -i \\
+	i & 0
+\end{matrix}\right]
+= Y\]
+
+Then $H(N) = \{\tau_N^h\omega_N^i Q_N^j P_N^k\}$, good. $\ord{H(N)}=2\ord{\Pi_N}=2N^3$.
+
+Oh this phase factor is just for even N. Fascinating. Naively that sounds like a novel thing to attack in a mixed level system?
+
+Apparently $\tau_2 = -i$, so the equation is actually $Y = \tau_2 Q_2 P_2$
+
+Then the centralizer is just the set of scalars $\{\tau^i\}$, and since $Q_N$ and $P_N$ commute, up to phase shift $\omega_N$, quotienting by the centralizer gives the abelian group $\mathbb{Z}_N^2$. Easy.
+
+\end{document}
