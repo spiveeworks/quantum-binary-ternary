@@ -527,4 +527,127 @@ Show that for any operator $A$, $A^\dagger A$ is positive.
 
 $\bra{v}A^\dagger A\ket{v} = (A\ket{v}, A\ket{v}) \geq 0$.
 
+\section{April 13}
+
+\subsection{Exercise 2.26}
+Let $\ket{\psi}=(\ket{0}+\ket{1})/\sqrt{2}$. Write out $\ket{psi}^{\otimes 2}$ and $\ket{\psi}^{\otimes 3}$ explicitly, both in terms of tensor products like $\ket{0}\ket{1}$, and using the Kronecker product.
+
+\begin{align*}
+\ket{\psi}^{\otimes 2}
+&= \frac{\ket{0} + \ket{1}}{\sqrt{2}} \otimes \frac{\ket{0} + \ket{1}}{\sqrt{2}}
+\\&= \frac{1}{2}(\ket{0} + \ket{1})(\ket{0} + \ket{1})
+\\&= \frac{1}{2}(\ket{00}+\ket{01}+\ket{10}+\ket{11})
+\end{align*}
+
+Similarly
+\[\ket{\psi}^{\otimes 3} = \frac{1}{2\sqrt{2}}(\ket{000}+\ket{001}+\ket{010}+\ket{011} + \ket{100}+\ket{101}+\ket{110}+\ket{111})\]
+
+Then in Kronecker product terms:
+
+\[
+\left(2^{-1/2}\left[\begin{matrix}1\\1\end{matrix}\right]\right)^{\otimes 2} = 2^{-1}\left[\begin{matrix}1\\1\\1\\1\end{matrix}\right]
+\]
+
+Skipping $\ket{\psi}^{\otimes 3}$
+
+\subsection{Diversion: Non-normal Diagonalization}
+
+This textbook deals with diagonalization of normal operators in the form $\sum_i \lambda_i\ket{v_i}\bra{v_i}$, but diagonalization of non-normal operators is also possible, and I would like to see how it looks in bra-ket notation.
+
+\begin{align*}
+A &= V\Lambda V^{-1}
+\\&=
+\left(\sum_i \ket{v_i}\bra{i}\right)
+\left(\sum_i \lambda_i\ket{i}\bra{i}\right)
+\left(\sum_i \ket{v_i}\bra{i}\right)^{-1}
+\end{align*}
+
+In the case that $V$ is unitary, i.e. $\ket{v_i}$ are orthogonal, then $V^{-1}=V^\dagger$ and we can simplify from there. Otherwise we have a general matrix inversion to do, which doesn't seem helpful at all.
+
+\subsection{Diversion: Generalized Diagonalization}
+
+Suppose instead that something only has generalized eigenvectors, but that these generalized eigenvectors are orthogonal. For example $A = \ket{0}\bra{1}$ with eigenvector $A\ket{0} = 0\ket{0}$ and generalized eigenvector $A\ket{1} = 1\ket{0}$.
+
+This appears to motivate the form $A=\sum_i \lambda_i \ket{v_{\pi(i)}}\bra{v_i}$ so that $A\ket{v_i} = \lambda_i \ket{v_{\pi(i)}}$, but generalized eigenvectors seem more complicated than this, since the rule $(A + I)\ket{v_i} = (\lambda_i + 1)\ket{v_i}$ doesn't directly hold, and whatever its analogue might be, would be too much of a diversion for now.
+
+\subsection{Exercise 2.27}
+Calculate the matrix representation of the tensor products of the Pauli operators (a) $X$ and $Z$; (b) $I$ and $X$; (c) $X$ and $I$. Is the tensor product commutative?
+\[
+\left[\begin{matrix}
+0 & 1 \\
+1 & 0
+\end{matrix}\right]
+\otimes
+\left[\begin{matrix}
+1 & 0 \\
+0 & -1
+\end{matrix}\right]
+=
+\left[\begin{matrix}
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & -1 \\
+1 & 0 & 0 & 0 \\
+0 & -1 & 0 & 0
+\end{matrix}\right]
+\]
+
+\[
+\left[\begin{matrix}
+0 & 1 \\
+1 & 0
+\end{matrix}\right]
+\otimes
+\left[\begin{matrix}
+1 & 0 \\
+0 & 1
+\end{matrix}\right]
+=
+\left[\begin{matrix}
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 \\
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0
+\end{matrix}\right]
+\]
+
+\[
+\left[\begin{matrix}
+1 & 0 \\
+0 & 1
+\end{matrix}\right]
+\otimes
+\left[\begin{matrix}
+0 & 1 \\
+1 & 0
+\end{matrix}\right]
+=
+\left[\begin{matrix}
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0
+\end{matrix}\right]
+\]
+
+\subsection{Exercise 2.28}
+
+Show that the transpose, complex conjugation, and adjoint operations distribute over the tensor product,
+
+\begin{align*}
+&\left(\sum_{ij}A_{ij}\ket{j}\bra{i}\right)
+\otimes
+\left(\sum_{kl}B_{kl}\ket{l}\bra{k}\right)\ket{mn}
+\\= &\sum_{jl}A_{mj}B_{nl} \ket{jl}
+\end{align*}
+So clearly by linearity
+\begin{align*}
+\left(\sum_{ij}A_{ij}\ket{j}\bra{i}\right)
+\otimes
+\left(\sum_{kl}B_{kl}\ket{l}\bra{k}\right)
+=
+\sum_{ijkl}A_{ij}B_{kl} \ket{jl}\bra{ik}
+\end{align*}
+
+From this all 3 results are obvious.
+
 \end{document}
