@@ -13,6 +13,8 @@
 \newcommand{\ord}[1]{\left| #1 \right|}
 \newcommand{\norm}[1]{\left\Vert #1 \right\Vert}
 
+\newcommand{\CNOT}{\text{CNOT}}
+
 % Title Page
 \title{Honours Diary 2020}
 \author{Jarvis Carroll}
@@ -650,4 +652,44 @@ So clearly by linearity
 
 From this all 3 results are obvious.
 
+\section{April 20}
+
+\subsection{Phase and Tensors}
+
+Reading ahead to chapter 5, the Fourier transform, the algorithm for eigenvalue measurement first relies on a conditional $U^j$, which is used to modify the \textit{condition} rather than the vector to which it is applied.
+
+Until now I have been ignoring phase, but this appears to be a direct application of it, so I have concocted a simpler example of phase shift through conditional operations on eigenvectors.
+
+I believe that $\CNOT\left(\ket{+}\otimes\ket{-}\right) = \ket{-}\otimes\ket{-}$.
+
+The matrix representation of CNOT is as follows:
+\[
+\CNOT = \left[\begin{matrix}
+1&0&0&0\\
+0&1&0&0\\
+0&0&0&1\\
+0&0&1&0
+\end{matrix}\right]
+\]
+and $\ket{+}\otimes\ket{-}$ expanded in the computational basis is:
+\begin{align*}
+\ket{+}\otimes\ket{-}
+&= \left(\ket{0}+\ket{1}\right) \otimes\left(\ket{0}-\ket{1}\right)
+\\&= \ket{00}-\ket{01}+\ket{10}-\ket{11}
+\end{align*}
+and similarly $\ket{-}\otimes\ket{-}$ is:
+\begin{align*}
+\ket{-}\otimes\ket{-}
+&= \left(\ket{0}-\ket{1}\right) \otimes\left(\ket{0}-\ket{1}\right)
+\\&= \ket{00}-\ket{01}-\ket{10}+\ket{11}
+\end{align*}
+Clearly the signs of $\ket{10}$ and $\ket{01}$ have been permuted, so the equation makes sense.
+
+I still find this consequence bizarre, and might have to wait until chapter 4 to better understand.
+
+This example was constructed based on $\ket{-}$ being an eigenvector of $X$, so that performing $X$ on it would have the effect of performing $Z$ on the first bit instead! I guess really this is a curiosity of conditional operations and ultimately of the physical process that represents such an operation.
+
+Or maybe this is best understood in terms of measurement? Although these two states are indistinguishable by measurement alone, so really it's $H$ that might present the phase as state and give us information. And since $H$ is an example of a Fourier transform, this is ultimately a curiosity of Fourier transform \textit{plus} conditional operations, so I haven't reduced the problem at all, just applied the simplest Fourier transform to the simplest conditional operation and gotten the same behavior.
+
+This appears to be related to Exercise 4.34, and surrounding theory, which I shall get to eventually.
 \end{document}
