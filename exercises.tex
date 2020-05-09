@@ -692,4 +692,291 @@ This example was constructed based on $\ket{-}$ being an eigenvector of $X$, so 
 Or maybe this is best understood in terms of measurement? Although these two states are indistinguishable by measurement alone, so really it's $H$ that might present the phase as state and give us information. And since $H$ is an example of a Fourier transform, this is ultimately a curiosity of Fourier transform \textit{plus} conditional operations, so I haven't reduced the problem at all, just applied the simplest Fourier transform to the simplest conditional operation and gotten the same behavior.
 
 This appears to be related to Exercise 4.34, and surrounding theory, which I shall get to eventually.
+
+\section{April 27}
+
+\subsection{Exercise 2.29, 2.30, 2.31, 2.32}
+Show that the tensor product of two unitary/hermitian/positive/projector operators is unitary/hermitian/positive/a projector.
+
+In the previous exercise we derived the following formula for the tensor product of two matrices:
+\begin{align*}
+\left(\sum_{ij}A_{ij}\ket{j}\bra{i}\right)
+\otimes
+\left(\sum_{kl}B_{kl}\ket{l}\bra{k}\right)
+=
+\sum_{ijkl}A_{ij}B_{kl} \ket{jl}\bra{ik}
+\end{align*}
+If $A$ and $B$ are normal, then we can use their eigenvectors as the basis, and this formula becomes the following:
+\begin{align*}
+\left(\sum_{i}v_i\ket{v_i}\bra{v_i}\right)
+\otimes
+\left(\sum_{j}u_j\ket{u_j}\bra{u_j}\right)
+=
+\sum_{ij}v_i u_j \left(\ket{v_i}\otimes\ket{u_j}\right) \left(\bra{v_i}\otimes\bra{u_j}\right)
+\end{align*}
+
+Clearly in this formula if $v_i$ and $u_j$ are all in some semigroup $S$, then their products will be as well, so the tensor of any operators with $S$ eigenvalues will be also have $S$ eigenvalues.
+
+Setting $S =$ U(1) gives products of unitary operators are unitary.
+
+Setting $S = \mathbb{R}$ gives products of Hermitian operators Hermitian.
+
+Setting $S = [0, \infty)$ gives products of positive operators positive (and $(0, \infty)$ for positive definite)
+
+Setting $S = \{0, 1\}$ gives products of projectors are projectors.
+\subsection{Exercise 2.33}
+The Hadamard operator on one qubit may be written as
+\[H=\frac{1}{\sqrt{2}}\left[(\ket{0}+\ket{1})\bra{0}+(\ket{0}-\ket{1})\bra{1}\right]\]
+Show explicitly that the Hadamard transform on $n$ qubits, $H^{\otimes n}$, may be written as 
+\[H^{\otimes n}=\frac{1}{\sqrt{2^n}}\sum_{x,y}(-1)^{x \cdot y}\ket{x}\bra{y}\]
+
+Clearly the formula holds for $n=1$, so we can take this as the base case of an induction.
+
+Then if the formula holds for $n=k$, we can simply tensor this with the $n=1$ formula to get
+\begin{align*}
+H^{\otimes k+1}
+&=
+\left(\frac{1}{\sqrt{2^k}}\sum_{x=0}^{2^k-1}\sum_{y=0}^{2^k-1}(-1)^{x \cdot y}\ket{x}\bra{y}\right)
+\otimes
+\left(\frac{1}{\sqrt{2}}\sum_{x=0}^1\sum_{y=0}^1(-1)^{x \cdot y}\ket{x}\bra{y}\right)
+\\&=
+\frac{1}{\sqrt{2^{k+1}}}
+\sum_{x_1=0}^{2^k-1}
+\sum_{y_1=0}^{2^k-1}
+\sum_{x_2=0}^1
+\sum_{y_2=0}^1
+(-1)^{x_1 \cdot y_1 + x_2 \cdot y_2}
+\ket{x_1}
+\ket{x_2}
+\bra{y_1}
+\bra{y_2}
+\\&=
+\frac{1}{\sqrt{2^{k+1}}}
+\sum_{x_1=0}^{2^k-1}
+\sum_{x_2=0}^1
+\sum_{y_1=0}^{2^k-1}
+\sum_{y_2=0}^1
+(-1)^{(x_1 \otimes x_2) \cdot (y_1 \otimes y_2)}
+\ket{x_1 \otimes x_2}
+\bra{y_1 \otimes y_2}
+\\&=
+\frac{1}{\sqrt{2^{k+1}}}
+\sum_{x=0}^{2^{k+1}-1}
+\sum_{y=0}^{2^{k+1}-1}
+(-1)^{x \cdot y}
+\ket{x}
+\bra{y}
+\end{align*}
+Where $x_1 \otimes x_2$ is just $2x_1 + x_2$
+
+Write out an explicit matrix representation for $H^{\otimes 2}$.
+\[
+H^{\otimes 2} =
+\left[\begin{matrix}
+1 & 1 & 1 & 1\\
+1 &-1 & 1 &-1\\
+1 & 1 &-1 &-1\\
+1 &-1 &-1 & 1
+\end{matrix}\right]
+\]
+
+\section{May 1}
+\subsection{Exercise 2.34}
+Find the square root and logarithm of the matrix
+\[A=\left[\begin{matrix}
+4 & 3\\
+3 & 4
+\end{matrix}\right]\]
+Note first the eigenvectors:
+\[
+\left[\begin{matrix}
+4 & 3\\
+3 & 4
+\end{matrix}\right]
+\left[\begin{matrix}
+1\\
+1
+\end{matrix}\right]
+=
+\left[\begin{matrix}
+7\\
+7
+\end{matrix}\right]
+\]
+\[
+\left[\begin{matrix}
+4 & 3\\
+3 & 4
+\end{matrix}\right]
+\left[\begin{matrix}
+1\\
+-1
+\end{matrix}\right]
+=
+\left[\begin{matrix}
+1\\
+-1
+\end{matrix}\right]
+\]
+So we diagonalize as follows:
+\begin{align*}
+A = 7\ket{+}\bra{+}\ +\ \ket{-}\bra{-}
+\\\sqrt{A} = \sqrt{7}\ket{+}\bra{+}\ +\ \ket{-}\bra{-}
+\\=
+\frac{1}{2}\left[\begin{matrix}
+\sqrt{7}+1 & \sqrt{7}-1\\
+\sqrt{7}-1 & \sqrt{7}+1
+\end{matrix}\right]
+\end{align*}
+
+\subsection{Exercise 2.35}
+\[\exp(i\theta v\cdot \sigma)=\cos(\theta)I+i\sin(\theta) v\cdot \sigma\]
+
+First let's write out $v \cdot \sigma$ in matrix form.
+\begin{align*}
+v \cdot \sigma
+&= v_1X + v_2Y + v_3Z
+\\&=
+\left[\begin{matrix}
+v_3 & v_1 -iv_2\\
+v_1+iv_2 & -v_3
+\end{matrix}\right]
+\end{align*}
+Then the eigenvalue problem becomes
+\begin{align*}
+&v \cdot \sigma \ket{u} = \lambda \ket{u}
+\\\implies& (v_3-\lambda)(-v_3-\lambda) -(v_1-iv_2)(v_1+iv_2) = 0
+\\\implies& \lambda^2 - (v_1^2 + v_2^2 + v_3^2) = 0
+\\\implies& \lambda = \pm \norm{v}
+\end{align*}
+
+And the eigenvectors will satisfy
+\begin{align*}
+\left[\begin{matrix}
+v_3\mp\norm{v} & v_1-iv_2\\
+v_1+iv_2 & -v_3\mp\norm{v}
+\end{matrix}\right]
+\left[\begin{matrix}
+x\\
+y
+\end{matrix}\right]
+=
+\left[\begin{matrix}
+0\\
+0
+\end{matrix}\right]
+\\\implies
+\left[\begin{matrix}
+(v_1+iv_2)(v_3\mp\norm{v}) & v_1^2+v_2^2\\
+(v_1+iv_2)(v_3\mp\norm{v}) & v_1^2+v_2^2
+\end{matrix}\right]
+\left[\begin{matrix}
+x\\
+y
+\end{matrix}\right]
+=
+\left[\begin{matrix}
+0\\
+0
+\end{matrix}\right]
+\end{align*}
+Clearly eigenvectors will be proportional to $(v_1^2+v_2^2, (v_1+iv_2)(v_3\mp\norm{v}))$, but this isn't really important, we can observe the matrix is Hermitian and so will be diagonalizable with these real eigenvalues we found:
+
+\begin{align*}
+v\cdot \sigma
+&= \norm{v}\ket{u_1}\bra{u_1} - \norm{v}\ket{u_2}\bra{u_2}
+\\\implies \exp(i\theta v\cdot \sigma)
+&= \exp(i\theta \norm{v}) \ket{u_1}\bra{u_1}
+ + \exp(- i\theta \norm{v})\ket{u_2}\bra{u_2}
+\\&= (\cos(\theta \norm{v})+i\sin(\theta\norm{v})) \ket{u_1}\bra{u_1}
+ + (\cos(\theta \norm{v})-i\sin(\theta\norm{v}))\ket{u_2}\bra{u_2}
+\\&= \cos(\theta \norm{v})(\ket{u_1}\bra{u_1}  + \ket{u_2}\bra{u_2})
+ + i\sin(\theta\norm{v}) (\ket{u_1}\bra{u_1} - \ket{u_2}\bra{u_2})
+\\&= \cos(\theta \norm{v})I
+ + i\sin(\theta\norm{v}) \frac{1}{\norm{v}} v\cdot\sigma
+\end{align*}
+Then since $\norm{v}=1$ this gives the result.
+
+\section{May 4}
+It seems to be time to move on from chapter 2, even though I never got to the end of 2.1! The chapter will always be available as a reference, and I will see with time what parts deserve doing in full detail.
+
+It currently feels as though my primary education is in "Quantum Algorithm Implementations for Beginners", so rather than read through the same summary of algorithms and operations that I have covered many times, and am currently covering again, I will try moving on to interesting questions of decomposition, and see both through these exercises and through reading what requires more detailed practice.
+
+\subsection{Exercise 4.37}
+Provide a decomposition of the level 4 Fourier transform:
+\[
+S_4 =
+\frac{1}{2}
+\left[\begin{matrix}
+ 1& 1& 1& 1\\
+ 1& i&-1&-i\\
+ 1&-1& 1&-1\\
+ 1&-i&-1& i
+\end{matrix}\right]
+\]
+
+Define
+\[\alpha = \frac{1}{\sqrt{2}} \implies 2\alpha^2=1\]
+\[
+U_{10} = \left[\begin{matrix}
+\alpha&\alpha&0&0\\
+\alpha&-\alpha&0&0\\
+0&0&1&0\\
+0&0&0&1
+\end{matrix}\right]
+\]
+then
+\[
+U_{10}S_4 =
+\frac{1}{2}
+\left[\begin{matrix}
+2\alpha&(1+i)\alpha&0&(1-i)\alpha\\
+0&(1-i)\alpha&2\alpha&(1+i)\alpha\\
+1&-1&1&-1\\
+1&-i&-1&i
+\end{matrix}\right]
+\]
+next repeat
+\[\beta = \frac{1}{\sqrt{3}} \implies 3\beta^2=1\]
+\[
+U_{20} = \left[\begin{matrix}
+2\alpha\beta&0&\beta&0\\
+0&1&0&0\\
+\beta&0&-2\alpha\beta&0\\
+0&0&0&1
+\end{matrix}\right]
+\]
+\[
+U_{20}U_{10}S_4 =
+\frac{1}{2}
+\left[\begin{matrix}
+3\beta&i\beta&\beta&-i\beta\\
+0&(1-i)\alpha&2\alpha&(1+i)\alpha\\
+0&(3+i)\alpha\beta&-2\alpha\beta&(3-i)\alpha\beta\\
+1&-i&-1&i
+\end{matrix}\right]
+\]
+and again
+\[
+U_{30} = \left[\begin{matrix}
+3\alpha^2\beta&0&0&\alpha^2\\
+0&1&0&0\\
+0&0&1&0\\
+\alpha^2&0&0&-3\alpha^2\beta
+\end{matrix}\right]
+\]
+\[
+U_{30}U_{20}U_{10}S_4 =
+\frac{1}{2}
+\left[\begin{matrix}
+2&0&0&0\\
+0&(1-i)\alpha&2\alpha&(1+i)\alpha\\
+0&(3+i)\alpha\beta&-2\alpha\beta&(3-i)\alpha\beta\\
+0&2i\beta&2\beta&-2i\beta
+\end{matrix}\right]
+\]
+
+This looks like it might not be unitary, but I am out of time for today.
+This is obviously taking a lot of time but it feels valuable to me.
+
 \end{document}

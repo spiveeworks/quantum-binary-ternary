@@ -15,6 +15,7 @@
 
 \begin{document}
 
+\setlength{\parskip}{6pt}
 \section{April 10}
 
 Reading J Tolar, "On Clifford groups in quantum computing"
@@ -91,5 +92,57 @@ The proof is an application of "Schur's Lemma" which I will intuit as related to
 The next paragraph at least, is very representation heavy, so I will try to understand the significance of this in my own terms first.
 
 Two matrices conjugate any element of $H(N)$ the same way if and only if they are proportional to eachother. Since the clifford algebra is exactly the set of actions that conjugate $H(N)$ to other elements of $H(N)$, this statement can be refined to the statement that the conjugation action on $H(N)$, that is the automorphism $A \mapsto XAX^{-1}$, is equal only to the actions of scalar multiples of $X$. So then if we quotient the clifford group, we will end up with some group of automorphisms on $H(N)$. Wonderful.
+
+\section{May 4}
+
+Reading "Quantum Algorithm Implementations for Beginners"
+
+\begin{itemize}
+	\item Basic notation, probabilities from modulus of computational coordinates, column vector notation, Dirac notation.
+\item Tensor product in matrix (Kronecker) and Dirac form.
+\item Linear combinations of basis states, entanglement defined as states that aren't a tensor product of N-level (in this case 2-level) states.
+\item inner product or 'overlap', row matrices/bra states, (not described as covectors)
+\item outer product, defined as matrix product of column with row, spanned to give GL($\mathbb{C}$).
+\item "Measurement corresponds to transforming the quantum information into classical information."
+\item measurement of a single bit as the sum of all measurements for all values with that value (rather than as a corresponding projection matrix)
+\item \{H, T, CNOT\} and \{CCNOT\} are universal
+\item observable is an operator that maps a hilbert space to the expected/mean value of measuring a quantum computation.
+\item observables are Hermitian since the measurements they represent will be exactly their real eigenvalues
+\end{itemize}
+
+ibmqx4 offers a user interface with a large quantity of operators, that get decomposed into a simpler generator set, 'essentially' the following:
+\[\{U_1(\lambda), R_X(\pi/2), \text{CNOT}\}\]
+i.e.
+\[\{Z^{\lambda/\pi}, (I+Y)/\sqrt{2}, \text{CNOT}\}\]
+ibmqx4 lacks full connectivity, with higher index bits only acting as conditions for lower index bits, (or it would be this way if 3 and 4 were swapped) and no direct connections between 1 or 2 and 3 or 4.
+
+CNOT can be reversed by conjugating with $H\otimes H$, and extended to indirectly connected bits using a series of 4 CNOTs.
+
+Errors come from gate infidelity and state decoherence.
+
+Have read the discussion of Grover's algorithm, but will return to it tomorrow and summarize it.
+
+\section{May 5}
+
+\subsection{Overview of Grover}
+
+In computer science many problems require a certain time complexity to solve, but a significantly smaller time complexity to verify. E.g. problems that can be solved in non-deterministic polynomial time can be verified in deterministic polynomial time, but on a deterministic computer currently require exponential time to execute.
+
+Grover's algorithm allows one to leverage superposition in a very direct manner in order to solve in probabilistic quantum square-root time, any single-solution problem that can be verified in quantum linear time.
+
+The algorithm presupposes an oracle which performs the verification on qbits, which is then applied to a superposition of all possible inputs, followed by a reflection operation which based on this increases the magnitude of the valid inputs, and decreases the magnitude of the invalid inputs.
+
+This sequence, oracle then reflection, is called the Grover Operator, which when applied repeatedly to an initial uniform state $\psi$ yields a solution to the desired problem with probability > 1/2.
+
+\subsection{Details}
+
+Specifically the oracle $O$ is defined to map an input $\ket{x}\ket{y}$ to $\ket{x}\ket{y+f(x)}$, where $f$ is some function with a unique solution $f(x^*) = 1$.
+
+$\ket{y}$ is then set to $\ket{-}$ so that $\ket{y+1} = -\ket{y}$, i.e.\ $O\ket{x^*}\ket{y} = -\ket{x^*}\ket{y}$.
+
+The reflection operator is applied to all bits except the ancillary bit after this, defined as $2\ket{\psi}\bra{\psi}-I$. Repeatedly applying these solves the fixed point algorithm:
+\begin{align*}
+(\alpha\ket{\psi} + \beta\ket{x^*})\ket{-} = G(\alpha\ket{\psi}+\beta\ket{x^*})\ket{-}
+\end{align*}
 
 \end{document}
