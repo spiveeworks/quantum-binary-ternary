@@ -3,6 +3,8 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 
+\usepackage{hyperref}
+
 \renewcommand\thesection{}
 \renewcommand\thesubsection{}
 
@@ -978,5 +980,13 @@ U_{30}U_{20}U_{10}S_4 =
 
 This looks like it might not be unitary, but I am out of time for today.
 This is obviously taking a lot of time but it feels valuable to me.
+
+\section{May 9}
+
+Having written some C code to calculate Christoffel symbols yesterday, I'm thinking this might be a good place to write some C as well. The idea was to do it by hand to get a more intimate understanding of the process, but I think writing code will be equally intimate without the holdups from arithmetic error.
+
+The code gave the same results as me, and seems to have reduced the fourier transform all the way down!
+
+\url{https://github.com/spiveeworks/Archives/blob/c/unitary.c}
 
 \end{document}
