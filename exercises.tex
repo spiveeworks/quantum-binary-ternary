@@ -989,4 +989,62 @@ The code gave the same results as me, and seems to have reduced the fourier tran
 
 \url{https://github.com/spiveeworks/Archives/blob/c/unitary.c}
 
+\section{May 11}
+
+\subsection{Exercise 4.38}
+
+Prove that there exists a $d\times d$ unitary matrix $U$ which cannot be decomposed as a product of fewer than $d-1$ two-level unitary matrices.
+
+Not sure how to do this, but not really surprised by the result either.
+
+I could imagine that the first $d-1$ reductions in the general process if put together would give a matrix with $d-1$ degrees of freedom, and so simply taking the quotient space $U(d)/U(2)^{d-1}$ one could observe a very large space of unreached matrices, but that still doesn't anywhere near prove the result.
+
+Anyway I will move on since lower bounds aren't yet relevant.
+
+\subsection{Exercise 4.39}
+
+Find a quantum circuit using single qubit operations and CNOTs to implement the transformation
+\[\left[\begin{matrix}
+1&0&0&0&0&0&0&0\\
+0&1&0&0&0&0&0&0\\
+0&0&a&0&0&0&0&c\\
+0&0&0&1&0&0&0&0\\
+0&0&0&0&1&0&0&0\\
+0&0&0&0&0&1&0&0\\
+0&0&0&0&0&0&1&0\\
+0&0&b&0&0&0&0&d
+\end{matrix}\right]\]
+
+The gray code will be that of $010 \mapsto 111$, which will be the same as the example given prior to this exercise without the second/second from last CNOTs.
+
+\subsection{Discrete Basis}
+
+Reading the explanations that follow on how discrete sets of gates are universal up to an arbitrary approximation, the crux of the argument is that $R = HTH$ is an irrational rotation around some plane, and hence as it is iterated will provide arbitrary rotations in this plane.
+
+This is very far out of my domain of familiarity, so just reading through has taken some time, it seems to be a rephrasing of density of irrational spans $\langle 1, \theta \rangle$, which is not something that I realized would have practical applications, again because it is so far out of what I am familiar with.
+
+I will leave this here I tried to do some thinking about how it works, I mean if $1$ and $\theta$ are linearly dependent then you can at least find a rational presentation of $\theta$, which I guess is part of the "pidgeonhole" argument used in the proof.
+
+Anyway lots to learn I guess! Exercise 4.11 is referenced in the proof so I might go back to the start of chapter 4 soon, even though that won't help that much with density of irrationals.
+
+\section{May 12}
+Just a little recap on cubic roots of unity:
+
+\begin{align*}
+&(x+iy)^3 = x^3 + 3ix^2y - 3xy^2 -iy^3 = 1
+\\\implies& 3x^2y - y^3 = 0
+\\\implies& y = 0 \text{\ or\ } y = \pm x\sqrt{3}
+\\\implies& x^3 - 3x(\pm x\sqrt{3})^2 = 1
+\\\implies& x^3 = -\frac{1}{8}
+\\\implies& x = -\frac{1}{2}
+\end{align*}
+So we have the solution:
+\[\left(-\frac{1}{2} \pm \frac{\sqrt{3}}{2}i\right)^3 = 1\]
+
+Unsurprisingly I am going to have to generalize my code to something that doesn't require both terms to have the same radical.
+
+I might just use $\sqrt{n_1/d_1} + i\sqrt{n_2/d_2}$ and avoid the distinction between linear and quadratic representations. Addition needs to be checked and multiplication does not need to be checked, whatever I do.
+
+Might do this tomorrow!
+
 \end{document}

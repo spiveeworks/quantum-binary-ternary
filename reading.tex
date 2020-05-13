@@ -145,4 +145,57 @@ The reflection operator is applied to all bits except the ancillary bit after th
 (\alpha\ket{\psi} + \beta\ket{x^*})\ket{-} = G(\alpha\ket{\psi}+\beta\ket{x^*})\ket{-}
 \end{align*}
 
+\section{May 11}
+
+Bernstein-Vazirani Algorithm.
+
+This algorithm is fairly simple, taking a bitstring-dot-product oracle and inferring the string represented by the oracle in a single super-positioned query.
+
+Unsurprisingly the oracle is applied to a state $\ket{+}^{\otimes n}$ with an ancilla $\ket{-}$, and then the result is transformed into the computational basis via $H^{\otimes n}$ to get the exact state $\ket{s}$ represented by the oracle.
+
+Although I say this is unsurprising, given that it has the same "superimpose, apply oracle, transform, measure" structure as Grover and as eigenvalue measurement, the specifics of why it works escape me a little.
+
+If the oracle is the map:
+\[\ket{x}\ket{y} \mapsto \ket{x}\ket{y \oplus \langle s, x \rangle}\]
+and specifically setting $\ket{y} = \ket{-}$
+\[\ket{x}\ket{-} \mapsto (-1)^{\langle s, x \rangle}\ket{x}\ket{-}\]
+and finally setting $\ket{x} = \ket{+}^{\otimes n}$ we have
+\[\frac{1}{\sqrt{2^n}} \sum_x \ket{x}\ket{-} \mapsto \frac{1}{\sqrt{2^n}} \sum_x (-1)^{\langle s, x \rangle}\ket{x}\ket{-}\]
+
+Then $H^{\otimes n}$ is the map:
+\[\ket{x} \mapsto \frac{1}{\sqrt{2^n}}\sum_y (-1)^{\langle x, y \rangle}\ket{y}\]
+Composing these and ignoring the ancilla gives
+\[\frac{1}{2^n} \sum_{x, y} (-1)^{\langle s, x \rangle}(-1)^{\langle x, y \rangle}\ket{y}\]
+and apparently this is precisely the state $\ket{s}$
+
+It is pretty clear that the $\ket{s}$ component of this state is exactly:
+\begin{align*}
+\frac{1}{2^n} \sum_x (-1)^{2\langle s, x\rangle}
+=&\frac{1}{2^n} \sum_x 1
+\\=& \frac{1}{2^n}2^n
+\\=& 1
+\end{align*}
+Then if we consider $s_i \neq y_i$ at least 1 bit difference, the corresponding component will be:
+\begin{align*}
+\frac{1}{2^n} \sum_x (-1)^{\langle s, x \rangle}(-1)^{\langle x, y \rangle}
+=&\frac{1}{2^n} \sum_{x_i = s_i} (-1)^{\langle s, x \rangle}(-1)^{\langle x, y \rangle} +
+\frac{1}{2^n} \sum_{x_i = y_i} (-1)^{\langle s, x \rangle}(-1)^{\langle x, y \rangle}
+\\=&\frac{1}{2^n} \sum_{x_i = s_i} (-1)^{\langle s, x \rangle}(-1)^{\langle x, y \rangle} +
+\frac{1}{2^n} \sum_{x_i = s_i} (-1)^{s_i}(-1)^{\langle s, x \rangle}(-1)^{y_i}(-1)^{\langle x, y \rangle}
+\\=&\frac{1}{2^n} \sum_{x_i = s_i} (-1)^{\langle s, x \rangle}(-1)^{\langle x, y \rangle} -
+\frac{1}{2^n} \sum_{x_i = s_i} (-1)^{\langle s, x \rangle}(-1)^{\langle x, y \rangle}
+\\=& 0
+\end{align*}
+Alternatively by unitarity these maps must map a unit vector to a unit vector, so since we already have a component of length 1, all other components must be 0.
+
+This is a really direct demonstration of quantum superposition in computation! Compute on a superposition, and rotate so that the failures interfere destructively, and the successes constructively.
+
+\subsection{Testing on IBM}
+
+Although this algorithm is simple, in practice the oracle even for a constant bit-string will be quite expensive.
+
+The paper references a program that can decompose unitary matrices including those representing these bit-string oracles into fairly simple quantum circuits for practical use, and in doing so yielded gates that require around 38 time steps.
+
+Executing the full algorithm on ibmqx4 gave a higher probability of getting the correct string than any other, but in absolute terms the probabilities weren't that much better than uniform, which speaks to the drastic cost of this oracle and of not using error correction!
+
 \end{document}
