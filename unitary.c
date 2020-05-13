@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -9,20 +10,23 @@ int gcd(int x, int y) {
 		x = y;
 		y = rem;
 	}
+	if (x < 0) {
+		x = -x;
+	}
 	return x;
 }
 
 // stupidly slow when x is big, but intended use case is around int_sqrt(36)=6
-int int_sqrt(int x) {
-	int i = 1;
+unsigned int_sqrt(unsigned x) {
+	unsigned i = 1;
 	while (i*i <= x) {
 		i++;
 	}
 	return i-1;
 }
-int int_quadpart(int x) {
-	int i = 2;
-	int result = 1;
+unsigned int_quadpart(unsigned x) {
+	unsigned i = 2;
+	unsigned result = 1;
 	while (i*i <= x) {
 		if (x % (i*i) == 0) {
 			result *= i;
@@ -34,166 +38,154 @@ int int_quadpart(int x) {
 	return result;
 }
 
-// x represents the complex number (x.re + i*x.im)/sqrt(x.qu)
-typedef struct num {
-	int re;
-	int im;
-	int qu;
-} num;
+// x represents the real number x.wh * sqrt(x.qu)
+typedef struct radnum {
+	int whole;
+	unsigned qu;
+} radnum;
 
-num num_mul(num x, num y) {
-	num result;
-	result.re = x.re * y.re - x.im * y.im;
-	result.im = x.re * y.im + x.im * y.re;
-	result.qu = x.qu * y.qu;
-	return result;
+radnum radnum_reduce(radnum x) {
+	if (x.whole == 0 || x.qu == 0) {
+		return (radnum){0,1};
+	}
+	unsigned q = int_quadpart(x.qu);
+	return (radnum){x.whole*(int)q, x.qu/(q*q)};
 }
 
-num num_add(num x, num y) {
-	num result;
-	if (x.re == 0 && x.im == 0) {
+radnum radnum_add(radnum x, radnum y) {
+	if (x.whole == 0) {
 		return y;
 	}
-	if (y.re == 0 && y.im == 0) {
+	if (y.whole == 0) {
 		return x;
 	}
-	int dqu = gcd(x.qu, y.qu);
-	int xmodqu = x.qu / dqu;
-	int ymodqu = y.qu / dqu;
-	int xmod = int_sqrt(xmodqu);
-	int ymod = int_sqrt(ymodqu);
-	if (xmod*xmod != xmodqu || ymod * ymod != ymodqu) {
-		printf("Incompatible radicals: %d and %d\n", x.qu, y.qu);
+	if (x.qu != y.qu) {
+		printf("Incompatible radicals: %u and %u\n", x.qu, y.qu);
 		exit(1);
 	}
-	result.re = x.re * ymod + y.re * xmod;
-	result.im = x.im * ymod + y.im * xmod;
-	result.qu = x.qu * ymodqu;
-	return result;
+	return (radnum){x.whole+y.whole, x.qu};
 }
 
-// these (as with all num_* functions) are convenience functions, only use them
-// when they are MORE succinct than writing the arithmetic out by hand
-num num_neg(num x) {
-	return (num){-x.re,-x.im,x.qu};
-}
-num num_conj(num x) {
-	return (num){x.re,-x.im, x.qu};
+radnum radnum_mul(radnum x, radnum y) {
+	return (radnum){x.whole*y.whole, x.qu*y.qu};
 }
 
-// have to rationalize denominator and realize numerator
-// sqrt(q)/(x+iy) = q(x-iy)/sqrt(q)(x^2+y^2)
-num num_inv(num x) {
-	num result;
-	result.re = x.re * x.qu;
-	result.im = -x.im * x.qu;
-	int mod = x.re * x.re + x.im * x.im;
-	result.qu = x.qu * mod * mod;
-	return result;
+void radnum_print(radnum x) {
+	if (x.whole < 0) {
+		printf("-");
+		x.whole = -x.whole;
+	}
+	if (x.whole != 1 || x.qu == 1) {
+		printf("%d", x.whole);
+	}
+	if (x.qu != 1) {
+		printf("sqrt(%d)", x.qu);
+	}
 }
 
-// assuming a number is real and rational, take the inverse square root
-// (nr/dr)^-0.5 = d/sqrt(n*d)
-num num_invsqrt(num x) {
-	if (x.im != 0) {
-		printf("Tried to take invsqrt of non-real number\n");
-		exit(1);
-	}
-	int d = int_sqrt(x.qu);
-	if (d*d != x.qu) {
-		printf("Tried to take invsqrt of irrational number\n");
-		exit(1);
-	}
-	int r = gcd(x.re, d);
-	if (r < 0) {
-		r = -r;
-	}
-	int n = x.re / r;
-	d = d / r;
-	return (num){d, 0, n*d};
-}
-
-num num_mod_sq(num x) {
-	return (num){x.re*x.re + x.im*x.im, 0, x.qu*x.qu};
-}
-
-num num_mod(num x) {
-	int sq = x.re*x.re + x.im*x.im;
-	return (num){sq, 0, sq*x.qu};
-}
-
-/*
-int num_as_int(num x) {
-	if (x.qu == 0) {
-		printf("Tried to interpret non-finite num as integer\n");
-		exit(1);
-	}
-	if (x.im != 0) {
-		printf("Tried to interpret non-real num as integer\n");
-		exit(1);
-	}
-	if (x.re == 0) {
-		return 0;
-	}
-	int d = int_sqrt(x.qu);
-	if (d*d != x.qu) {
-		printf("Tried to interpret irrational num as integer\n");
-		exit(1);
-	}
-	int result = x.re / d;
-	if (result * d != x.re) {
-		printf("Tried to interpret fractional num as integer\n");
-		exit(1);
-	}
-	return result;
-}
-*/
+typedef struct num {
+	radnum re;
+	radnum im;
+	unsigned de;
+} num;
 
 num num_reduce(num x) {
-	int d = int_quadpart(x.qu);
-	d = gcd(d, x.re);
-	d = gcd(d, x.im);
-	if (d < 0) {
-		d = -d;
-	}
-	return (num){x.re/d, x.im/d, x.qu/(d*d)};
+	x.re = radnum_reduce(x.re);
+	x.im = radnum_reduce(x.im);
+	int d = gcd(gcd(x.re.whole, x.im.whole), (int)x.de);
+	x.re.whole /= (int)d;
+	x.im.whole /= (int)d;
+	x.de /= d;
+	return x;
 }
 
 void num_print(num x) {
-	if (x.re == 0 && x.im == 0) {
+	//printf("{%d, %u, %d, %u, %u}", x.re.whole, x.re.qu, x.im.whole, x.im.qu, x.de);
+	bool paren = x.re.whole != 0 && x.im.whole != 0 && x.de != 1;
+	if (paren) {
+		printf("(");
+	}
+	if (x.re.whole == 0 && x.im.whole == 0) {
 		printf("0");
 	} else {
-		if (x.re != 0 && x.im != 0 && x.qu != 1) {
-			printf("(");
+		if (x.re.whole != 0) {
+			radnum_print(x.re);
 		}
-		if (x.re != 0) {
-			printf("%d", x.re);
-		}
-		if (x.re != 0 && x.im > 0) {
+		if (x.re.whole != 0 && x.im.whole > 0) {
 			printf("+");
 		}
-		if (x.im == 1) {
+		if (x.im.whole == 1 && x.im.qu == 1) {
 			printf("i");
-		} else if (x.im == -1) {
+		} else if (x.im.whole == -1 && x.im.qu == 1) {
 			printf("-i");
-		} else if (x.im != 0) {
-			printf("%di", x.im);
-		}
-		if (x.re != 0 && x.im != 0 && x.qu != 1) {
-			printf(")");
-		}
-		if (x.qu != 1) {
-			printf("/");
-			int d = int_quadpart(x.qu);
-			int qu = x.qu / (d*d);
-			if (d != 1) {
-				printf("%d", d);
-			}
-			if (qu != 1) {
-				printf("sqrt(%d)", qu);
-			}
+		} else if (x.im.whole != 0) {
+			radnum_print(x.im);
+			printf("i");
 		}
 	}
+	if (paren) {
+		printf(")");
+	}
+	if (x.de != 1) {
+		printf("/%u", x.de);
+	}
+}
+
+num num_add(num x, num y) {
+	x.re.whole *= (int)y.de;
+	x.im.whole *= (int)y.de;
+	y.re.whole *= (int)x.de;
+	y.im.whole *= (int)x.de;
+	return (num){radnum_add(x.re, y.re), radnum_add(x.im, y.im), x.de*y.de};
+}
+
+num num_mul(num x, num y) {
+	num result;
+	// x.de *= y.de;
+	// y.de *= x.de;
+	radnum xryr = radnum_reduce(radnum_mul(x.re, y.re));
+	radnum xiyr = radnum_reduce(radnum_mul(x.im, y.re));
+	radnum xryi = radnum_reduce(radnum_mul(x.re, y.im));
+	radnum xiyi = radnum_reduce(radnum_mul(x.im, y.im));
+	xiyi.whole = -xiyi.whole;
+	result.re = radnum_add(xryr, xiyi);
+	result.im = radnum_add(xryi, xiyr);
+	result.de = x.de * y.de;
+	return result;
+}
+
+num num_mod_sq(num x) {
+	int mod_sq = x.re.whole * x.re.whole * (int)x.re.qu
+		+ x.im.whole * x.im.whole * (int)x.im.qu;
+	return (num){{mod_sq, 1}, {0, 1}, x.de*x.de};
+}
+
+num num_inv(num x) {
+	int mod_sq = x.re.whole * x.re.whole * (int)x.re.qu
+		+ x.im.whole * x.im.whole * (int)x.im.qu;
+	x.re.whole *= (int)x.de;
+	x.im.whole *= -(int)x.de;
+	x.de = mod_sq;
+	return x;
+}
+
+num num_inv_sqrt(num x) {
+	if (x.im.whole != 0 && x.im.qu != 0) {
+		printf("Tried to take invsqrt of non-real number\n");
+		exit(1);
+	}
+	if (x.re.qu != 1) {
+		printf("Tried to take invsqrt of non-rational number\n");
+		exit(1);
+	}
+	int sgn = 1;
+	int nu = (int)x.de;
+	int de = x.re.whole;
+	if (de < 0) {
+		sgn = -1;
+		de = -de;
+	}
+	return (num){{sgn, nu * de}, {0, 1}, de};
 }
 
 /* My matrices are just pointers to num
@@ -215,7 +207,7 @@ void num_print(num x) {
 void mat_mul(int n, num *out, num *x, num *y) {
 	range(i, n) {
 		range (k, n) {
-			num sum = {0, 0, 1};
+			num sum = {{0, 1}, {0, 1}, 1};
 			range (j, n) {
 				sum = num_add(sum, num_mul(x[i*n+j], y[j*n+k]));
 			}
@@ -247,23 +239,26 @@ void eliminator(int n, int i, int j, num *out, num *x) {
 	num a = x[j*n+j];
 	num b = x[i*n+j];
 	num modsq = num_add(num_mod_sq(a), num_mod_sq(b));
-	num mod = num_invsqrt(modsq);
+	num mod = num_inv_sqrt(modsq);
 	// printf("|"); num_print(a); printf("|^2 + |"); num_print(b); printf("|^2 = "); num_print(modsq); printf("\n");
 	// printf("1/sqrt("); num_print(modsq); printf(") = "); num_print(mod); printf("\n");
 	a = num_mul(a, mod);
 	b = num_mul(b, mod);
 	range (k, n) {
 		range (l, n) {
-			out[k*n+l] = (num){0,0,1};
+			out[k*n+l] = (num){{0, 1}, {0, 1}, 1};
 		}
 	}
 	range (k, n) {
-		out[k*n+k] = (num){1, 0, 1};
+		out[k*n+k] = (num){{1, 1}, {0, 1}, 1};
 	}
-	out[j*n+j] = num_conj(a);
-	out[i*n+i] = num_neg(a);
+	a.im.whole = -a.im.whole;
+	out[j*n+j] = a;
+	a.re.whole = -a.re.whole;
+	out[i*n+i] = a;
 	out[i*n+j] = b;
-	out[j*n+i] = num_conj(b);
+	b.im.whole = -b.im.whole;
+	out[j*n+i] = b;
 }
 
 int main() {
@@ -272,16 +267,16 @@ int main() {
 		range (j, 4) {
 			switch ((i*j)%4) {
 				case 0:
-					fourier[i][j] = (num) {1, 0, 4};
+					fourier[i][j] = (num) {{1, 1}, {0, 1}, 2};
 					break;
 				case 1:
-					fourier[i][j] = (num) {0, 1, 4};
+					fourier[i][j] = (num) {{0, 1}, {1, 1}, 2};
 					break;
 				case 2:
-					fourier[i][j] = (num) {-1, 0, 4};
+					fourier[i][j] = (num) {{-1, 1}, {0, 1}, 2};
 					break;
 				case 3:
-					fourier[i][j] = (num) {0, -1, 4};
+					fourier[i][j] = (num) {{0, 1}, {-1, 1}, 2};
 			}
 		}
 	}
