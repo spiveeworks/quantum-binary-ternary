@@ -882,7 +882,7 @@ y
 0
 \end{matrix}\right]
 \end{align*}
-Clearly eigenvectors will be proportional to $(v_1^2+v_2^2, (v_1+iv_2)(v_3\mp\norm{v}))$, but this isn't really important, we can observe the matrix is Hermitian and so will be diagonalizable with these real eigenvalues we found:
+Clearly eigenvectors will be proportional to $(v_1^2+v_2^2, -(v_1+iv_2)(v_3\mp\norm{v}))$, but this isn't really important, we can observe the matrix is Hermitian and so will be diagonalizable with these real eigenvalues we found:
 
 \begin{align*}
 v\cdot \sigma
@@ -1046,5 +1046,207 @@ Unsurprisingly I am going to have to generalize my code to something that doesn'
 I might just use $\sqrt{n_1/d_1} + i\sqrt{n_2/d_2}$ and avoid the distinction between linear and quadratic representations. Addition needs to be checked and multiplication does not need to be checked, whatever I do.
 
 Might do this tomorrow!
+
+\section{May 16}
+
+Returning to chapter 4 for some slower paced quantum gate practice, since I have the qutrit homework should I want to push myself.
+
+\subsection{Exercise 4.1}
+Map the eigenvectors of the Pauli matrices onto the Bloch sphere.
+
+Exercise 2.11 gave us the eigenvectors:
+\[
+X = \ket{+}\bra{+} - \ket{-}\bra{-}
+\]
+\[Y = (S\ket{+})(\bra{+}S^\dagger) - (S\ket{-})(\bra{-}S^\dagger)\]
+\[Z = \ket{0}\bra{0} - \ket{1}\bra{1}\]
+
+These have the following Bloch coordinates:
+\[
+\ket{+} = \cos(\pi/4)\ket{0} + e^0\sin(\pi/4)\ket{1} \mapsto (1, 0, 0)
+\]
+\[
+\ket{-} = \cos(-\pi/4)\ket{0} + e^0\sin(-\pi/4)\ket{1} \mapsto (-1, 0, 0)
+\]
+equivalently
+\[
+\ket{-} = \cos(\pi/4)\ket{0} + e^{i\pi}\sin(\pi/4)\ket{1} \mapsto (-1, 0, 0)
+\]
+
+\[S\ket{+} = \cos(\pi/4)\ket{0} + e^{i\pi/2}\sin(\pi/4)\ket{1} \mapsto (0, 1, 0)\]
+\[S\ket{-} = \cos(-\pi/4)\ket{0} + e^{i\pi/2}\sin(-\pi/4)\ket{1} \mapsto (0, -1, 0)\]
+
+\[\ket{0} = \cos(0)\ket{0} + e^0\sin(0)\ket{1} \mapsto (0, 0, 1)\]
+\[\ket{1} = \cos(\pi/2)\ket{0} + e^0\sin(\pi/2)\ket{1} \mapsto (0, 0, -1)\]
+
+\subsection{Eigenvectors of Unitary Hermitian Matrices on Bloch Sphere}
+
+In Exercise 2.35 we are asked to exponentiate $i\theta(v_1X+v_2Y+v_3Z)$ and in doing so had to diagonalize an almost arbitrary unitary hermitian matrix $v_1X+v_2Y+v_3Z$.
+
+It satisfied the following verbose eigenvector relation:
+\[(v_1X+v_2Y+v_3Z)((v_1^2+v_2^2)\ket{0} - (v_1+iv_2)(v_3\mp \norm{v})\ket{1}) = \pm ((v_1^2+v_2^2)\ket{0} - (v_1+iv_2)(v_3\mp \norm{v})\ket{1})\]
+
+The $\ket{0}$ coordinate looks suspiciously sphere-related, so it is tempting to see what $v = (\cos(\phi)\sin(\theta),\sin(\phi)\sin(\theta),\cos\theta)$ gives:
+\[v_1^2+v_2^2=\sin^2(\theta)\ket{0}\]
+\[-(v_1+iv_2)(v_3\mp\norm{v}) = -e^{i\phi}\sin(\theta)(\cos(\theta \mp 1))\]
+
+So the $\phi$ almost maps directly, but the $\theta$ requires some rejigging? In any case it seems there is a very close relationship between the vector $v$ and the eigenvectors of $v \cdot \sigma$.
+
+\subsection{Exercise 4.2}
+Let $x$ be a real number and $A$ a matrix such that $A^2=I$. Show that 
+\[\exp(iAx)=\cos(x)I+i\sin(x)A\]
+Use this result to verify Equations (4.4) through (4.6).
+
+Exercise 2.35 shows this equation holds for a related set of unitary hermitian matrices, from which (4.4) through (4.6) directly follow.
+
+We will show this more general case now though.
+
+If $A$ is normal then it will have eigenvalues satisfying $\lambda^2 = 1$, meaning it will be hermitian and unitary.
+
+Then
+\begin{align*}
+\exp(iAx)
+&= \exp\left(i\left(\sum_j v_j\ket{v_j}\bra{v_j}\right)x\right)
+\\&= \sum_j \exp(iv_jx)\ket{v_j}\bra{v_i}
+\\&= \sum_j (\cos(x)+iv_jsin(x))\ket{v_j}\bra{v_i}
+\\&= \cos(x)\left(\sum_j \ket{v_j}\bra{v_i}\right)+isin(x)\left(\sum_j v_j\ket{v_j}\bra{v_i}\right)
+\\&= \cos(x)I+isin(x)A
+\end{align*}
+
+If $A$ is not normal then its exponential is not a defined concept, but presumably $A^2=1$ implies normality? I'm not sure this has come up in the exercises.
+
+\begin{align*}
+\left[\begin{matrix}
+a&b\\
+c&d
+\end{matrix}\right]^2
+=
+\left[\begin{matrix}
+a^2+bc&b(a+d)\\
+c(a+d)&bc+d^2
+\end{matrix}\right]
+=
+\left[\begin{matrix}
+1&0\\
+0&1
+\end{matrix}\right]
+\end{align*}
+\begin{align*}
+\left[\begin{matrix}
+a&b\\
+c&d
+\end{matrix}\right]
+\left[\begin{matrix}
+a&b\\
+c&d
+\end{matrix}\right]^\dagger
+=
+\left[\begin{matrix}
+\ord{a}^2+\ord{b}^2&ac^*+bd^*\\
+a^*c+b^*d&\ord{c}^2+\ord{d}^2
+\end{matrix}\right]
+\neq
+\left[\begin{matrix}
+a&b\\
+c&d
+\end{matrix}\right]^\dagger
+\left[\begin{matrix}
+a&b\\
+c&d
+\end{matrix}\right]
+=
+\left[\begin{matrix}
+\ord{a}^2+\ord{c}^2&a^*b+c^*d\\
+ab^*+cd^*&\ord{b}^2+\ord{d}^2
+\end{matrix}\right]
+\end{align*}
+
+This gives the following possible relations:
+\[a^2=d^2=1-bc\]
+\[a=-d \text{\ or\ } b = c = 0\]
+\[\ord{b} \neq \ord{c} \text{\ or\ } ac^*+bd^* \neq a^*b+c^*d\]
+
+Now we definitely have $a=-d$, since otherwise we'd have $b=c=0$ which implies normality.
+
+Then if $a=-d$ we could easily set $b=0$, $c=1$ to get non-normality, and then $a^2=1$ is sufficient for $A^2=I$.
+
+\[
+A=\left[\begin{matrix}
+1&1\\
+0&-1
+\end{matrix}\right]\]
+This is in fact not normal since it has the non-orthogonal eigenvectors $\ket{0}$ and $\ket{0}-2\ket{1}$.
+
+This isn't relevant for quantum computation but in any case let's exponentiate it:
+\begin{align*}
+\exp(iAx)=
+\exp(ix\left[\begin{matrix}
+1&1\\
+0&-2
+\end{matrix}\right]
+&\left[\begin{matrix}
+1&0\\
+0&-1
+\end{matrix}\right]
+\left[\begin{matrix}
+1&1\\
+0&-2
+\end{matrix}\right]^{-1}
+)
+\\=
+-\frac{1}{2}
+\left[\begin{matrix}
+1&1\\
+0&-2
+\end{matrix}\right]
+&\left[\begin{matrix}
+\exp(ix)&0\\
+0&\exp(-ix)
+\end{matrix}\right]
+\left[\begin{matrix}
+-2&-1\\
+0&1
+\end{matrix}\right]
+\\=
+-\frac{1}{2}
+&\left[\begin{matrix}
+\exp(ix)&\exp(-ix)\\
+0&-2\exp(-ix)
+\end{matrix}\right]
+\left[\begin{matrix}
+-2&-1\\
+0&1
+\end{matrix}\right]
+\\=
+&\left[\begin{matrix}
+\exp(ix)&\sinh(ix)\\
+0&\exp(-ix)
+\end{matrix}\right]
+\\=
+\left[\begin{matrix}
+\cos(x)&0\\
+0&\cos(x)
+\end{matrix}\right]
++i&\left[\begin{matrix}
+\sin(x)&\sin(x)\\
+0&-\sin(x)
+\end{matrix}\right]
+\\=\cos(x)I+&i\sin(x)A
+\end{align*}
+
+So interestingly the result applies for this matrix, I guess that you could prove it like follows:
+\begin{align*}
+&I=A^2=(V\Lambda V^{-1})^2=V\Lambda^2V^{-1}
+\\\implies &\Lambda^2=I
+\end{align*}
+But $\Lambda$ is normal so it will be hermitian and unitary, then since conjugation is linear the result follows from the above proof for hermitian unitary matrices.
+\begin{align*}
+\exp(iAx)
+&=\exp(iV\Lambda V^{-1}x)
+\\&=V\exp(i\Lambda x)V^{-1}
+\\&=V(\cos(x)I + i\sin(x)\Lambda)V^{-1}
+\\&=\cos(x)VIV^{-1} + i\sin(x)V\Lambda V^{-1}
+\\&=\cos(x)I + i\sin(x)A
+\end{align*}
 
 \end{document}
