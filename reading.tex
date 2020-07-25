@@ -198,4 +198,130 @@ The paper references a program that can decompose unitary matrices including tho
 
 Executing the full algorithm on ibmqx4 gave a higher probability of getting the correct string than any other, but in absolute terms the probabilities weren't that much better than uniform, which speaks to the drastic cost of this oracle and of not using error correction!
 
+\section{June 3}
+Going to start working through the Linear Systems algorithm from the Quantum Algorithm Implementations for Beginners.
+
+Solve $A\ket{x}=\ket{b}$.
+
+We choose the Hermitian matrix:
+\[A = \left[\begin{matrix}
+1.5&0.5\\
+0.5&1.5
+\end{matrix}\right]\]
+
+Diagonalize as follows:
+\begin{align*}
+A =& I + \ket{+}\bra{+}
+\\=& 2\ket{+}\bra{+} + \ket{-}\bra{-}
+\\\implies U=e^{iA} =& e^{2i}\ket{+}\bra{+} + e^{i}\ket{-}\bra{-}
+\end{align*}
+
+Suppose we have an arbitrary vector with coordinates described in the $+/-$ basis:
+\[\ket{b} = b_+\ket{+}+b_-\ket{-}\]
+
+Now suppose we have some $n$ register qubits, initially set to $\ket{+}$ by measuring $\ket{0}$ and applying $H$.
+
+Then perform controlled-$U^{2^t}$ to $\ket{b}$ using register bit $t$:
+\begin{align*}
+\ket{r_tb}=&CU^{2^t}\ket{+}\ket{b}
+\\=& \frac{1}{\sqrt{2}}\ket{0}\ket{b} + \frac{1}{\sqrt{2}}\ket{1}U^{2^t}\ket{b}
+\\=& \frac{1}{\sqrt{2}}\ket{0}\ket{b} + \frac{1}{\sqrt{2}}\exp\left(2^{t+1}i\right)b_+\ket{1}\ket{+} + \frac{1}{\sqrt{2}}\exp\left(2^{t}i\right)b_-\ket{1}\ket{-}
+\\=& \frac{1}{\sqrt{2}}b_+\left(\ket{0}+\left(2^{t+1}i\right)\ket{1}\right)\ket{+}+\frac{1}{\sqrt{2}}b_-\left(\ket{0}+\exp\left(2^{t}i\right)\ket{1}\right)\ket{-}
+\end{align*}
+Collecting all $\ket{r_t}$ and $\ket{b}$ into a single state vector:
+\begin{align*}
+\ket{rb}=&b_+\bigotimes \ket{r_{t+}}\ket{+} + b_-\bigotimes \ket{r_{t-}}\ket{-}
+\end{align*}
+Consider the register bits in the first term of this vector:
+\begin{align*}
+\bigotimes_{t=0}^{n-1} \ket{r_{t+}}
+=& \bigotimes_{t=0}^{n-1} \frac{1}{\sqrt{2}}\left(\ket{0}+\exp\left(2^{t+1}i\right)\ket{1}\right)
+\\=& \frac{1}{\sqrt{2^n}}\bigotimes_{t=0}^{n-1} \left(\sum_{j\in\{0,1\}} \exp\left(2^{t+1}ij\right)\ket{j} \right)
+\\=& \frac{1}{\sqrt{2^n}}\sum_{k=0}^{2^n-1}\left(\bigotimes_{t=0}^{n-1} \exp\left(2^{t+1}ik_t\right)\ket{k_t}\right)
+\\=& \frac{1}{\sqrt{2^n}}\sum_{k=0}^{2^n-1}\left(\prod_{t=0}^{n-1} \exp\left(2^{t+1}ik_t\right)\right)\ket{k}
+\\=& \frac{1}{\sqrt{2^n}}\sum_{k=0}^{2^n-1}\exp\left(2ik\right)\ket{k}
+\end{align*}
+Similarly the second term will be:
+\[\bigotimes_{t=0}^{n-1} \ket{r_{t-}} = \frac{1}{\sqrt{2^n}}\sum_{k=0}^{2^n-1}\exp({ik})\ket{k}\]
+
+So the state at this point in time will be:
+\[\ket{rb}=b_+\frac{1}{\sqrt{2^n}}\sum_{k=0}^{2^n-1}\exp(2ik)\ket{k}\ket{+} + b_-\frac{1}{\sqrt{2^n}}\sum_{k=0}^{2^n-1}\exp(ik)\ket{k}\ket{-}\]
+Now we apply the Quantum Fourier Transform to the register bits,
+\begin{align*}
+\ket{r_-'}=&\text{QFT}\ket{r_-}
+\\=&\left(\frac{1}{\sqrt{2^n}}\sum_{j,k}\exp\left(\frac{2\pi i}{2^n}jk\right)\ket{j}\bra{k}\right)\left(\frac{1}{\sqrt{2^n}}\sum_{k}\exp\left(2ik\right)\ket{k}\right)
+\\=& \frac{1}{2^n}\sum_{j,k}\exp\left(\frac{2\pi i}{2^n}jk+2ik\right)\ket{j}
+\end{align*}
+U is wrong, need a factor of $2\pi$ as well. I'll come back to this in the future.
+
+\section{June 9}
+
+\begin{align*}
+U=&\exp(2\pi iA)
+\\=&\exp(4\pi i)\ket{+}\bra{+} + \exp(2 \pi i)\ket{-}\bra{-}
+\\=& \ket{+}\bra{+} + \ket{-}\bra{-}
+\\=& I
+\end{align*}
+Need a factor of $2^t$ as well? Not sure. Let's just move on to Shor.
+
+We will find $p$ such that $11^p \mod 15 \equiv 1$.
+
+Take some index register to be $\ket{+}^{\otimes m}$, then perform modular exponentiation $\ket{i}\ket{j}\mapsto\ket{i}\ket{j+11^i\mod15}$:
+\begin{align*}
+\ket{+}^{\otimes m}\ket{0} \mapsto& \frac{1}{\sqrt{M}}\sum_i^M \ket{i}\ket{11^i\mod 15}
+\\=&\frac{1}{\sqrt{M}}\sum_q \sum_r \ket{qp+r}\ket{11^{qp}11^r\mod 15}
+\\=&\frac{1}{\sqrt{M}}\sum_q \sum_r \ket{qp+r}\ket{11^r\mod 15}
+\end{align*}
+Now apply QFT:
+\begin{align*}
+&\left(\frac{1}{\sqrt{M}}\sum_{j,k}\exp\left(\frac{2\pi i}{M}jk\right)\ket{k}\ket{j}\right)
+\left(\frac{1}{\sqrt{M}}\sum_q \sum_r \ket{qp+r}\ket{11^r\mod 15}\right)
+\\=&\frac{1}{M}\sum_{j,k}\sum_q \sum_r\exp\left(\frac{2\pi i}{M}jk\right) \ket{k}\braket{j}{qp+r}\ket{11^r\mod 15}
+\\=&\frac{1}{M}\sum_{k}\sum_q \sum_r\exp\left(\frac{2\pi i}{M}k(qp+r)\right) \ket{k}\ket{11^r\mod 15}
+\\=&\frac{1}{M}\sum_{k}\sum_r
+\left(\sum_q \exp\left(\frac{2\pi i}{M}kqp\right)\right)
+\exp\left(\frac{2\pi i}{M}kr\right)
+\ket{k}\ket{11^r\mod 15}
+\end{align*}
+Now divide $k$ by $M/p$ similar to how $i$ was divided by $p$:
+\begin{align*}
+\\=&\frac{1}{M}\sum_{k'}\sum_{l}\sum_r
+\left(\sum_q \exp\left(\frac{2\pi i}{M}\left(k'Mq+lqp\right)\right)\right)
+\exp\left(2\pi i\left(\frac{k'}{p}+\frac{l}{M}\right)r\right)
+\ket{k'M/p+l}\ket{11^r\mod 15}
+\\=&\frac{1}{M}\sum_{k'}\sum_{l}\sum_r
+\left(\frac{M}{p}\delta_{0,l}\right)
+\exp\left(2\pi i\left(\frac{k'}{p}+\frac{l}{M}\right)r\right)
+\ket{k'M/p+l}\ket{11^r\mod 15}
+\\=&\frac{1}{p}\sum_{k'}\sum_r
+\exp\left(\frac{2\pi ik'r}{p}\right)
+\ket{k'M/p}\ket{11^r\mod 15}
+\end{align*}
+Measuring this first state, we will get some value $i'=k'M/p$.
+
+Running this circuit repeatedly we will be able to discern the smallest nonzero $i'$ value -- corresponding to $k'=1$. Then $M/i'=p$ so we have the period.
+
+I'll substitute some numbers into the above formulas to see what the amplitudes look like, but it's not going to be that surprising after thinking about it in the abstract.
+
+After modular exponentiation:
+\[\frac{1}{16}\sum_q^{8}\left(\ket{2q}\ket{1}+\ket{2q+1}\ket{11}\right)\]
+After QFT:
+\[\frac{1}{2}\ket{0}\ket{1}+\frac{1}{2}\ket{0}\ket{11}+\frac{1}{2}\ket{128}\ket{1}-\frac{1}{2}\ket{128}\ket{11}\]
+
+Oh actually I didn't really think about how $p$ is small so $M/p$ is going to be huge! We eliminate a lot of values of $l$! Imagine this in a cryptographic case, with large $M$, millions of amplitudes all cancelled out to zero.
+
+Then of course measuring the first register will give $0$ or $128$, so finishing the algorithm:
+\[p = 256/128 = 2\]
+\[(11^2-1)=(11-1)(11+1)=10 \cdot 12\]
+\[15 = \gcd(10,15)\cdot\gcd(12,15)=5\cdot3\]
+
+\subsection{Improved Ternary Arithmetics Inquiry}
+
+The paper used two forms of controlled gate $\wedge(U)$ and $C_c(U)$, but the central observation of the paper is that carry trits only take the values 0 and 1, meaning as control trits these gates would be equivalent. Do they use one where the other would also be possible?
+
+Their carry look-ahead algorithm uses carry trits in a way that would be advantageous in binary addition as well, and their ripple carry add uses carry bits in the addition of trits, both very natural examples of mixed-level algorithm! Run through both of these algorithms with register objects of the appropriate multiplicities.
+
+Could some more dense encodings be available for adding classical bits or trits in a qutrit? Either by leveraging superpositions in the ancillary lines that remain hidden to the inputs and outputs, or by assuming a non-orthogonal encoding of data in the inputs or outputs?
+
+Mixed level notation and gates, I am currently thinking $\wedge(U)$ for $U^{\{0,1,2\}}$, $C_c(U)$ for $U^\delta$, both with control trits, and $C(U)$ for control bits. By never dropping the subscript in $C_c(U)$ one would know not only that it is ternary, but that it is an operation that would be more natural in binary!
 \end{document}

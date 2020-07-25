@@ -1,0 +1,221 @@
+% newcommands.tex (new command definitions)
+
+% Here you would include any additional packages that you want to use.
+% You should make sure they don't clash with the above packages that
+% are in use in the style file.
+% If you want to call in some style files or new packages, put them here
+%\usepackage{undertilde}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage[a4paper]{geometry}
+%\usepackage[latin1]{inputenc}
+\usepackage{amsmath, latexsym, color, graphicx, amssymb, here}
+\usepackage{amsfonts}
+\usepackage{epsf, epsfig, pifont,tikz}
+\usepackage{graphics, calrsfs}
+%\usepackage{tangocolors}
+\usepackage{times}
+\usepackage{fancybox,calc}
+\usepackage{hyperref}
+\usepackage{pgfplots}
+\usepackage{verbatim}
+\usepackage{esint} 
+\usepackage{amsthm}
+
+
+%% environment name, counter, text
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+%% Use like:
+% \begin{definition}
+% Blah blah blah
+% \end{definition}
+
+
+
+%% Brackets
+\newcommand{\lb}{\left(}
+\newcommand{\rb}{\right)}
+%% Square Brackets
+\newcommand{\lbs}{\left[}
+\newcommand{\rbs}{\right]}
+
+%Bolded letters
+\newcommand{\A}{{\bf A}}
+\newcommand{\B}{{\bf B}}
+\newcommand{\T}{{\bf T}}
+\newcommand{\C}{{\bf C}}
+\newcommand{\N}{{\bf N}}
+\newcommand{\n}{{\bf n}}
+\newcommand{\bfx}{{\ensuremath{\mathbf{x}}}}
+%Bolded letters, which previously had a command
+\renewcommand{\v}{{\bf v}}
+\renewcommand{\r}{{\bf r}}
+\renewcommand{\a}{{\bf a}}
+
+%Set notation. Needs to be in a maths environment (equation or $$)
+\newcommand{\R}{{\mathbb R}}
+\newcommand{\Z}{{\mathbb Z}}
+
+%Unit vectors. Needs to be in a maths environment (equation or $$)
+\newcommand{\uniti}{{\hat{\mbox{\boldmath $\imath$}}}}
+\newcommand{\unitj}{{\hat{\mbox{\boldmath $\jmath$}}}}
+\newcommand{\unitk}{{\hat{\mbox{\boldmath $\mathit{k}$}}}}
+\newcommand{\unitn}{{\hat{\mbox{\boldmath $\mathit{n}$}}}}
+\newcommand{\unite}{{\hat{\mbox{\boldmath $\mathit{e}$}}}}
+\newcommand{\unitu}{{\hat{\mbox{\boldmath $\mathit{u}$}}}}
+
+
+%Shorthand for commonly used expressions with cursive font
+\newcommand{\ie}{{\em i.e.} \/}
+\newcommand{\eg}{{\em e.g.} \/}
+\newcommand{\etc}{{\em etc.} \/}
+\newcommand{\etal}{{\em et al. }}
+
+
+%Bolded, cursive strings of characters
+\newcommand{\mathbi}[1]{\textbf{\em #1}}
+
+
+%Bolded dot symbol
+\newcommand{\bcdot}{\mbox{\boldmath $\, \cdot \, $}}
+
+%bolds and puts in a cursive underline for a vector
+\renewcommand{\vec}[1]{{\mbox{\boldmath $\utilde{\mathit{#1}}$}}}
+
+
+%Shorthand commands for writing xy,xz,yz planes
+\newcommand{\xyplane}{$x$-$y$ plane\/}
+\newcommand{\xzplane}{$x$-$z$ plane\/}
+\newcommand{\yzplane}{$y$-$z$ plane\/}
+\newcommand{\abplane}[2]{${#1}$-${#2}$ plane\/}
+
+%Full derivative of A wrt B. Needs to be in a maths environment (equation or $$)
+\newcommand{\FullDif}[2]{\dfrac{d {#1}}{d {#2}}}
+
+%Partial derivative of A wrt B. Needs to be in a maths environment (equation or $$)
+\newcommand{\ParDif}[2]{\dfrac{\partial {#1}}{\partial {#2}}}
+%Second partial derivative of A wrt B. Needs to be in a maths environment (equation or $$)
+\newcommand{\DblParDif}[2]{\frac{\partial^2 #1}{\partial #2 ^2}}
+
+%Material derivative of A wrt B. Needs to be in a maths environment (equation or $$)
+\newcommand{\MatDif}[2]{\dfrac{D {#1}}{D {#2}}}
+
+
+%Writes the cartesian gradient of a function. Leave as {} to write the operator. Needs to be in a maths environment (equation or $$)
+\newcommand{\grad}[1]{\ParDif{#1}{x}  \uniti+ \ParDif{#1}{y} \, \unitj + \ParDif{#1}{z} \, \unitk}
+
+
+%Writes the cartesian Laplacian of a function. Leave as {} to write the operator. Needs to be in a maths environment (equation or $$)
+\newcommand{\laplacian}[1]{\DblParDif{{#1}}{x} + \DblParDif{{#1}}{y}+ \DblParDif{{#1}}{z}}
+
+%Writes the cylindrical gradient of a function. Leave as {} to write the operator. Needs to be in a maths environment (equation or $$)
+\newcommand{\gradCylindrical}[1]{\ParDif{{#1}}{\rho} \, \unite_\rho \ + \ \dfrac{1}{\rho} \ParDif{{#1}}{\phi} \, \unite_\phi \ + \ \ParDif{{#1}}{z} \, \unite_z}
+
+
+
+%Writes the spherical gradient of a function. Leave as {} to write the operator. Needs to be in a maths environment (equation or $$)
+\newcommand{\gradSpherical}[1]{\ParDif{{#1}}{r} \, \unite_r \ + \ \dfrac{1}{r} \ParDif{{#1}}{\theta} \, \unite_\theta \ + \ \dfrac{1}{r \sin(\theta)}\ParDif{{#1}}{\phi} \, \unite_\phi}
+
+%Writes the spherical divergence of a function. Leave as {}{}{} to write the operator, otherwise #1 is r component, #2 is theta component and #3 is phi component. Needs to be in a maths environment (equation or $$)
+\newcommand{\divSpherical}[3]{\dfrac{1}{R^2}\, \ParDif{}{R}\lb(R^2\, {#1}\rb) \ + \  \dfrac{1}{R \sin(\theta)} \ParDif{}{\theta} \lb(\sin(\theta)\, {#2}\rb) \ + \ \dfrac{1}{R \sin(\theta)}\ParDif{{#3}}{\phi} \  }
+
+%Creates a cartesian position vector, argument is the vector field in question. Needs to be in a maths environment (equation or $$)
+\newcommand{\posvect}[1]{{#1}_x \, \uniti + {#1}_y \, \unitj + {#1}_z \, \unitk}
+
+%Creates the cartesian generic position vector r. Needs to be in a maths environment (equation or $$)
+\newcommand{\posvectr}{x \, \uniti + y \, \unitj + z \, \unitk}
+%Creates the cylindrical generic position vector r. Needs to be in a maths environment (equation or $$)
+\newcommand{\posvectcyl}{\rho \, \unite_\rho \, + z \, \unite_z}
+%Creates the spherical generic position vector r. Needs to be in a maths environment (equation or $$)
+\newcommand{\posvectsph}{r \, \unite_\r}
+
+
+%Shorthand for a parametrised position vector. Needs to be in a maths environment (equation or $$)
+\newcommand{\parametricposvectr}{\vec{r}(t) \ = \ x(t) \, \uniti + y(t) \, \unitj + z(t) \, \unitk}
+
+%Creates the divergence of a specified vector. Needs to be in a maths environment (equation or $$)
+\renewcommand{\div}[1]{\nabla \bcdot \vec{#1}}
+
+%Creates the curl of a specified vector. Needs to be in a maths environment (equation or $$)
+\newcommand{\curl}[1]{\nabla \times \vec{#1}}
+
+%Creates the magnitude of a specified vector. Needs to be in a maths environment (equation or $$)
+\newcommand{\magnitude}[1]{ \| \vec{#1} \| }
+
+
+
+%Creates a differential distance in Cartesian. Needs to be in a maths environment (equation or $$)
+\newcommand{\drCart}{d x \, \uniti + d y \, \unitj + d z \, \unitk}
+%Creates a differential distance in Cylindrical. Needs to be in a maths environment (equation or $$)
+\newcommand{\drCyl}{d \rho \, \unite_\rho + \rho \, d \phi \, \unite_\phi + d z \, \unite_z}
+%Creates a differential distance in Spherical. Needs to be in a maths environment (equation or $$)
+\newcommand{\drSph}{d r \, \unite_r + r \, d \theta \, \unite_\theta + r \, \sin(\theta) \, d \phi \, \unite_\phi }
+
+
+%Creates arbitrary vectors with 3 arguments. Needs to be in a maths environment (equation or $$)
+\newcommand{\coordvect}[3]{{#1} \, \uniti \, + \, {#2} \, \unitj \, + {#3} \, \unitk}
+\newcommand{\cylcoordvect}[3]{{#1} \, \unite_\rho \, + \, {#2} \, \unite_\phi \, + {#3} \, \unite_z}
+\newcommand{\sphcoordvect}[3]{{#1} \, \unite_\r \, + \, {#2} \, \unite_\theta \, + {#3} \, \unite_\phi}
+
+
+%Creates a box around a given equation. Must be in a maths environment.
+\newsavebox{\fmbox}
+\newenvironment{eqnframe}[1]     
+{
+	\begin{center} 
+	\begin{lrbox}{\fmbox}
+	\begin{minipage}{#1}
+}     
+{
+	\end{minipage}
+	\end{lrbox}\fbox{\usebox{\fmbox}}
+	\end{center}
+}
+
+
+%These make differently aligned boxes, with width {#1} and height {#2}
+\newcommand\Tpad[2]{\rule[4.5ex]{{#1}pt}{{#2}pt}}
+\newcommand\Bpad[2]{\rule[-3.75ex]{{#1}pt}{{#2}pt}}
+
+%These make slightly different shaped zeros.
+\renewcommand{\labelenumi}{\textbf{\arabic{enumi}}.}
+\renewcommand{\labelenumii}{\textbf{(\roman{enumii})}}
+\renewcommand{\labelenumiii}{\textbf{(\alph{enumiii})}}
+
+%Lets you use \cross instead of times. Needs to be in a maths environment (equation or $$)
+\newcommand{\cross}{\times}
+
+
+% define some colors
+\definecolor{cBlue}{rgb}{.255,.41,.884} % RoyalBlue of svgnames
+\definecolor{cRed}{rgb}{1, 0, 0} % Red of svgnames
+
+
+%Shorthand for various useful things
+%Argument 1, with argument 2 as a subscript
+\newcommand{\An}[2]{{#1}_{{#2}}}
+%Define the pair of co-ordinates
+\newcommand{\AnBm}[4]{(\An{{#1}}{{#2}},\An{{#3}}{{#4}})}
+
+%integral from x0 to x1
+\newcommand{\intxoxi}{\int_{\An{x}{0}}^{\An{x}{1}}}
+
+%f(x,y)
+\newcommand{\fxy}{f(x,y)}
+%g(x,y)
+\newcommand{\gxy}{g(x,y)}
+
+%%f(x,y,z)
+\newcommand{\fxyz}{f(x,y,z)}
+%%g(x,y,z)
+\newcommand{\gxyz}{g(x,y,z)}
+
+%% Variant epsilon
+\newcommand{\ep}{\varepsilon}
+
+%%Yprime squared
+\newcommand{\yp}{(y^\prime)^{2}}
+
+%%Coordinates ~extra style~
+\newcommand{\cord}{co$\ddot{\text{o}}$rdinates\ }

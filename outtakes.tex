@@ -1,0 +1,213 @@
+\documentclass[]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\renewcommand\thesection{}
+\renewcommand\thesubsection{}
+
+\newcommand{\bra}[1]{\langle #1 |}
+\newcommand{\ket}[1]{| #1 \rangle}
+\newcommand{\braket}[2]{\langle #1 | #2 \rangle}
+
+\newcommand{\ord}[1]{\left| #1 \right|}
+\newcommand{\norm}[1]{\left\Vert #1 \right\Vert}
+
+\begin{document}
+
+\subsection{Single Qubit Operations}
+
+Displacement operations let us develop a very important result about quantum computation in qubits called universality, starting with the key result and associated technique that any unitary matrix can be decomposed into 4 parameterized rotation operations.
+
+In two dimensions we have four displacement operators, which are exactly the following:
+\begin{align*}
+D_{0,0}=I=\left[\begin{matrix}
+1&0\\
+0&1
+\end{matrix}\right]
+&&&
+D_{1,0}=X=\left[\begin{matrix}
+0&1\\
+1&0
+\end{matrix}\right]
+\\
+D_{0,1}=Z=\left[\begin{matrix}
+1&0\\
+0&-1
+\end{matrix}\right]
+&&&
+D_{1,1}=Y=\left[\begin{matrix}
+0&-i\\
+i&0
+\end{matrix}\right]
+\end{align*}
+In the context of qubit computation the matrices $X$, $Y$, and $Z$ are actually called the Pauli matrices, whereas the higher-dimensional matrices $X_n$ and $Z_n$ are generalizations based on these.
+
+All four of these matrices are Hermitian, so not only will they form a basis for all $2\times2$ matrices, but a $2\times2$ matrix will be Hermitian if and only if its coordinates in this basis are real. Given the characterization of Hermitian and unitary matrices discussed previously, this lets us decompose a $2\times2$ unitary matrix into 4 parameterized rotations as follows:
+\begin{align*}
+U
+=& \sum_j \exp(i\theta_j)\ket{v_j}\bra{v_j}
+\\=& \exp\left(i\sum_j \theta_j\ket{v_j}\bra{v_j}\right)
+\\=& \exp\left(i(\phi I + v_xX+v_yY+v_zZ)\right)
+\\=& \exp\left(i\phi\right)\exp(iv_xX)\exp(iv_yY)\exp(iv_zZ)
+\end{align*}
+
+When physically implementing quantum computers as real, programmable devices, this decomposition, and other decompositions that it allows, are extremely useful for understanding what the minimum set of operations are that a quantum computer would need to have available to it when performing arbitrary quantum algorithms.
+
+\subsection{Universality chapter intro}
+We have postulated that any operation acting on a quantum object must be a unitary linear operator, and thus we treat the unitary matrix as the fundamental object of a quantum algorithm. [further can any unitary be implemented as a single $e^{itH/\hbar}$?] In order to run these algorithms, however, we require that the physical quantum computer being used is capable of the physical manipulation that our chosen unitary matrices represent. Implementing physical manipulations in an automatic, digitally controlled way has an engineering cost, meaning each individual quantum computer has a specific finite set of operations it is capable of directly performing, a set that depends on physical parameters that vary between different implementations, and that cannot be controlled by the theoretical algorithm designer. For these reasons a great deal of work has been and continues to be put into quantum compilation, which is the subject of converting a unitary matrix into a sequence of quantum operations that can be achieved on a specific quantum computer while reducing the total error of this implementation. [error is a whole can of worms that I haven't begun to talk about, oops]
+
+Fundamental to quantum compilation are the various techniques of matrix decomposition, where one analyses how different sets of matrices can be multiplied to give new, more general sets of matrices. In particular the problem of universal computation is the problem of finding a finite set of unitary matrices that generate arbitrarily accurate approximations of any other unitary matrix. In this chapter we shall apply some group theory and spherical geometry in order to describe how universal computation is achieved, while sketching some of the implications this has for the performance of quantum algorithms whether compiled or manually designed.
+
+\subsection{Clifford Group}
+[3 state hadamard, clifford algebra, mention naturality vs engineering choice]
+
+Call the set of $n\times n$ unitary matrices $U(n)$. Since the identity matrix, inverse of a unitary matrix, and product of two unitary matrices are also unitary, the set $U(n)$ is a group under matrix multiplication. This means that many problems of matrix decomposition can be easily understood as problems relating to different subgroups of $U(n)$ -- for example universal computation can be understood as the problem of finding a particular kind of finitely generated subgroup of $U(n)$.
+
+The Clifford group is a finite subgroup of $U(n)$ with very small generator, making it a convenient group to understand algebraically, and one that is easier to realize physically than groups that might have larger generators. Despite this the Clifford group still contains a variety of useful operations for manipulating quantum states, making up the bulk of many prominent quantum algorithms, and while the Clifford group does not by itself provide universal computation, it does play a central role in some of the most general techniques thereof.
+
+The following study of the Clifford group of individual quantum objects comes from $[\cite]$, and provides an insight into the structure of the group, as well as the behaviour of its normal subgroup, the Pauli group $\Pi_n$. In order to define the Clifford group we first define $Pi_n$ to be the subgroup of $U(n)$ generated by two matrices $X_n$, and $Z_n$. We write $\Pi_n = \langle X_n, Z_n\rangle$, where the two matrices $X_n$ and $Z_n$ have the following action on the basis:
+\begin{align*}
+X_n\ket{i} &= \begin{cases}\ket{i+1} & i < n-1 \\ \ket{0} & i = n-1\end{cases}
+\\Z_n\ket{i} &= \omega_n^i\ket{i}
+\end{align*}
+Here $\omega_n$ is the principal root of unity. By briefly setting $i^2 = -1$ this can be written $\omega_n = e^{\frac{2\pi i}{n}}$. [have an explicit convention somewhere that in vector equations $i$ is an integer and in matrix equations $i$ is $\omega_4$? or just stop using $i$ as an index?]
+
+Powers of $X_n$ are effectively cyclic translations of the interval $0, 1, 2\dots n-1$, whereas powers of $Z_n$ are effectively harmonics of that same interval. Both of these operations have order $n$, and so it is very convenient to think of our indices as elements of the cyclic group $\mathbb{Z}_n = \mathbb{Z}/n\mathbb{Z}$, and simply write $X_n\ket{i}=\ket{i+1}$.
+
+In 2 dimensions these matrices are exactly the Pauli matrices $X$ and $Z$:
+\begin{align*}
+X_2 &= \left[\begin{matrix}0&1\\1&0\end{matrix}\right]
+\\Z_2 &= \left[\begin{matrix}1&0\\0&-1\end{matrix}\right]
+\end{align*}
+
+The third Pauli matrix $Y_2$ can be expressed as $\omega_4X_2Z_2$, which is one motivation for defining the Weyl-Heisenberg group for even integers $n$ as $H(n) = \langle X_n, Z_n, \omega_{2n}\rangle$. This group is important for understanding the Clifford group in general, but in this context it is sufficient to focus on the Pauli group $\Pi_n$. [this doesn't seem to be true in the end...]
+
+Our two generators are finite order, so if they could commute we would have $\Pi_n \cong \mathbb{Z}_n\times \mathbb{Z}_n$, but comparing $X_2Z_2$ with $Z_2X_2$ we see that this does not hold:
+\[X_2Z_2 = \left[\begin{matrix}0&-1\\1&0\end{matrix}\right]\]
+\[Z_2X_2 = \left[\begin{matrix}0&1\\-1&0\end{matrix}\right] = -X_2Z_2\]
+In fact in general we have $Z_nX_n = \omega_nX_nZ_n$:
+\begin{align*}
+Z_nX_n\ket{i}
+=& Z_n\ket{i+1}
+\\=& \omega_n^{i+1}\ket{i+1}
+\\=& \omega_n^{i+1}X_n\ket{i}
+\\=& \omega_nX_nZ_n\ket{i}
+\end{align*}
+This means that the scalar matrix $\omega_nI_n$ is in the Pauli group, another matrix with order $n$. Since $\omega_n$ \textit{will} commute with any matrix, we can now observe the Pauli group to be the following set of order $n^3$:
+\[\Pi_n = \{\omega_n^iX_n^jZ_n^k\ |\ i, j, k \in \mathbb{Z}_n\}\]
+
+For even $n$ we similarly find the Weyl-Heisenberg group to be a very similar looking set with order $2n^3$:
+\[H(n) = \{\omega_{2n}^iX_n^jZ_n^k\ |\ i \in \mathbb{Z}_{2n}, j, k \in \mathbb{Z}_n\}\]
+
+[what follows is my previous justification for the quotient in terms of global phase, I am not sure about it since this chapter is now working towards single object gates, and it seems to be worth giving more care to global phase in case one wishes to use controlled Clifford gates, and more to the point it's just easier to justify in algebraic terms -- but I may want some kind of explanation of global phase either here or elsewhere]
+\begin{verbatim}
+It turns out that we can ignore these scalar factors 
+$\omega_n^i$, since by reflecting on the postulates of quantum 
+mechanics declared in the previous chapter one observes that 
+scalar factors cannot be measured directly, and that unitary 
+transformations are not able to map scalar factors to anything 
+other than scalar factors. This means that the group of unit 
+complex numbers $U(1)$ can be treated as not participating in 
+computation, and instead of understanding the group $U(n)$ one 
+can seek to understand the quotient group $U(n)/U(1)$. The 
+corresponding Pauli quotient group $\Pi_n / \langle \omega_n 
+\rangle$ will be commutative and thus isomorphic to 
+$\mathbb{Z}_n\times \mathbb{Z}_n$.
+\end{verbatim}
+
+The Clifford group, now, can be defined as the normalizer of the Weyl-Heisenberg group defined previously, that is the group of matrices $A$ that satisfy $AQA^{-1} \in H(n)$ for any matrix $Q \in H(n)$. Since $H(n)$ is generated by exactly a scalar, $X_n$, and $Z_n$, it is sufficient to consider only the action of $A$ on $X_n$ and $Z_n$. [move this to before quotients are mentioned? interrupted stream of thought]
+
+Now it is shown in $[\backslash cite]$ that the Clifford quotient group, that is the quotient of the Clifford group by scalar factors, is isomorphic to the set of inner automorphisms $Q \mapsto AQA^{-1}$, where $A \in U(n)$ and $Q \in H(n)$. Then in the same way that the Clifford group is the normalizer of $H(n)$, this group of inner automorphisms was shown to be the normalizer of the subgroup $\{Q \mapsto AQA^{-1}\ |\ A \in H(n)\}$, and that this subgroup was also isomorphic to $\mathbb{Z}_n\times\mathbb{Z}_n$. Finally by quotienting by this normal subgroup and interpreting the actions $AX_n^jZ_n^kA^{-1}$ as linear maps on $\mathbb{Z}_n\times\mathbb{Z}_n$ with determinant 1, the Clifford quotient group is ultimately isomorphic to \[(\mathbb{Z}_n\times\mathbb{Z}_n)\rtimes\text{SL}(2,\mathbb{Z}_n)\]
+[appendix for these many group definitions, maybe explain a bit more/motivation, if at all, possibly a linear algebra appendix as well, use ]
+
+[Tolar references a 2002 paper to determine a generator for this group, maybe cite that as well?]
+Clearly this group has order less than $n^6$, and can be shown to have the generator:
+\begin{align*}
+X' = \left(1, 0, \left[\begin{matrix}
+1&0\\
+0&1
+\end{matrix}\right]\right)
+\\
+Z' = \left(0, 1, \left[\begin{matrix}
+1&0\\
+0&1
+\end{matrix}\right]\right)
+\\
+S' = \left(0, 0, \left[\begin{matrix}
+0&1\\
+1&0
+\end{matrix}\right]\right)
+\\
+D' = \left(0, 0, \left[\begin{matrix}
+1&1\\
+0&1
+\end{matrix}\right]\right)
+\end{align*}
+
+These correspond to the unitary operators $X_n, Z_n, S_n, D_n$, where $S_n$ is the discrete Fourier transform with matrix elements $(S_n)_{ij} = \omega_n^{ij}/\sqrt{n}$, and $D_n$ is a diagonal matrix which for odd $n$ acts on the basis as $\ket{i} \mapsto \omega_{2n}^{i(1-i)}$, and for even $n$ as $\ket{i} \mapsto \omega_{2n}^{i(n-i)}$.
+
+In general we have $X_n = S_nZ_nS_n^{-1}$ so we can remove $X_n$ from the generator if we like, and in the binary case we also have $Z_n = D_n^2$, so the Clifford quotient group for $n=2$ is generated by (cosets represented by) the Hadamard gate $S_2=H$, and the phase gate $D_2$:
+\begin{align*}
+S_2 = H =& \frac{1}{\sqrt{2}}\left[\begin{matrix}
+1&1\\
+1&-1
+\end{matrix}\right]
+\\
+D_2 =& \left[\begin{matrix}
+1&0\\
+0&i
+\end{matrix}\right]
+\end{align*}
+
+This group has 24 elements in it, but the full Clifford group will also have any unit-complex multiple of these. By taking the gates $S_n$ and $D_n$ in particular 
+
+\subsection{Rotations of the Sphere}
+
+\subsection{Approximating Single Object Gates}
+[I would like to describe or reference the clifford + one non-clifford proof in general bases seeing as we will need both 2 and 3 for later original work]
+
+[notes from early planning stage: gate limited hardware, finite set of gates, want to approximate any unitary, in principle any unitary, in programmable practice finite family of gates, in principle rotate a sphere by infinitesimal accuracy, in practice up to precision of machine]
+
+\subsection{Unitary Decomposition}
+[A general unitary matrix can be decomposed into a sequence of up to $n(n-1)/2$ 2-level unitary matrices, or into a sequence of $n$ unitary matrices acting on the same eigen-basis]
+
+[by applying permutation matrices to these we can...]
+\subsection{Permutation Matrices}
+[decomposition of transpositions into CNOT, giving universality for binary systems]
+\subsection{Universal Computation in general systems}
+[$[\cite]$ demonstrates how there are a variety of universal gate sets for a given composite system where every object has the same base, sketch this construction]
+\subsection{Exact Decompositions}
+[`Improved Quantum Ternary Arithmetics' demonstrates how to implement any ternary permutation matrix exactly in the `supermetaplectic basis', would be nice to sketch out as well, and point out its implications for generalizing the permutation approach to universality to general or mixed bases.]
+
+
+\section{Quantum Algorithms}
+[these ones are all just Fourier Transform]
+
+[if the previous chapter was about the computer-automated approach to algorithm design, this chapter will be about the human-ingenuity approach to algorithm design, calling back to the previous chapter in justifying the 'non-clifford gate count' metric of these algorithms, describing oracles and mentioning how quantum search and fourier transform can turn oracles that implement classical algorithms into powerful quantum-superior algorithms, ultimately sketching Shor's period finding algorithm.]
+\subsection{Probabilistic Algorithms}
+In computer science there is a distinction between deterministic algorithms, and randomized/probabilistic algorithms, the latter often used as an implementation for a more abstract class of non-deterministic algorithms. In summary a deterministic algorithm is a sequence of exact steps that can be executed in order to compute a result, whereas a probabilistic algorithm relies on some source of random information to determine its control flow, meaning that the same input could result in many different outputs.
+
+The advantage of probabilistic algorithms is that they can often avoid the worst-case performance of certain input states. (for example, sorting in ascending order a list that is already sorted in descending order) At an intuitive level such worst-case input states tend to exploit the specific order in which an algorithm explores its possible solutions, and so since a randomized algorithm has no single order in which it might explore solutions, such worst-case inputs do not exist.
+
+On classical computers deterministic algorithms are often more natural, and even when a randomized algorithm is used it will likely use a pseudo-random number generator in place of a true random source of information. This is heavily contrasted with quantum computation, where measuring the state of a quantum object is inherently probabilistic, and physical implementations of quantum algorithms often introduce physical sources of error as well, as a result all quantum algorithms are essentially probabilistic.
+
+One important consequence of this is that a quantum algorithm that appears to perform well might still perform better on a classical computer with a source of randomness; when comparing quantum with classical, we must consider the probabilistic algorithms of both.
+
+A further distinction in computer science is made between Las Vegas and Monte Carlo algorithms, the former being algorithms that always yield a result, but have random run-time, and the latter being algorithms that may yield a result in fixed run-time, but have a random chance of failing or producing an incorrect result. Often an algorithm in one of these classes can be converted into the other, Las Vegas algorithms that repeatedly search for a solution can be modified to yield a false negative after a fixed number of attempts, and Monte Carlo algorithms that may produce a false negative can check their solution using a deterministic algorithm, and retry until a valid solution is found.
+
+This means that in classical contexts this distinction is less important than that of deterministic vs probabilistic algorithms, since both classes can achieve similar things with the same resources. In quantum contexts however, algorithms are generally assumed to be Monte Carlo algorithms, since the sources of error discussed are sources of incorrect output, rather than sources of increased run-time. Further when a physical quantum computer is run, it is run repeatedly, often thousands of times, in order to determine the probability of each output, so that one can infer which output is the correct one.
+
+\subsection{Algorithms for Arithmetic}
+\subsection{Ternary Or Mixed Arithmetic}
+
+\subsection{Hadamard}
+\subsection{Deutsch's Algorithm}
+
+\subsection{Entanglement}
+\subsection{Bernstein-Vazirani Algorithm}
+
+\subsection{General Fourier Transform}
+\subsection{Shor's Algorithm}
+
+\end{document}

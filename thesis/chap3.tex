@@ -1,0 +1,70 @@
+% chap3.tex (Chapter 3 of the thesis)
+\chapter[CALCULATION IN BINARY-TERNARY]{Calculation in Binary-Ternary}
+
+\section{Notation for Mixed Systems}
+[move to preliminaries and make sure that I am actually using this notation]
+
+A very ergonomic notation for gates in quantum algorithms is to subscript the gate with relevant information about that gate such as the dimension of the object or system on which it acts, the index of the individual object or part of the composite system on which it acts, or the computational basis states that it affects.
+
+Many discussions of quantum algorithms vary only one property of a given quantum gate at a time, making this notation unambiguous. Unfortunately we must have gates acting on distinct objects of a composite system, each with a dimension that could be different, which requires us to take extra care. Lest we lose the ergonomics of putting all the necessary information in small and descriptive subscripts, we continue to place variables in these subscripts, but avoid numerals unless the meaning is clear. We will now enumerate in advance the exact index sets that could be used for a variable in a subscript, a preferred letter in the alphabet for representing such a variable, and what that subscript means when this variable is used.
+
+In composite quantum systems we define $N$ to be the number of computational basis states, and either $n$ to be the number of individual objects in the composite system, or $n$ to be the number of qubits and $m$ to be the number of qutrits. For example we could use these variables to index the Quantum Fourier Transform $\text{QFT}_N$ or a general unitary matrix $U_N$ acting on $N$ computational basis states, or $H^{\otimes n}$ for the Kronecker product of the $H$ matrix with itself $n$ times.
+
+In quantum systems of a single finite-dimensional object we instead call the dimension of this object $n$, and index each of the computational basis states $0$ through to $n-1$, represented by variables such as $i$, $j$, and $k$. For example we will frequently distinguish between $X_2$, $X_3$, and generally $X_n$ in the context of a single quantum object. This is the one case where we will use both numerals and variables for subscripts, since we very often want to say specific things about the $n=2$ and $n=3$ cases.
+
+Note that we change the meaning of $n$ based on context, for the sole purpose of reminding ourselves of the cyclic group formed by the set $\mathbb{Z}_n = \mathbb{Z}/n\mathbb{Z}$ equipped with addition, a very familiar object which appears repeatedly in finite groups of quantum gates acting on single quantum objects.
+[do we actually talk about single objects outside of the preliminary discussion of Pauli matrices? Won't know until later in semester]
+
+When we want to talk about an individual object in a composite system, we index each object $1$ through to $n$, (or $1$ through to $n+m$) and use variables such as $p$, $q$, and $r$ to represent such an index. We then define $d_p$ to be the dimension of the object indexed by $p$. This allows us to extend some unitary matrix $G_d$ acting on a single quantum object of dimension $d$ to a unitary matrix $G_p$ acting on some composite system satisfying $d_p = d$. Written as a Kronecker product, $G_p$ looks like the following:
+\[G_p = I_{d_1}\otimes \dots \otimes I_{d_{p-1}} \otimes G_d \otimes I_{d_{p+1}} \otimes \dots \otimes I_{d_n}\]
+
+When indexing computational basis states in a composite system, we use the integers $0$ through to $N-1$ much like in single systems, [unless I removed that paragraph/notation] and variables such as $i$, $j$, and $k$ to represent such indeces. This is particularly useful for the special class of permutation matrices that represent a transposition, where we can write $S_{i,j}$ to represent the matrix that exchanges the computational basis states $\ket{i}$ and $\ket{j}$, while leaving all others unchanged.
+
+When we introduce a variable such as $i$, satisfying $0 \leq i \leq N-1$, we assume implicitly that the sequence of digits $i_1i_2\dots i_p \dots i_n$ exists and that each variable $i_p$ is understood to refer to the corresponding digit in this sequence. We also identify all such integers $0\dots N-1$ with their corresponding sequences of digits whenever we discuss the computational basis states.
+
+When we have a unitary matrix $U$ acting on a composite system with $N$ computational basis states, and a set $c \subseteq \{0\dots N-1\}$, our final subscript notation will be to define the controlled operation $C_c(U)$ which has the following action on the computational basis:
+\[C_c(U)\ket{i} = \begin{cases}
+U\ket{i} & \text{if\ }i \in c \\
+\ket{i} & \text{if\ }i \notin c
+\end{cases}\]
+Note that in order for $C_c(U)$ to be unitary, it is sufficient that the image $U\ket{i}$ of any computational basis vector $\ket{i}$ satisfying $i \in c$ be a linear combination of basis vectors $\ket{j}$ themselves satisfying $j \in c$. For example if we have a gate $G_p$ acting only on object $p$ of the system, then $C_c(G_p)$ will be unitary whenever $c$ is a set whose defining predicate $i_1\dots i_n \in c$ does not depend on the digit $i_p$.
+
+When we have a condition 
+
+Finally when $G_d$ is a unitary matrix acting on a $d$-dimensional object, and $G_p$ is the corresponding matrix acting on object $p$ of a composite system, it is sometimes useful for the set $c$ to impose a constraint on all but $d$ of the computational basis states of the composite system, in which case we can write $C_c(G_d)$ instead of $C_c(G_p)$.
+\section{Decomposing Operations into Circuits}
+[two sections? one on known 'multicontrolled are universal' and assume individual objects universal]
+
+We would like to show that the same finite bases/generators of universal computation in multi-qubit contexts can be used to achieve universal computation on mixed qubit-qutrit systems. The beginning and end of this process are the same as in the purely qubit case, however there are a few details in the middle which  must be verified explicitly.
+
+Universal computation has a language ambiguity, in that it has two ways of being described, which are logically equivalent, but appear to be worded in the exact opposite way: Universal computation is a decomposition of arbitrary unitaries $U \in U(N)$ into an approximating sequence of operators chosen from some generator set, and equivalently the generation of a dense subset of $U(N)$ from such a generator set. It is common and perhaps most intuitive to adopt the former choice of language, which is what we shall do as well.
+
+Suppose then that we have an arbitrary unitary operator $U \in U(N)$, where $N$ is the overall number of computational basis states, $2^n3^m$. As is already demonstrated in \cite{textbook}, such a unitary can be decomposed into unitary operators acting on each of the $N(N-1)/2$ pairs of distinct computational basis states, so we refine our goal to the decomposition of an arbitrary such two-level unitary operator, acting on the basis states $\ket{i}$ and $\ket{j}$:
+\begin{align*}
+U_2 &= a\ket{i}\bra{i} + b\ket{j}\bra{i} + c\ket{i}\bra{j} + d\ket{j}\bra{j} + \sum_{k \neq i, j} \ket{k}\bra{k}
+\end{align*}
+
+After this we define $\ket{j'}$ to be the computational basis state that is equal to $\ket{i}$ in every qutrit, and all but one qubit $p$, say. Then if we can implement the permutation matrix $S_{j,j'}$ we can write $U_2 = S_{j,j'}U_2'S_{j,j'}$, where $U_2'$ will now be the following:
+\begin{align*}
+U_2' &= a\ket{i}\bra{i} + b\ket{j'}\bra{i} + c\ket{i}\bra{j'} + d\ket{j}\bra{j'} + \sum_{k \neq i, j'} \ket{k}\bra{k}
+\end{align*}
+Then we can observe that $U_2'$ is a controlled qubit operation $V = a\ket{0}\bra{0} + b\ket{1}\bra{0} + c\ket{0}\bra{1} + d\ket{1}\bra{1}$ acting on qubit $p$, with the control condition that all of the other qubits and qutrits are equal to that of $i$ and $j'$.
+
+From this point on we again refer to \cite{textbook} to implement $V$ as $AXBXC$ where $ABC=I$, and thus implement $U_2'$ as $A_pS_{i,j'}B_pS_{i,j'}C_p$, which will have no effect on any qutrits and on qubits except $p$, for which the effect shall be $V$ on states equal to $i$ or $j'$, and $ABC=I$ for all other states. This means that implementing arbitrary qubit operations, and arbitrary permutations on pairs of computational basis states is sufficient for universal computation.
+
+The permutation $S_{i,j'}$ is really a controlled $S_{0,1}$ operation targeting the qubit $p$ using the rest of the objects in the system as control objects of arbitrary control value. We shall now consider a general $i < j < N$ and decompose $S_{i,j}$ into such controlled single-object permutations.
+\\Define $j'$ to be $j$ but with one of the qubits or qutrits of $j$ that differ from $i$ changed to equal that of $i$ instead. Then $S_{i,j} = S_{j,j'}S_{i,j'}S_{j,j'}$, so by induction $S_{i,j}$ can be decomposed into a sequence of permutations swapping computational basis states that differ in only a single qubit or qutrit.
+
+Now in order to implement such a permutation operation $S_{i,j}$ where $i$ and $j$ differ in only a single object, we introduce some number of ancillary qubits initialised to 0, and proceed with the usual decomposition of multiple-control operations into double- or single-controlled operations, supposing that $i$ and $j$ differ at qubit $p$, and ancillary qubit $q$ is initialised to $\ket{0}$, and qubits $r$ and $s$ of $i$ and $j$ are equal to 1, we write $S_{i,j} = C(X_q\ |\ k_r=k_s=1)S_{i',j'}C(X_q\ |\ k_r=k_s=1)$ where $i'$ and $j'$ are the computational basis states on all qubits and qutrits, minus $r, s$, plus $q$, with $i'_q=j'_q=1$, thus we can remove digits until eventually everything has been implemented in terms of double-controlled qubit-not.
+
+Alternatively we can require an ancillary qutrit, and make the decomposition $S_{i,j} = C(S_{0,1}\ |\ k_r=1)C(S_{1,2}\ |\ k_s=1)S_{i',j'}C(S_{1,2}\ |\ k_s=1)C(S_{0,1}\ |\ k_r=1)$, thus requiring a single ancillary qutrit and the single controlled operations $CS_{0,1}$ and $CS_{1,2}$. Either way we need single-object permutations to map the appropriate control objects to $1$ before and after applying these decompositions.
+
+So this means that arbitrary single qubit operations + arbitrary single controlled single qutrit permutations are universal, or arbitrary single qubit operations + arbitrary double controlled single qubit negations are universal.
+
+\section{Implementing Small Permutations}
+[notation chapter before or after? notation would be some nice 'original work']
+We have reduced general unitary operators, to unitaries in 1 object plus permutations in 2 and 3 objects.
+
+These permutations and 
+
+\section{General Permutations? Clifford bases?}

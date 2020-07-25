@@ -1,3 +1,13 @@
 *.aux
+*.eps
+*.bbl
+*.blg
+*.idx
 *.log
+*.lot
+*.lof
+*.out
+*.pdf
+*.toc
 *.gz
+*.zip

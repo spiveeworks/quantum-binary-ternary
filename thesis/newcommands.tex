@@ -1,0 +1,119 @@
+% newcommands.tex (new command definitions)
+
+% Here you would include any additional packages that you want to use.
+% You should make sure they don't clash with the above packages that
+% are in use in the style file.
+% If you want to call in some style files or new packages, put them here
+\usepackage{undertilde}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage[a4paper]{geometry}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath, latexsym, color, graphicx, amssymb, here}
+\usepackage{amsfonts}
+\usepackage{epsf, epsfig, pifont,tikz}
+\usepackage{graphics, calrsfs}
+%\usepackage{tangocolors}
+\usepackage{times}
+\usepackage{fancybox,calc}
+\usepackage{hyperref}
+\usepackage{pgfplots}
+\usepackage{verbatim}
+
+% Some examples (yours may be different):
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newcommand{\bfx}{{\ensuremath{\mathbf{x}}}}
+
+\newcommand{\A}{{\bf A}}
+\newcommand{\B}{{\bf B}}
+\newcommand{\T}{{\bf T}}
+\newcommand{\C}{{\bf C}}
+\newcommand{\N}{{\bf N}}
+\newcommand{\R}{{\mathbb R}}
+\newcommand{\Z}{{\mathbb Z}}
+\newcommand{\n}{{\bf n}}
+\renewcommand{\v}{{\bf v}}
+\renewcommand{\r}{{\bf r}}
+\renewcommand{\a}{{\bf a}}
+
+\newcommand{\uniti}{{\hat{\mbox{\boldmath $\imath$}}}}
+\newcommand{\unitj}{{\hat{\mbox{\boldmath $\jmath$}}}}
+\newcommand{\unitk}{{\hat{\mbox{\boldmath $\mathit{k}$}}}}
+\newcommand{\unitn}{{\hat{\mbox{\boldmath $\mathit{n}$}}}}
+\newcommand{\unite}{{\hat{\mbox{\boldmath $\mathit{e}$}}}}
+\newcommand{\unitu}{{\hat{\mbox{\boldmath $\mathit{u}$}}}}
+\newcommand{\ie}{{\em i.e.} \/}
+\newcommand{\eg}{{\em e.g.} \/}
+\newcommand{\etc}{{\em etc.} \/}
+\newcommand{\etal}{{\em et al. }}
+\newcommand{\mathbi}[1]{\textbf{\em #1}}
+\newcommand{\bcdot}{\mbox{\boldmath $\, \cdot \, $}}
+\newcommand{\vect}[1]{{\mbox{\boldmath $\utilde{\mathit{#1}}$}}}
+\newcommand{\xyplane}{$x$-$y$ plane \/}
+\newcommand{\xzplane}{$x$-$z$ plane \/}
+\newcommand{\yzplane}{$y$-$z$ plane \/}
+\newcommand{\dint}{\int \! \! \int}
+\newcommand{\tint}{\int \! \! \int \! \! \int}
+\newcommand{\doint}{\bigcirc \! \! \! \! \! \! \! \! \int \! \! \! \! \!  \int}
+\newcommand{\inlinedoint}{\circ\!\!\!\! \! \int \!\!\!\! \int}
+%\newcommand{\deloperator}[3]{{\frac{\partial{#1}}{\partial x} \, \uniti \frac{\partial{#2}}{\partial y} \, \unitj + \frac{\partial{#3}}{\partial z} \, \unitk}}
+\newcommand{\deloperator}{{\frac{\partial}{\partial x} \, \uniti + \frac{\partial}{\partial y} \, \unitj + \frac{\partial}{\partial z} \, \unitk}}
+\newcommand{\laplaceoperator}{{\frac{\partial^2}{\partial x^2} + \frac{\partial^2}{\partial y^2} + \frac{\partial^2}{\partial z^2}}}
+%\newcommand{\grad}[1]{{\frac{\partial {#1}}{\partial x} \, \uniti + \frac{\partial {#1}}{\partial y} \, \unitj + \frac{\partial {#1}}{\partial z} \, \unitk}}
+\newcommand{\gradCylindrical}[1]{{\frac{\partial {#1}}{\partial \rho} \, \unite_\rho \ + \ \frac{1}{\rho} \frac{\partial {#1}}{\partial \phi} \, \unite_\phi \ + \ \frac{\partial {#1}}{\partial z} \, \unite_z} }
+\newcommand{\gradSpherical}[1]{{\frac{\partial {#1}}{\partial r} \, \unite_r \ + \ \frac{1}{r} \frac{\partial {#1}}{\partial \theta} \, \unite_\theta \ + \ \frac{1}{r \sin(\theta)}\frac{\partial {#1}}{\partial \phi} \, \unite_\phi} }
+\newcommand{\divSpherical}[3]{{\frac{1}{R^2}\, \frac{\partial}{\partial R}\left(R^2\, {#1}\right) \ + \  \frac{1}{R \sin(\theta)} \frac{\partial}{\partial \theta} \left(\sin(\theta)\, {#2}\right) \ + \ \frac{1}{R \sin(\theta)}\frac{\partial {#3}}{\partial \phi} \  }}
+%\newcommand{\laplacian}[1]{{\frac{\partial^2 {#1}}{\partial x^2} + \frac{\partial^2 {#1}}{\partial y^2} + \frac{\partial^2 {#1}}{\partial z^2}}}
+\newcommand{\posvect}[1]{{#1}_1 \, \uniti + {#1}_2 \, \unitj + {#1}_3 \, \unitk}
+\newcommand{\posvectr}{x \, \uniti + y \, \unitj + z \, \unitk}
+\newcommand{\posvectcyl}{\rho \, \unite_\rho \, + z \, \unite_z}
+\newcommand{\posvectsph}{r \, \unite_\r}
+\newcommand{\arbvect}[3]{{#1} \, \uniti \, + \, {#2} \, \unitj \, + \, {#3} \, \unitk}
+\newcommand{\genvect}[5]{{#1} \, \uniti \, {#2}\,  {#3} \, \unitj \, {#4} \, {#5} \, \unitk}
+\newcommand{\parametricposvectr}{\vect{r}(t) \ = \ x(t) \, \uniti + y(t) \, \unitj + z(t) \, \unitk}
+\newcommand{\divergence}[1]{\nabla \bcdot \vect{#1}}
+%\newcommand{\curl}[1]{\nabla \times \vect{#1}}
+\newcommand{\magnitude}[1]{ \| \vect{#1} \| }
+\newcommand{\drCart}{d x \, \uniti + d y \, \unitj + d z \, \unitk}
+\newcommand{\drCyl}{d \rho \, \unite_\rho + \rho \, d \phi \, \unite_\phi + d z \, \unite_z}
+\newcommand{\drSph}{d r \, \unite_r + r \, d \theta \, \unite_\theta + r \, \sin(\theta) \, d \phi \, \unite_\phi }
+\newcommand{\coordvect}[3]{{#1} \, \uniti \, + \, {#2} \, \unitj \, + {#3} \, \unitk}
+\newcommand{\cylcoordvect}[3]{{#1} \, \unite_\rho \, + \, {#2} \, \unite_\phi \, + {#3} \, \unite_z}
+\newcommand{\sphcoordvect}[3]{{#1} \, \unite_\r \, + \, {#2} \, \unite_\theta \, + {#3} \, \unite_\phi}
+
+\newcommand{\ul}[1]{\underline{#1}}
+
+\newsavebox{\fmbox}
+\newenvironment{eqnframe}[1]     
+{
+	\begin{center} 
+	\begin{lrbox}{\fmbox}
+	\begin{minipage}{#1}
+}     
+{
+	\end{minipage}
+	\end{lrbox}\fbox{\usebox{\fmbox}}
+	\end{center}
+}
+
+\newcommand\Tpad{\rule[4.5ex]{0pt}{0pt}}
+\newcommand\Bpad{\rule[-3.75ex]{0pt}{0pt}}
+
+\renewcommand{\labelenumi}{\textbf{\arabic{enumi}}.}
+\renewcommand{\labelenumii}{\textbf{(\roman{enumii})}}
+\renewcommand{\labelenumiii}{\textbf{(\alph{enumiii})}}
+
+\newcommand{\parD}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\parDD}[2]{\frac{\partial^2 #1}{\partial #2 ^2}}
+\newcommand{\laplacian}{\Delta}
+\renewcommand{\div}{\nabla\cdot}
+\newcommand{\grad}{\nabla}
+\newcommand{\divp}{\nabla^\prime\cdot}
+\newcommand{\gradp}{\nabla^\prime}
+\newcommand{\curl}{\nabla\times}
+\newcommand{\cross}{\times}
+\renewcommand{\dot}{\cdot}
+% define some colors
+\definecolor{cBlue}{rgb}{.255,.41,.884} % RoyalBlue of svgnames
+\definecolor{cRed}{rgb}{1, 0, 0} % Red of svgnames
+

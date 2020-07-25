@@ -1,0 +1,43 @@
+% prelude.tex (specification of which features in `mathphdthesis.sty' you
+% are using, your personal information, and your title & abstract)
+
+% Specify features of `mathphdthesis.sty' you want to use:
+\titlepgtrue % main title page (required)
+\signaturepagetrue % page for declaration of originality (required)
+\copyrighttrue % copyright page (required)
+\abswithesisfalse % abstract to be bound with thesis (optional)
+\ackfalse % acknowledgments page (optional)
+\tablecontentstrue % table of contents page (required)
+\tablespagefalse % table of contents page for tables (required only if you have tables)
+\figurespagefalse % table of contents page for figures (required only if you have figures)
+
+\title{PLACE THESIS TITLE HERE} % use all capital letters
+\author{Your Name} % use mixed upper & lower case
+\prevdegrees{B.Sc. (Qld)} % Used to specify your previous degrees...use mixed upper & lower case
+\advisor{Dr Ask Me} % example: Professor Lawrence K. Forbes 
+\dept{Mathematics} % your academic department
+\submitdate{October 2018} % month & year of your thesis submission
+
+\newcommand{\abstextwithesis}
+{
+The basic abstract goes here. You can use paragraphs and normal \LaTeX~commands.
+
+For example, I looked at the problem $a^n+b^n=c^n$ and found some
+integer solutions for $n>2$! Take that Fermat!
+}
+
+\newcommand{\acknowledgement}
+{
+Thank all your helpers here.
+
+This Honours thesis template for \LaTeX~exists primarily because of the efforts of past students Tim Callaghan, Mike Sumner, and Melissa Humphries in producing templates for their respective PhD theses.
+
+Thank you also to Thomas Hindle for tidying newcommands.tex. This file is filled with shortcuts to simplify the writing of repetitive equations, expressions, and environments. Thomas has removed redundant definitions, improved existing definitions, introduced some new ones, and added descriptions to each of the shortcuts.
+}
+
+% Take care of things in `mathphdthesis.sty' or 'MathPhysHonoursThesis.sty'
+% behind the scenes.
+% Basically just does a check of all the fields that have been activated
+% above and fills out the appropriate pages and adds them to the thesis.
+\beforepreface
+\afterpreface

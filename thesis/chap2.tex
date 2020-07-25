@@ -1,0 +1,74 @@
+% chap2.tex (Chapter 2 of the thesis)
+
+\chapter[MULTI VALUED LOGIC LITERATURE REVIEW]{Multi-Valued Logic Literature Review}
+While quantum computation has sparked a lot of theoretical and practical interest in recent decades, and quite a strong understanding is being developed, much of the focus is on binary quantum mechanical systems, that is, systems that are a composite of some number of qubits. These objects are the simplest, and also the most familiar object of computation, with certain numerical algorithms coming directly from classical computer science without much modification, however this means we inherit the lack of flexibility of binary computation, without any of the advantages or needs that motivated it in the classical case.
+
+In classical computation data is represented as the voltage of a circuit, and the fundamental operations of computation come from transistors which essentially multiply voltages. If we wish to represent two states then we can choose voltages that will be closed under this multiplication, essentially the order 2 group $\{0, 1\}$. As soon as we add any positive number to this set it will stop being closed under multiplication, which makes physical implementation of a ternary or greater logic system drastically more complicated than binary, while at the same time being much more sensitive to error. Quantum objects on the other hand are fundamentally poly-dimensional, and a very deliberate effort is made to choose objects that are merely binary and not ternary or greater. This suggests that alternate models of computation, while still being more complicated to implement and use than binary models, aren't more complicated to the same degree as in classical computation.
+
+Another distinction between the trade-offs of classical and quantum computation is that storage of bits is not an inherent bottleneck of classical computation, so long as one has the materials and power supply, one can create a second body of latches for storing additional data, whereas in quantum computation we must always retain access to quantum entanglement in order to effectively use the algorithms that make quantum computation powerful. This means that not only are qubits not essential, but they are the \textit{least} efficient at achieving what is in fact the largest bottleneck of quantum computation.
+
+These tradeoffs suggest a lot of promise in the topic of non-binary quantum computation, but the decision isn't a matter of picking a base for doing all computation. In theory each object in the system could have a different base, allowing costs and benefits to be chosen based on the role that each object has in an algorithm. Computers that have a variety of objects in a variety of bases could turn out to be the most cost effective way of providing high amounts of quantum information capacity, without requiring the redundancy of purely ternary or higher valued systems in the situations where an algorithm demands binary calculation.
+
+To that end the latter half of this document will give an overview of some of the literature that makes up the current understanding of quantum computation, with a specific focus on ternary or higher forms of logic, as well as what little is currently known about mixed systems with a combination of qubits, qutrits, and higher objects.
+
+\subsection{Textbook}
+The textbook ``Quantum Computation and Quantum Information''\cite{textbook} is ubiquitous and foundational in its fields. It demands little prerequisite knowledge except for familiarity with the practice of algebra itself, and builds up through linear algebra and group theory, through Quantum/Schrödinger mechanics, up to the fundamental techniques of quantum computation and quantum information theory. A good deal of attention is also paid to the historical and conceptual context of the field, making for a read that is as interesting and intuitive as it is informative.
+
+This textbook does not address ternary, n-ary, or mixed logic systems beyond the general treatment of quantum mechanics and linear algebra that was echoed in the previous chapter of this document, [at least I think it doesn't!] however one cannot get far without these things, and without an understanding of what the techniques of quantum computation look like in its simplest case of binary digits.
+
+\subsection{Quantum Algorithm Implementations for Beginners}
+``Quantum Algorithm Implementations for Beginners''\cite{algos} is a very recent paper coming from a large number of authors that summarises a large number of quantum algorithms to be understood by a general computer science audience. This is motivated by the trend that quantum computation is making, with more powerful quantum computers becoming accessible to larger cohorts of people, it is becoming needful to increase the number of people capable of using these devices. The paper starts with a more brief overview of the required quantum mechanics and linear algebra, before diving into a conceptual and technical overview of 20 distinct quantum algorithms.
+
+Most of these algorithms are implemented on various 5-qubit computers available via IBM, (QX4, QX5, ESSEX, VIGO) making for a powerful practical demonstration of a topic that can be quite overwhelmingly theoretical. The level of error that comes from short algorithms to solve problems at the scale of 2 bits is significant, and so this paper demonstrates practical motivation for the techniques for detecting and correcting errors that are available in quantum computation, although this paper does not directly talk about those techniques.
+
+This paper focuses entirely on qubit computation, so while it is a very useful and contemporary paper for understanding the algorithms that exist in quantum computation, it does not make any of the further steps into ternary or higher forms of computation.
+\subsection{On Clifford Groups}
+The first paper studying higher forms of computation that we shall look at is the paper ``On Clifford groups in Quantum Computing''\cite{tolar-clifford}, which aims to understand an important group of unitary matrices -- the Clifford group. This group is generally defined as being the normalizer of the Weyl-Heisenberg group, (or sometimes the Pauli group, though this excludes some useful operations) that is the set of all unitary matrices $A$ with the property that the two conjugations $AX_nA^{-1}$ and $AZ_nA^{-1}$ are both in the Weyl-Heisenberg group.
+
+The first thing that Tolar does is develop a way of proving a known isomorphism between Clifford groups on single objects, and finite groups acting on ring modules. Specifically he analyses conjugation of the Pauli group as a group action of the Clifford group. Since this group action is unaffected by scalar factors, it turns out to be a very algebraically powerful, in particular the Pauli group is Abelian up to scale factors, forming a convenient Abelian subgroup of these Ad-actions.
+
+In any case the technique turns out to be amenable to analysing systems of multiple objects as well, allowing a general understanding of Clifford groups in composite quantum systems in terms of the same kinds of groups that single object Clifford groups are isomorphic to.
+
+In particular, for single object Clifford groups the isomorphism was to the group $(\mathbb{Z}_n\times\mathbb{Z}_n)\rtimes\text{SL}(2,\mathbb{Z}_n)$, which is a finite group generated by less than $4$ group elements; for systems with $k$ objects of the same dimension $n$ the Clifford group was further isomorphic to $\mathbb{Z}_n^{2k}\rtimes\text{SL}(2k, \mathbb{Z}_n)$. For pairs of objects with co-prime dimension the Clifford group was essentially the Clifford group of single objects with the same dimension, but for systems with an object of dimension $ap^k$ and an object of dimension $bp^{k+r}$ for some $a, b, p, k, r$ positive and $p$ prime, no decomposition of this form was found, an interesting place left to explore by this analysis.
+
+This paper thus presents a technique for analyzing Clifford groups of arbitrary and mixed dimension, a presentation of how many Clifford groups are isomorphic to subsets of different ring modules, and finally a novel unexplored possibility within mixed-level objects of particular dimensions.
+
+This is the only paper we found that looks at quantum systems with objects of differing dimension.
+
+\subsection{Multi-valued Logic Gates}
+Up until this point our discussion has been largely abstract, but since our stated motivations are practical, it is important to pay attention to practical concerns, such as the kinds of hardware that might implement ternary or higher forms of quantum computation, and how those implementations might in principle perform arbitrary quantum algorithms. A paper that is very directly concerned with these questions is ``Multi-valued logic gates for quantum computation''\cite{multi-valued-logic}, which looks at how quantum algorithms acting on multiple objects that are all of dimension $d$ might be performed using a common technique known as the linear ion trap.
+
+The first half of the paper is focused on an intuitive scheme for decomposing an arbitrary unitary matrix based on its spectral decomposition, where objects analogous to the generalized $X$ and $Z$ Pauli matrices are used to implement gradually larger classes of unitary operator, until eventually all unitary operators have been implemented using only these $X$ and $Z$ like objects acting on one or two digits at a time.
+
+The $X$ and $Z$ like gates are not really individual gates, but families of gates, so this result is not general to any quantum computer; typically a theoretical proof of arbitrary (or universal) quantum computation relies on a very small set of individual gates, such as $\{H, \text{Toffoli}\}$, whereas this paper relies on families of gates with $2d$ real-valued parameters, and a similar number of degrees of freedom in how each of these families might be chosen, making for a computational basis that is easy to work with, but vague to implement.
+
+The paper gets away with this by proposing a physical implementation of this family of gates, through direct control of physical parameters of the device, relating the implementation of these basic gates to known problems of quantum device control in linear trapped ion systems, where the $n$-dimensional computational basis corresponds to the various excitation levels of the ion.
+
+This paper is a very promising theoretical and practical foundation for working with quantum systems with multiple objects all of one arbitrary dimension.
+
+\{Qudit versions of the qubit ``pi-over-eight'' gate\}
+\begin{itemize}
+	\item A standard basis for asymptotically universal quantum computation in binary contexts is the Hadamard gate, and the ``pi-over-eight'' phase gate, which is a unitary operation that is diagonal in the computational basis
+	\item this paper generalizes the latter gate to a family of gates with similar properties, acting on any quantum object with a prime number of basis states.
+	\item first the basic properties of the phase gate are described, and solved algebraically, giving a discrete family of diagonal unitary matrices in the same level of the Clifford hierarchy as the phase gate in 2 dimensions.
+	\item this family of gates is then understood as a finite Abelian group, and is therefore reduced to the direct product of cyclic groups
+	\item the different number of states gave different group structure, depending on whether there were 2, 3, or more states. These 3 cases were each given a small generator of diagonal phase-like gates.
+	\item these gates turn out to share important geometric properties with the phase gate, in addition to being diagonal, they are maximally distinct from any Clifford gate, which has implications for how accurate they will be in the presence of noise.
+	\item \ [something something magic state distillation]
+\end{itemize}
+
+\subsection{Improved Ternary Arithmetics}
+\begin{itemize}
+	\item Opens with a description of two implementations of ternary addition
+	\item First is a "modified ripple-carry adder" which uses only a single ancillary qutrit to compute a sum in-place
+	\item Next is a "carry look-ahead adder" which implements a divide-and-conquer algorithm of addition in order to implement addition with many more ancillary qubits, but logarithmic circuit depth through parallelism
+	\item both of these algorithms are fairly unsurprising, but their implementation takes advantage of the specifics of qutrits in order to minimize the memory and computational overhead as described
+	\item addition is foundational to implementing modular arithmetic, which the paper discusses in the context of Shor's period finding algorithm
+	\item modular addition, subtraction, and integer comparison are discussed, including the positive or negative effects they have on the computational cost of the circuit
+	\item the carry look-ahead adder also demonstrates a non-numerical variable which takes 3 values, well leveraged in this algorithm, and very interesting in the discussion of different number schemes and their relative trade-offs.
+	\item the technology that was used to optimize each algorithm is given, where gates that permute the computational basis are understood as polynomials acting on the digits of this basis, and algebraic manipulation is used to understand which gates are equivalent to which
+	\item further this technology was used to construct important gates exactly (as opposed to asymptotically) using a diagonal unitary gate described in ``Qudit versions of the qubit ``pi-over-eight'' gate.''
+	\item the technology of this paper is very well attuned to the goal of understanding quantum computation in different number systems, both from algorithmic perspective of efficiently implementing useful computations, and from the more foundational perspective of choosing a basis/generator in which to do these computations.
+	\item further the clear communication of which kinds of non-clifford gate are used allows one to apply the algorithms to any other basis, finding a more suitable compilation of these operations. This was done well in that the gates required were all well justified, and their equivalence to each-other was made clear.
+\end{itemize}
+
