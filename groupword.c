@@ -138,14 +138,18 @@ void print_cycle_decomposition(ConstMap m, u8 num) {
 	}
 }
 
-int main() {
+void findgen() {
 #define NUM 6
 	u8 cx3[NUM] = {0,1,2,4,5,3};
 	u8 cx2[NUM] = {0,4,2,3,1,5};
 	u8 x3[NUM] = {1,2,0,4,5,3};
+	u8 s3[NUM] = {1,0,2,4,3,5};
 	u8 x2[NUM] = {3,4,5,0,1,2};
+	u8 x2x3[NUM] = {4,5,3,1,2,0};
+	u8 g6[NUM] = {1,2,3,4,5,0};
+	u8 cs3[NUM] = {0,1,2,4,3,5};
 #define GEN_LEN 4
-	ConstMap gen[GEN_LEN] = {cx3, cx2, x3, x2};
+	ConstMap gen[GEN_LEN] = {x2, s3, cx3};
 	MapIndex gen_mi[GEN_LEN];
 	for (size_t i = 0; i < GEN_LEN; i++) {
 		gen_mi[i] = map_index(gen[i], NUM);
@@ -171,5 +175,54 @@ int main() {
 	}
 	printf("Hit %u out of %u permutations\n", paths.path_count, sn);
 	printf("Max word length was %d\n", paths.paths[paths.path_count - 1].len.n);
+}
+
+int main() {
+	u8 shift[NUM][NUM];
+	u8 x2x3[NUM] = {4,5,3,1,2,0};
+	for (u8 x = 0; x < NUM; x++) {
+		shift[0][x] = x;
+	}
+	for (u8 i = 1; i < NUM; i++) {
+		for (u8 x = 0; x < NUM; x++) {
+			shift[i][x] = x2x3[shift[i-1][x]];
+		}
+		printf("x2x3^%u = ", i);
+		print_cycle_decomposition(shift[i], NUM);
+		printf("\n");
+	}
+	for (MapIndex mi = {0}; mi.i < 6*6*6*6*6*6; mi.i++) {
+		u8 m[NUM];
+		u8 minv[NUM] = {255, 255, 255, 255, 255, 255};
+		from_map_index(m, NUM, mi);
+		for (u8 x = 0; x < NUM; x++) {
+			minv[m[x]] = x;
+		}
+		bool invertible = true;
+		for (u8 y = 0; y < NUM; y++) {
+			if (minv[y] == 255) {
+				invertible = false;
+			}
+		}
+		if (!invertible) { continue; }
+		u8 result[NUM];
+		for (u8 x = 0; x < NUM; x++) {
+			result[x] = minv[x2x3[m[x]]];
+		}
+		for (u8 i = 0; i < NUM; i++) {
+			bool match = true;
+			for (u8 x = 0; x < NUM; x++) {
+				if (result[x] != shift[i][x]) {
+					match = false;
+				}
+			}
+			if (match) {
+				print_cycle_decomposition(minv, NUM);
+				printf(" x2x3 ");
+				print_cycle_decomposition(m, NUM);
+				printf(" = x2x3^%u\n", i);
+			}
+		}
+	}
 }
 
