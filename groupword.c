@@ -1,41 +1,22 @@
 #include<stdbool.h>
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 
 typedef unsigned char u8;
 typedef u8 *Map;
 typedef u8 const *ConstMap;
 
-typedef struct { size_t i; } MapIndex;
-
-MapIndex map_index(ConstMap m, u8 num) {
-	size_t mul = 1;
-	MapIndex result = {};
-	for (size_t i = 0; i < num; i++) {
-		result.i += m[i]*mul;
-		mul *= num;
-	}
-	return result;
-}
-
-void from_map_index(Map m, u8 num, MapIndex mi) {
-	for (size_t i = 0; i < num; i++) {
-		m[i] = mi.i%num;
-		mi.i /= num;
-	}
-}
-
-typedef struct { size_t i; } PathIndex;
+typedef struct { size_t i; } GenIndex;
 typedef struct { size_t n; } PathLength;
 
-#define MAX_PATH_STEPS 100
-typedef struct {
+typedef struct PathNode {
 	PathLength len;
-	MapIndex result;
-	PathIndex pred;
+	struct PathNode *pred;
 	// we're using the convention x . y = x after y
 	// so by last we mean leftmost
-	MapIndex last;
+	GenIndex last;
+	void *result;
 } PathNode;
 
 typedef struct {
@@ -44,65 +25,61 @@ typedef struct {
 } PathList;
 
 
-PathList gen_paths(size_t gen_len, MapIndex *gen_mi, u8 num) {
-	u8 gen[gen_len][num];
-	for (size_t i = 0; i < gen_len; i++) {
-		from_map_index(gen[i], num, gen_mi[i]);
-	}
+PathList gen_paths(
+	size_t gen_len, void** gen, size_t elem_size,
+	void (*compose)(void*,void*,void*)
+) {
 #define MAX_PATH_COUNT 1000
 	static PathNode paths[MAX_PATH_COUNT];
-
-	u8 ident[num];
-	for (u8 i = 0; i < num; i++) { ident[i] = i; }
-	paths[0].len.n = 0;
-	paths[0].result = map_index(ident, num);
-	paths[0].pred.i = ~0U;
-	paths[0].last.i = ~0U;
-	PathList out = {1,paths};
+	PathNode *next_node = paths;
+	size_t path_count = 0;
 
 #define DEQ_CAP 1024
-	PathIndex deq[DEQ_CAP];
+	PathNode *deq[DEQ_CAP];
 	size_t deq_start = 0;
-	deq[0].i = 0;
-	size_t deq_end = 1;
+
+	for (size_t i = 0; i < gen_len; i++) {
+		next_node->len.n = 1;
+		next_node->pred = NULL;
+		next_node->last.i = i;
+		next_node->result = gen[i];
+		deq[i] = next_node;
+		next_node++;
+		path_count++;
+	}
+
+	size_t deq_end = gen_len;
 
 	while (deq_end > deq_start) {
-		PathIndex curr_pi = deq[deq_start % DEQ_CAP];
+		PathNode* curr = deq[deq_start % DEQ_CAP];
 		deq_start++;
-		PathLength curr_len = out.paths[curr_pi.i].len;
-		MapIndex curr_mi = out.paths[curr_pi.i].result;
-		u8 curr[num];
-		from_map_index(curr, num, curr_mi);
 		for (size_t i = 0; i < gen_len; i++) {
-			// result = gen[i] . curr
-			// i.e. gen[i] after curr
-			u8 result[num];
-			for (u8 x = 0; x < num; x++) {
-				result[x] = gen[i][curr[x]];
-			}
-			MapIndex result_mi = map_index(result, num);
+			u8 result[elem_size];
+			compose(result, gen[i], curr->result);
 			bool new = true;
-			for (PathIndex pi = {0}; new && pi.i < out.path_count; pi.i++) {
-				if (out.paths[pi.i].result.i == result_mi.i) {
+			for (PathNode *it = paths; it < next_node; it++) {
+				if (memcmp(result, it->result, elem_size) == 0) {
 					new = false;
 				}
 			}
 			if (!new) { continue; }
-			PathIndex next_pi = {out.path_count++};
-			out.paths[next_pi.i].len.n = curr_len.n + 1;
-			out.paths[next_pi.i].result = result_mi;
-			out.paths[next_pi.i].pred = curr_pi;
-			out.paths[next_pi.i].last = gen_mi[i];
+			next_node->len.n = curr->len.n + 1;
+			next_node->pred = curr;
+			next_node->last.i = i;
+			next_node->result = malloc(elem_size);
+			memcpy(next_node->result, result, elem_size);
 			if (deq_end - deq_start >= DEQ_CAP) {
 				printf("Queue is full!\n");
 				exit(1);
 			}
-			deq[deq_end % DEQ_CAP] = next_pi;
+			deq[deq_end % DEQ_CAP] = next_node;
 			deq_end++;
+			next_node++;
+			path_count++;
 		}
 	}
 
-	return out;
+	return (PathList){path_count, paths};
 }
 
 void print_cycle_decomposition(ConstMap m, u8 num) {
@@ -111,8 +88,10 @@ void print_cycle_decomposition(ConstMap m, u8 num) {
 		printed[i] = false;
 	}
 	bool err = false;
+	bool any_printed = false;
 	for (u8 i = 0; i < num; i++) {
 		if (m[i] == i || printed[i]) { continue; }
+		any_printed = true;
 		printf("(%u", i);
 		printed[i] = true;
 		u8 d = i;
@@ -133,39 +112,56 @@ void print_cycle_decomposition(ConstMap m, u8 num) {
 		}
 		printf(")");
 	}
+	if (!any_printed) {
+		printf("()");
+	}
 	if (err) {
 		printf("WARNING non-cycle was generated\n");
 	}
 }
 
-void findgen() {
 #define NUM 6
-	u8 cx3[NUM] = {0,1,2,4,5,3};
-	u8 cx2[NUM] = {0,4,2,3,1,5};
-	u8 x3[NUM] = {1,2,0,4,5,3};
-	u8 s3[NUM] = {1,0,2,4,3,5};
-	u8 x2[NUM] = {3,4,5,0,1,2};
-	u8 x2x3[NUM] = {4,5,3,1,2,0};
-	u8 g6[NUM] = {1,2,3,4,5,0};
-	u8 cs3[NUM] = {0,1,2,4,3,5};
-#define GEN_LEN 4
-	ConstMap gen[GEN_LEN] = {x2, s3, cx3};
-	MapIndex gen_mi[GEN_LEN];
-	for (size_t i = 0; i < GEN_LEN; i++) {
-		gen_mi[i] = map_index(gen[i], NUM);
+
+void compose_permutations(u8 *out, const u8 *x, const u8 *y) {
+	for (size_t i = 0; i < NUM; i++) {
+		out[i] = x[y[i]];
 	}
-	PathList paths = gen_paths(GEN_LEN, gen_mi, NUM);
-	for (size_t i = 1; i < paths.path_count; i++) {
-		u8 buff[NUM];
-		from_map_index(buff, NUM, paths.paths[i].result);
-		print_cycle_decomposition(buff, NUM);
+}
+
+void findgen() {
+#define MAPS_LEN 8
+	struct {
+		char *name;
+		u8 map[6];
+		bool include;
+	} maps[MAPS_LEN] = {
+		{"cx3", {0,1,2,4,5,3}, false},
+		{"cx2", {0,4,2,3,1,5}, false},
+		{"x3", {1,2,0,4,5,3}, true},
+		{"s3", {1,0,2,4,3,5}, true},
+		{"x2", {3,4,5,0,1,2}, true},
+		{"x2x3", {4,5,3,1,2,0}, false},
+		{"g6", {1,2,3,4,5,0}, false},
+		{"cs3", {0,1,2,4,3,5}, false},
+	};
+	size_t gen_len = 0;
+	void* gen[MAPS_LEN];
+	char* gen_names[MAPS_LEN];
+	for (size_t i = 0; i < MAPS_LEN; i++) {
+		if (maps[i].include) {
+			gen[gen_len] = maps[i].map;
+			gen_names[gen_len] = maps[i].name;
+			gen_len++;
+		}
+	}
+	PathList paths = gen_paths(gen_len, gen, NUM, compose_permutations);
+	for (size_t i = 0; i < paths.path_count; i++) {
+		print_cycle_decomposition(paths.paths[i].result, NUM);
 		printf(" =");
-		PathIndex pi = {i};
-		while (pi.i != 0) {
-			printf(" ");
-			from_map_index(buff, NUM, paths.paths[pi.i].last);
-			print_cycle_decomposition(buff, NUM);
-			pi = paths.paths[pi.i].pred;
+		PathNode *curr = &paths.paths[i];
+		while (curr) {
+			printf(" %s", gen_names[curr->last.i]);
+			curr = curr->pred;
 		}
 		printf("\n");
 	}
@@ -177,7 +173,7 @@ void findgen() {
 	printf("Max word length was %d\n", paths.paths[paths.path_count - 1].len.n);
 }
 
-int main() {
+void findcliffordish() {
 	u8 shift[NUM][NUM];
 	u8 x2x3[NUM] = {4,5,3,1,2,0};
 	for (u8 x = 0; x < NUM; x++) {
@@ -191,10 +187,10 @@ int main() {
 		print_cycle_decomposition(shift[i], NUM);
 		printf("\n");
 	}
-	for (MapIndex mi = {0}; mi.i < 6*6*6*6*6*6; mi.i++) {
-		u8 m[NUM];
+	u8 m[NUM] = {};
+	bool done = false;
+	while (!done) {
 		u8 minv[NUM] = {255, 255, 255, 255, 255, 255};
-		from_map_index(m, NUM, mi);
 		for (u8 x = 0; x < NUM; x++) {
 			minv[m[x]] = x;
 		}
@@ -204,25 +200,38 @@ int main() {
 				invertible = false;
 			}
 		}
-		if (!invertible) { continue; }
-		u8 result[NUM];
-		for (u8 x = 0; x < NUM; x++) {
-			result[x] = minv[x2x3[m[x]]];
-		}
-		for (u8 i = 0; i < NUM; i++) {
-			bool match = true;
+		if (invertible) {
+			u8 result[NUM];
 			for (u8 x = 0; x < NUM; x++) {
-				if (result[x] != shift[i][x]) {
-					match = false;
+				result[x] = minv[x2x3[m[x]]];
+			}
+			for (u8 i = 0; i < NUM; i++) {
+				bool match = true;
+				for (u8 x = 0; x < NUM; x++) {
+					if (result[x] != shift[i][x]) {
+						match = false;
+					}
+				}
+				if (match) {
+					print_cycle_decomposition(minv, NUM);
+					printf(" x2x3 ");
+					print_cycle_decomposition(m, NUM);
+					printf(" = x2x3^%u\n", i);
 				}
 			}
-			if (match) {
-				print_cycle_decomposition(minv, NUM);
-				printf(" x2x3 ");
-				print_cycle_decomposition(m, NUM);
-				printf(" = x2x3^%u\n", i);
-			}
+		}
+
+		for (u8 x = 0; x < NUM; x++) {
+			m[x] += 1;
+			if (m[x] < NUM) { break; }
+			m[x] = 0;
+			if (x+1 == NUM) { done = true; }
 		}
 	}
+}
+
+int main() {
+	findgen();
+	findcliffordish();
 }
 
