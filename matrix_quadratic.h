@@ -205,6 +205,14 @@ num num_inv_sqrt(num x) {
  * I will probably come to regret this if I continue to use this code.
  */
 
+void mat_zero(int n, num *out) {
+	range(i, n) {
+		range(j, n) {
+			out[i*n+j] = (num){{0, 1}, {0, 1}, 1};
+		}
+	}
+}
+
 // performs matrix multiplication
 void mat_mul(int n, num *out, num *x, num *y) {
 	range(i, n) {

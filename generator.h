@@ -31,7 +31,7 @@ PathList gen_paths(
 	size_t gen_len, void** gen, size_t elem_size,
 	void (*compose)(void*,void*,void*)
 ) {
-#define MAX_PATH_COUNT 1000
+#define MAX_PATH_COUNT 10000
 	static PathNode paths[MAX_PATH_COUNT];
 	PathNode *next_node = paths;
 	size_t path_count = 0;
@@ -65,6 +65,10 @@ PathList gen_paths(
 				}
 			}
 			if (!isnew) { continue; }
+			if (path_count >= MAX_PATH_COUNT) {
+				printf("Path List is full!\n");
+				exit(1);
+			}
 			next_node->len.n = curr->len.n + 1;
 			next_node->pred = curr;
 			next_node->last.i = i;
