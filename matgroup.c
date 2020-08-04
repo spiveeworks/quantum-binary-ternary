@@ -1,13 +1,10 @@
 #include "generator.h"
 #include "matrix_quadratic.h"
 
-#define MAT_DIM 3
+#define MAT_DIM_A 3
+#define MAT_DIM_B 1
+#define MAT_DIM (MAT_DIM_A * MAT_DIM_B)
 const size_t MAT_SIZE = (sizeof(num)*MAT_DIM*MAT_DIM);
-
-typedef num Mat[MAT_DIM][MAT_DIM];
-// variables of type Mat can be used as MatPtr, but MatPtr makes for a more
-// convenient parameter
-typedef num (*MatPtr)[MAT_DIM];
 
 void mat_mul_reduce(void *out, void *x, void *y) {
 	mat_mul(MAT_DIM, out, x, y);
@@ -21,7 +18,8 @@ bool num_is_zero(num x) {
 
 void mat_mul_phase(void *out_v, void *x, void *y) {
 	mat_mul(MAT_DIM, out_v, x, y);
-	MatPtr out = out_v;
+	// think of this as a pointer to num[MAT_DIM][MAT_DIM]
+	num (*out)[MAT_DIM] = out_v;
 	size_t pi = 0, pj = 0;
 	mat_reduce(MAT_DIM, out_v);
 	while (num_is_zero(out[pi][pj])) {
@@ -49,85 +47,82 @@ void mat_mul_phase(void *out_v, void *x, void *y) {
 	}
 }
 
-void shift(MatPtr out) {
-	mat_zero(MAT_DIM, &out[0][0]);
-	range(i, MAT_DIM) {
-		out[(i+1)%MAT_DIM][i].re.whole = 1;
-	}
-}
+num omega12 = {{1, 3}, {1, 1}, 2}; // cos(1/12) + isin(1/12)
 
-void clock(MatPtr out, num *phase, size_t phase_len) {
-	range(i, MAT_DIM) {
-		out[i][i] = phase[i%phase_len];
-	}
-}
+enum {
+	GATE_X,
+	GATE_Z,
+	GATE_H,
+	GATE_D,
+	GATE_COUNT,
+};
 
-void fourier(MatPtr out, num *phase, size_t phase_len) {
-	range(i, MAT_DIM) {
-		range(j, MAT_DIM) {
-			num coord = phase[i*j%phase_len];
-			coord.re.qu *= MAT_DIM;
-			coord.im.qu *= MAT_DIM;
-			coord.de *= MAT_DIM;
-			out[i][j] = num_reduce(coord);
+void clifford_gen(int n, num *out) {
+	if (12 % n != 0) {
+		printf("Tried to generate Clifford matrices for n = %d\n", n);
+		exit(1);
+	}
+	num roots_12[12];
+	num roots_2n[2*n];
+	num roots[n];
+	{
+		num curr = {{1,1},{0,1},1};
+		range(i, 12) {
+			roots_12[i] = curr;
+			curr = num_reduce(num_mul(curr, omega12));
+		}
+		range(i, 2*n) {
+			roots_2n[i] = roots_12[i*6/n];
+		}
+		range(i, n) {
+			roots[i] = roots_12[i*12/n];
 		}
 	}
-}
-
-void cliff_diag(MatPtr out, num *phase, size_t phase_len) {
-	range(i, MAT_DIM) {
-		out[i][i] = phase[i*(MAT_DIM-i)%phase_len];
-	}
+	mat_shift(n, out);
+	mat_clock(n, out + n*n, roots, n);
+	mat_fourier(n, out + 2*n*n, roots, n);
+	mat_cliff_diag(n, out + 3*n*n, roots_2n, 2*n);
 }
 
 void find_group() {
-#define MAX_ROOTS 7
-	num principle_roots[MAX_ROOTS] = {
-		{{1, 1}, {0, 1}, 1}, // arbitrary
-		{{1, 1}, {0, 1}, 1}, // 1
-		{{-1, 1}, {0, 1}, 1}, // -1
-		{{-1, 1}, {1, 3}, 2}, // (-1 + sqrt(3)i)/2
-		{{0, 1}, {1, 1}, 1}, // i
-		{{1, 1}, {0, 1}, 1}, // not representable
-		{{1, 1}, {1, 3}, 2}, // (1 + sqrt(3)i)/2
-	};
-	num roots[MAX_ROOTS][MAX_ROOTS];
-	range(i, MAX_ROOTS) {
-		num curr = {{1,1},{0,1},1};
-		range(j, MAX_ROOTS) {
-			roots[i][j] = curr;
-			curr = num_reduce(num_mul(curr, principle_roots[i]));
-		}
+	num ident_a[MAT_DIM_A][MAT_DIM_A];
+	mat_ident(MAT_DIM_A, &ident_a[0][0]);
+	num gates_a[GATE_COUNT][MAT_DIM_A][MAT_DIM_A];
+	clifford_gen(MAT_DIM_A, &gates_a[0][0][0]);
+
+	num ident_b[MAT_DIM_B][MAT_DIM_B];
+	mat_ident(MAT_DIM_B, &ident_b[0][0]);
+	num gates_b[GATE_COUNT][MAT_DIM_B][MAT_DIM_B];
+	clifford_gen(MAT_DIM_B, &gates_b[0][0][0]);
+
+	char gate_base_names[GATE_COUNT][2] = {"X", "Z", "H", "D"};
+	char gate_names[2*GATE_COUNT][8];
+	num gates[2*GATE_COUNT][MAT_DIM][MAT_DIM];
+	range(i, GATE_COUNT) {
+		mat_kronecker(MAT_DIM_A, MAT_DIM_B,
+				&gates[i][0][0], &gates_a[i][0][0], &ident_b[0][0]);
+		mat_reduce(MAT_DIM, &gates[i][0][0]);
+		sprintf(gate_names[i], "%s%d", gate_base_names[i], MAT_DIM_A);
+
+		size_t j = i + GATE_COUNT;
+		mat_kronecker(MAT_DIM_A, MAT_DIM_B,
+				&gates[j][0][0], &ident_a[0][0], &gates_b[i][0][0]);
+		mat_reduce(MAT_DIM, &gates[j][0][0]);
+		sprintf(gate_names[j], "%s%d", gate_base_names[i], MAT_DIM_B);
 	}
-#define GATES_MAX 4
-	Mat gates[GATES_MAX];
-	char *gate_names[GATES_MAX];
-	int gates_count = 0;
-	range(i, GATES_MAX) {
-		mat_zero(MAT_DIM, &gates[i][0][0]);
-	}
-	gate_names[gates_count] = "X";
-	shift(gates[gates_count]);
-	gates_count+=1;
 
-	gate_names[gates_count] = "Z";
-	clock(gates[gates_count], roots[MAT_DIM], MAT_DIM);
-	gates_count+=1;
-
-	gate_names[gates_count] = "H";
-	fourier(gates[gates_count], roots[MAT_DIM], MAT_DIM);
-	gates_count+=1;
-
-	gate_names[gates_count] = "D";
-	cliff_diag(gates[gates_count], roots[2*MAT_DIM], 2*MAT_DIM);
-	gates_count+=1;
-
-	void *gen[gates_count];
-	range(i, gates_count) {
+	void *gen[GATE_COUNT];
+	range(i, 2*GATE_COUNT) {
 		gen[i] = gates[i];
+	/* uncomment if debugging gen_paths
+		printf("%s:\n", gate_names[i]);
+		mat_print(MAT_DIM, (num*)gates[i], ", ", "\n");
+		printf("\n");
+	*/
 	}
 
-	PathList paths = gen_paths(gates_count, gen, MAT_SIZE, mat_mul_phase);
+	int gate_count = MAT_DIM_B == 1 ? GATE_COUNT : 2*GATE_COUNT;
+	PathList paths = gen_paths(gate_count, gen, MAT_SIZE, mat_mul_phase);
 	range(i, paths.path_count) {
 		PathNode *curr = &paths.paths[i];
 		while (curr) {

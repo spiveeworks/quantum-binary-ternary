@@ -95,8 +95,8 @@ num num_reduce(num x) {
 	x.re = radnum_reduce(x.re);
 	x.im = radnum_reduce(x.im);
 	int d = gcd(gcd(x.re.whole, x.im.whole), (int)x.de);
-	x.re.whole /= (int)d;
-	x.im.whole /= (int)d;
+	x.re.whole /= d;
+	x.im.whole /= d;
 	x.de /= d;
 	return x;
 }
@@ -225,6 +225,65 @@ void mat_mul(int n, num *out, num *x, num *y) {
 		}
 	}
 }
+
+// takes the Kronecker product of an m x m matrix and an n x n matrix
+// out must be an mn x mn matrix
+void mat_kronecker(int m, int n, num *out, num *x, num *y) {
+	range(i1, m) {
+		range(i2, n) {
+			range(j1, m) {
+				range(j2, n) {
+					out[(i1*n+i2)*m*n+(j1*n+j2)] =
+						num_mul(x[i1*m+j1], y[i2*n+j2]);
+				}
+			}
+		}
+	}
+}
+
+void mat_ident(int n, num *out) {
+	mat_zero(n, out);
+	range(i, n) {
+		out[i*n+i].re.whole = 1;
+	}
+}
+
+// initializes the permutation matrix that maps basis vector i to i+1
+void mat_shift(int n, num *out) {
+	mat_zero(n, out);
+	range(i, n) {
+		out[((i+1)%n)*n+i].re.whole = 1;
+	}
+}
+
+void mat_clock(int n, num *out, num *phase, size_t phase_len) {
+	mat_zero(n, out);
+	range(i, n) {
+		out[i*n + i] = phase[i%phase_len];
+	}
+}
+
+void mat_fourier(int n, num *out, num *phase, size_t phase_len) {
+	range(i, n) {
+		range(j, n) {
+			num coord = phase[i*j%phase_len];
+			coord.re.qu *= n;
+			coord.im.qu *= n;
+			coord.de *= n;
+			out[i*n+j] = num_reduce(coord);
+		}
+	}
+}
+
+// generates a diagonal matrix which along with the previous 3 functions give a
+// basis for the Clifford quotient group
+void mat_cliff_diag(int n, num *out, num *phase, size_t phase_len) {
+	mat_zero(n, out);
+	range(i, n) {
+		out[i*n+i] = phase[i*(n-i)%phase_len];
+	}
+}
+
 
 void mat_reduce(int n, num *x) {
 	range (i, n) {
