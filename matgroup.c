@@ -24,11 +24,11 @@ void mat_mul_phase(void *out_v, void *x, void *y) {
 	MatPtr out = out_v;
 	size_t pi = 0, pj = 0;
 	while (num_is_zero(out[pi][pj])) {
-		if (pj < MAT_DIM) {
-			pj += 1;
-		} else if (pi < MAT_DIM) {
+		if (pi < MAT_DIM) {
 			pi += 1;
-			pj = 0;
+		} else if (pj < MAT_DIM) {
+			pj += 1;
+			pi = 0;
 		} else {
 			break;
 		}
