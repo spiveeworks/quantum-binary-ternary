@@ -1,7 +1,7 @@
 #include "generator.h"
 #include "matrix_quadratic.h"
 
-#define MAT_DIM 2
+#define MAT_DIM 3
 const size_t MAT_SIZE = (sizeof(num)*MAT_DIM*MAT_DIM);
 
 typedef num Mat[MAT_DIM][MAT_DIM];
@@ -23,6 +23,7 @@ void mat_mul_phase(void *out_v, void *x, void *y) {
 	mat_mul(MAT_DIM, out_v, x, y);
 	MatPtr out = out_v;
 	size_t pi = 0, pj = 0;
+	mat_reduce(MAT_DIM, out_v);
 	while (num_is_zero(out[pi][pj])) {
 		if (pi < MAT_DIM) {
 			pi += 1;
@@ -38,14 +39,14 @@ void mat_mul_phase(void *out_v, void *x, void *y) {
 		// normalise
 		phase = num_mul(phase, num_inv_sqrt(num_mod_sq(phase)));
 		// invert
-		phase = num_inv(phase);
+		phase = num_reduce(num_inv(phase));
 		range(i, MAT_DIM) {
 			range(j, MAT_DIM) {
 				out[i][j] = num_mul(out[i][j], phase);
 			}
 		}
+		mat_reduce(MAT_DIM, out_v);
 	}
-	mat_reduce(MAT_DIM, out_v);
 }
 
 void shift(MatPtr out) {
@@ -105,20 +106,20 @@ void find_group() {
 	range(i, GATES_MAX) {
 		mat_zero(MAT_DIM, &gates[i][0][0]);
 	}
-	gate_names[gates_count] = "X2";
+	gate_names[gates_count] = "X";
 	shift(gates[gates_count]);
 	gates_count+=1;
 
-	gate_names[gates_count] = "Z2";
-	clock(gates[gates_count], roots[2], 2);
+	gate_names[gates_count] = "Z";
+	clock(gates[gates_count], roots[MAT_DIM], MAT_DIM);
 	gates_count+=1;
 
-	gate_names[gates_count] = "H2";
-	fourier(gates[gates_count], roots[2], 2);
+	gate_names[gates_count] = "H";
+	fourier(gates[gates_count], roots[MAT_DIM], MAT_DIM);
 	gates_count+=1;
 
-	gate_names[gates_count] = "D2";
-	cliff_diag(gates[gates_count], roots[4], 4);
+	gate_names[gates_count] = "D";
+	cliff_diag(gates[gates_count], roots[2*MAT_DIM], 2*MAT_DIM);
 	gates_count+=1;
 
 	void *gen[gates_count];
@@ -137,6 +138,7 @@ void find_group() {
 		mat_print(MAT_DIM, paths.paths[i].result, ", ", "\n");
 		printf("\n");
 	}
+	printf("Total of %lu gates generated\n", paths.path_count);
 }
 
 int main() {
