@@ -36,25 +36,20 @@ PathList gen_paths(
 	PathNode *next_node = paths;
 	size_t path_count = 0;
 
-#define DEQ_CAP 1024
-	PathNode *deq[DEQ_CAP];
-	size_t deq_start = 0;
+	size_t searched_count = 0;
 
 	for (size_t i = 0; i < gen_len; i++) {
 		next_node->len.n = 1;
 		next_node->pred = NULL;
 		next_node->last.i = i;
 		next_node->result = gen[i];
-		deq[i] = next_node;
 		next_node++;
 		path_count++;
 	}
 
-	size_t deq_end = gen_len;
-
-	while (deq_end > deq_start) {
-		PathNode* curr = deq[deq_start % DEQ_CAP];
-		deq_start++;
+	while (searched_count < path_count) {
+		PathNode* curr = &paths[searched_count];
+		searched_count++;
 		for (size_t i = 0; i < gen_len; i++) {
 			u8 result[elem_size];
 			compose(result, gen[i], curr->result);
@@ -74,12 +69,6 @@ PathList gen_paths(
 			next_node->last.i = i;
 			next_node->result = malloc(elem_size);
 			memcpy(next_node->result, result, elem_size);
-			if (deq_end - deq_start >= DEQ_CAP) {
-				printf("Queue is full!\n");
-				exit(1);
-			}
-			deq[deq_end % DEQ_CAP] = next_node;
-			deq_end++;
 			next_node++;
 			path_count++;
 		}
