@@ -12,40 +12,31 @@ void eliminator(int n, int i, int j, num *out, num *x) {
 	b = num_mul(b, mod);
 	range (k, n) {
 		range (l, n) {
-			out[k*n+l] = (num){{0, 1}, {0, 1}, 1};
+			out[k*n+l] = num_from_int(0);
 		}
 	}
 	range (k, n) {
-		out[k*n+k] = (num){{1, 1}, {0, 1}, 1};
+		out[k*n+k] = num_from_int(1);
 	}
-	a.im.whole = -a.im.whole;
-	out[j*n+j] = a;
-	a.re.whole = -a.re.whole;
-	out[i*n+i] = a;
+	out[j*n+j] = num_conj_i(a);
+	// @Performance make num_mul_int and use it here
+	out[i*n+i] = num_mul(a, num_from_int(-1));
 	out[i*n+j] = b;
-	b.im.whole = -b.im.whole;
-	out[j*n+i] = b;
+	out[j*n+i] = num_conj_i(b);
 }
 
 int main() {
+	num phase[4] = {};
+	phase[0].c[0][0][0] = 1;
+	phase[1].c[1][0][0] = 1;
+	phase[2].c[0][0][0] = -1;
+	phase[3].c[1][0][0] = -1;
+	phase[0].de = 1;
+	phase[1].de = 1;
+	phase[2].de = 1;
+	phase[3].de = 1;
 	num fourier[4][4];
-	range(i, 4) {
-		range (j, 4) {
-			switch ((i*j)%4) {
-				case 0:
-					fourier[i][j] = (num) {{1, 1}, {0, 1}, 2};
-					break;
-				case 1:
-					fourier[i][j] = (num) {{0, 1}, {1, 1}, 2};
-					break;
-				case 2:
-					fourier[i][j] = (num) {{-1, 1}, {0, 1}, 2};
-					break;
-				case 3:
-					fourier[i][j] = (num) {{0, 1}, {-1, 1}, 2};
-			}
-		}
-	}
+	mat_fourier(4, &fourier[0][0], phase, 4);
 	printf("fourier: \n");
 	mat_print(4, &fourier[0][0], ", ", "\n");
 
