@@ -1,8 +1,8 @@
 #include "generator.h"
 #include "matrix_quadratic.h"
 
-#define MAT_DIM_A 3
-#define MAT_DIM_B 1
+#define MAT_DIM_A 2
+#define MAT_DIM_B 3
 #define MAT_DIM (MAT_DIM_A * MAT_DIM_B)
 const size_t MAT_SIZE = (sizeof(num)*MAT_DIM*MAT_DIM);
 
@@ -11,9 +11,18 @@ void mat_mul_reduce(void *out, void *x, void *y) {
 	mat_reduce(MAT_DIM, out);
 }
 
-// not robust to weird values of x, e.g. sqrt(0)/0
+// not sure what we should do for 0/0
 bool num_is_zero(num x) {
-	return x.re.whole == 0 && x.im.whole == 0;
+	range(i, 2) {
+		range(j, 2) {
+			range(k, 2) {
+				if (x.c[i][j][k] != 0) {
+					return false;
+				}
+			}
+		}
+	}
+	return true;
 }
 
 void mat_mul_phase(void *out_v, void *x, void *y) {
@@ -47,7 +56,13 @@ void mat_mul_phase(void *out_v, void *x, void *y) {
 	}
 }
 
-num omega12 = {{1, 3}, {1, 1}, 2}; // cos(1/12) + isin(1/12)
+num omega12() {
+	num out = {};
+	out.c[0][0][1] = 1;
+	out.c[1][0][0] = 1;
+	out.de = 2;
+	return out;
+}
 
 enum {
 	GATE_X,
@@ -66,10 +81,11 @@ void clifford_gen(int n, num *out) {
 	num roots_2n[2*n];
 	num roots[n];
 	{
-		num curr = {{1,1},{0,1},1};
+		num curr = num_from_int(1);
+		num w = omega12();
 		range(i, 12) {
 			roots_12[i] = curr;
-			curr = num_reduce(num_mul(curr, omega12));
+			curr = num_reduce(num_mul(curr, w));
 		}
 		range(i, 2*n) {
 			roots_2n[i] = roots_12[i*6/n];

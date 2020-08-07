@@ -90,7 +90,6 @@ void num_print(num x) {
 			}
 		}
 	}
-	//printf("{%d, %u, %d, %u, %u}", x.re.whole, x.re.qu, x.im.whole, x.im.qu, x.de);
 	if (terms == 0) {
 		printf("0");
 	} else if (terms >= 2 && x.de != 1) {
@@ -100,12 +99,17 @@ void num_print(num x) {
 	range(i, 2) {
 		range(j, 2) {
 			range(k, 2) {
-				if (x.c[i][j][k] != 0) {
-					if (x.c[i][j][k] > 0 && !first_term) {
+				int c = x.c[i][j][k];
+				if (c != 0) {
+					if (c > 0 && !first_term) {
 						printf("+");
 					}
-					if (x.c[i][j][k] != 1 || (i == 0 && j == 0 && k == 0)) {
-						printf("%d", x.c[i][j][k]);
+					if (c < 0) {
+						printf("-");
+						c = -c;
+					}
+					if (c != 1 || (i == 0 && j == 0 && k == 0)) {
+						printf("%d", c);
 					}
 					if (j == 1 || k == 1) {
 						printf("sqrt(%d)", MONOMIAL_SQUARES[0][j][k]);
@@ -120,6 +124,8 @@ void num_print(num x) {
 	}
 	if (terms >= 2 && x.de != 1) {
 		printf(")");
+	}
+	if (x.de != 1) {
 		printf("/%u", x.de);
 	}
 }
@@ -137,15 +143,16 @@ num num_add(num x, num y) {
 	return out;
 }
 
+bool debug = false;
 num num_mul(num x, num y) {
-	int out_c[3][3][3];
+	int out_c[3][3][3] = {};
 	range(i1, 2) {
 		range(j1, 2) {
 			range(k1, 2) {
 				range(i2, 2) {
 					range(j2, 2) {
 						range(k2, 2) {
-							out_c[i1+i2][j1+j2][k1+k2] =
+							out_c[i1+i2][j1+j2][k1+k2] +=
 								x.c[i1][j1][k1] * y.c[i2][j2][k2];
 						}
 					}
@@ -157,8 +164,16 @@ num num_mul(num x, num y) {
 		range(j, 3) {
 			out_c[i][j][0] += out_c[i][j][2] * MONOMIAL_SQUARES[0][0][1];
 			out_c[i][j][2] = 0;
+		}
+	}
+	range(i, 3) {
+		range(j, 3) {
 			out_c[i][0][j] += out_c[i][2][j] * MONOMIAL_SQUARES[0][1][0];
 			out_c[i][2][j] = 0;
+		}
+	}
+	range(i, 3) {
+		range(j, 3) {
 			out_c[0][i][j] += out_c[2][i][j] * MONOMIAL_SQUARES[1][0][0];
 			out_c[2][i][j] = 0;
 		}
@@ -203,7 +218,11 @@ num num_conj_3(num x) {
 }
 
 num num_mod_sq(num x) {
+	debug = true;
+	num y = num_mul(x, num_conj_i(x));
+	debug = false;
 	return num_mul(x, num_conj_i(x));
+	// return num_mul(x, num_conj_i(x));
 }
 
 num num_inv(num x) {
@@ -255,9 +274,9 @@ num num_inv_sqrt(num x) {
 
 	num out = {};
 	out.de = int_quadpart(x_nu);
-	x_nu /= out.de;
+	x_nu /= out.de * out.de;
 	int out_nu = int_quadpart(x.de);
-	x.de /= out_nu;
+	x.de /= out_nu * out_nu;
 
 	int j = 0;
 	if (x_nu % 2 == 0) {
