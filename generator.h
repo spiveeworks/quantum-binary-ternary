@@ -5,9 +5,9 @@
 #include<stdlib.h>
 #include<string.h>
 
+#define MAX_PATH_COUNT 1000000
+
 typedef unsigned char u8;
-typedef u8 *Map;
-typedef u8 const *ConstMap;
 
 typedef struct { size_t i; } GenIndex;
 typedef struct { size_t n; } PathLength;
@@ -29,9 +29,8 @@ typedef struct {
 
 PathList gen_paths(
 	size_t gen_len, void** gen, char **names, size_t elem_size,
-	void (*compose)(void*,void*,void*), void (*print_elem)(void*)
+	void (*compose)(void*,void*,void*), void (*print_elem)(void*), bool (*print_cond)(void*)
 ) {
-#define MAX_PATH_COUNT 10000
 	static PathNode paths[MAX_PATH_COUNT];
 	PathNode *next_node = paths;
 	size_t path_count = 0;
@@ -57,6 +56,7 @@ PathList gen_paths(
 			for (PathNode *it = paths; it < next_node; it++) {
 				if (memcmp(result, it->result, elem_size) == 0) {
 					isnew = false;
+					break;
 				}
 			}
 			if (!isnew) { continue; }
@@ -69,7 +69,7 @@ PathList gen_paths(
 			next_node->last.i = i;
 			next_node->result = malloc(elem_size);
 			memcpy(next_node->result, result, elem_size);
-			{
+			if (print_cond == NULL || print_cond(next_node->result)){
 				PathNode *curr = next_node;
 				while (curr) {
 					printf(" %s", names[curr->last.i]);

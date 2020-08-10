@@ -1,5 +1,8 @@
 #include "generator.h"
 
+typedef u8 *Map;
+typedef u8 const *ConstMap;
+
 void print_cycle_decomposition(ConstMap m, u8 num) {
 	bool printed[num];
 	for (u8 i = 0; i < num; i++) {
@@ -79,7 +82,7 @@ void findgen() {
 			gen_len++;
 		}
 	}
-	PathList paths = gen_paths(gen_len, gen, gen_names, NUM, compose_permutations, print_permutation);
+	PathList paths = gen_paths(gen_len, gen, gen_names, NUM, compose_permutations, print_permutation, NULL);
 	size_t sn = 1;
 	for (size_t i = 1; i <= NUM; i++) {
 		sn *= i;
