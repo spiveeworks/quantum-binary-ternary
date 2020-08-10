@@ -56,6 +56,10 @@ void mat_mul_phase(void *out_v, void *x, void *y) {
 	}
 }
 
+void mat_print_default(void *x) {
+	mat_print(MAT_DIM, x, ", ", "\n");
+}
+
 num omega12() {
 	num out = {};
 	out.c[0][0][1] = 1;
@@ -112,8 +116,12 @@ void find_group() {
 	clifford_gen(MAT_DIM_B, &gates_b[0][0][0]);
 
 	char gate_base_names[GATE_COUNT][2] = {"X", "Z", "H", "D"};
-	char gate_names[2*GATE_COUNT][8];
-	num gates[2*GATE_COUNT][MAT_DIM][MAT_DIM];
+	char gate_name_buffs[2*GATE_COUNT+2][8];
+	char *gate_names[2*GATE_COUNT+2];
+	range(i, 2*GATE_COUNT+2) {
+		gate_names[i] = gate_name_buffs[i];
+	}
+	num gates[2*GATE_COUNT+2][MAT_DIM][MAT_DIM];
 	range(i, GATE_COUNT) {
 		mat_kronecker(MAT_DIM_A, MAT_DIM_B,
 				&gates[i][0][0], &gates_a[i][0][0], &ident_b[0][0]);
@@ -126,29 +134,32 @@ void find_group() {
 		mat_reduce(MAT_DIM, &gates[j][0][0]);
 		sprintf(gate_names[j], "%s%d", gate_base_names[i], MAT_DIM_B);
 	}
+	int gate_count;
+	if (MAT_DIM_B == 1) {
+		gate_count = GATE_COUNT;
+	} else {
+		gate_count = 2*GATE_COUNT;
+		//gate_count = 0;
+		mat_sum_right(MAT_DIM_A, MAT_DIM_B, &gates[gate_count][0][0]);
+		sprintf(gate_names[gate_count], "C%d(X%d)", MAT_DIM_A, MAT_DIM_B);
+		gate_count += 1;
+		mat_sum_left(MAT_DIM_A, MAT_DIM_B, &gates[gate_count][0][0]);
+		sprintf(gate_names[gate_count], "C%d(X%d)", MAT_DIM_B, MAT_DIM_A);
+		gate_count += 1;
+	}
 
-	void *gen[GATE_COUNT];
-	range(i, 2*GATE_COUNT) {
+	void *gen[2*GATE_COUNT+2];
+	range(i, gate_count) {
 		gen[i] = gates[i];
 	/* uncomment if debugging gen_paths
+	 */
 		printf("%s:\n", gate_names[i]);
 		mat_print(MAT_DIM, (num*)gates[i], ", ", "\n");
 		printf("\n");
-	*/
+	/**/
 	}
 
-	int gate_count = MAT_DIM_B == 1 ? GATE_COUNT : 2*GATE_COUNT;
-	PathList paths = gen_paths(gate_count, gen, MAT_SIZE, mat_mul_phase);
-	range(i, paths.path_count) {
-		PathNode *curr = &paths.paths[i];
-		while (curr) {
-			printf(" %s", gate_names[curr->last.i]);
-			curr = curr->pred;
-		}
-		printf(":\n");
-		mat_print(MAT_DIM, paths.paths[i].result, ", ", "\n");
-		printf("\n");
-	}
+	PathList paths = gen_paths(gate_count, gen, gate_names, MAT_SIZE, mat_mul_phase, mat_print_default);
 	printf("Total of %lu gates generated\n", paths.path_count);
 }
 

@@ -350,6 +350,10 @@ void mat_mul(int n, num *out, num *x, num *y) {
 	}
 }
 
+// if X = A (x) B = mat_kronecker(m, n, X, A, B)
+// then X[KRON_INDEX(m, n, i1, j1, i2, j2)] = A_{i1 j1}*B_{i2 j2}
+#define KRON_INDEX(m, n, i1, j1, i2, j2) (((i1)*(n)+(i2))*(m)*(n)+((j1)*(n)+(j2)))
+
 // takes the Kronecker product of an m x m matrix and an n x n matrix
 // out must be an mn x mn matrix
 void mat_kronecker(int m, int n, num *out, num *x, num *y) {
@@ -357,7 +361,7 @@ void mat_kronecker(int m, int n, num *out, num *x, num *y) {
 		range(i2, n) {
 			range(j1, m) {
 				range(j2, n) {
-					out[(i1*n+i2)*m*n+(j1*n+j2)] =
+					out[KRON_INDEX(m, n, i1, j1, i2, j2)] =
 						num_mul(x[i1*m+j1], y[i2*n+j2]);
 				}
 			}
@@ -393,6 +397,26 @@ void mat_fourier(int n, num *out, num *phase, size_t phase_len) {
 		range(j, n) {
 			num coord = phase[i*j%phase_len];
 			out[i*n+j] = num_reduce(num_mul(scale, coord));
+		}
+	}
+}
+
+// |i>|j> \mapsto |i>|i+j mod n>
+void mat_sum_right(int m, int n, num *out) {
+	mat_zero(m*n, out);
+	range(i1, m) {
+		range(i2, n) {
+			out[KRON_INDEX(m, n, i1, i1, (i1+i2)%n, i2)].c[0][0][0] = 1;
+		}
+	}
+}
+
+// |i>|j> \mapsto |i+j mod m>|j>
+void mat_sum_left(int m, int n, num *out) {
+	mat_zero(m*n, out);
+	range(i1, m) {
+		range(i2, n) {
+			out[KRON_INDEX(m, n, (i1+i2)%m, i1, i2, i2)].c[0][0][0] = 1;
 		}
 	}
 }

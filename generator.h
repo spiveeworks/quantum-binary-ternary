@@ -28,8 +28,8 @@ typedef struct {
 
 
 PathList gen_paths(
-	size_t gen_len, void** gen, size_t elem_size,
-	void (*compose)(void*,void*,void*)
+	size_t gen_len, void** gen, char **names, size_t elem_size,
+	void (*compose)(void*,void*,void*), void (*print_elem)(void*)
 ) {
 #define MAX_PATH_COUNT 10000
 	static PathNode paths[MAX_PATH_COUNT];
@@ -69,6 +69,16 @@ PathList gen_paths(
 			next_node->last.i = i;
 			next_node->result = malloc(elem_size);
 			memcpy(next_node->result, result, elem_size);
+			{
+				PathNode *curr = next_node;
+				while (curr) {
+					printf(" %s", names[curr->last.i]);
+					curr = curr->pred;
+				}
+				printf(":\n");
+				print_elem(next_node->result);
+				printf("\n");
+			}
 			next_node++;
 			path_count++;
 		}
