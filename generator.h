@@ -6,6 +6,7 @@
 #include<string.h>
 
 #define MAX_PATH_COUNT 1000000
+#include "hashmap.h"
 
 typedef unsigned char u8;
 
@@ -42,6 +43,7 @@ PathList gen_paths(
 		next_node->pred = NULL;
 		next_node->last.i = i;
 		next_node->result = gen[i];
+		hash_insert(next_node->result, elem_size, next_node);
 		next_node++;
 		path_count++;
 	}
@@ -52,14 +54,7 @@ PathList gen_paths(
 		for (size_t i = 0; i < gen_len; i++) {
 			u8 result[elem_size];
 			compose(result, gen[i], curr->result);
-			bool isnew = true;
-			for (PathNode *it = paths; it < next_node; it++) {
-				if (memcmp(result, it->result, elem_size) == 0) {
-					isnew = false;
-					break;
-				}
-			}
-			if (!isnew) { continue; }
+			if (hash_lookup(result, elem_size) != NULL) { continue; }
 			if (path_count >= MAX_PATH_COUNT) {
 				printf("Path List is full!\n");
 				exit(1);
@@ -69,6 +64,7 @@ PathList gen_paths(
 			next_node->last.i = i;
 			next_node->result = malloc(elem_size);
 			memcpy(next_node->result, result, elem_size);
+			hash_insert(next_node->result, elem_size, next_node);
 			if (print_cond == NULL || print_cond(next_node->result)){
 				PathNode *curr = next_node;
 				while (curr) {
