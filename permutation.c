@@ -82,7 +82,7 @@ void findgen() {
 			gen_len++;
 		}
 	}
-	PathList paths = gen_paths(gen_len, gen, gen_names, NUM, compose_permutations, print_permutation, NULL);
+	PathList paths = gen_paths(gen_len, gen, gen_names, NUM, compose_permutations, print_permutation, NULL, SEARCH_BREADTH_FIRST);
 	size_t sn = 1;
 	for (size_t i = 1; i <= NUM; i++) {
 		sn *= i;

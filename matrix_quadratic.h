@@ -59,6 +59,22 @@ num num_from_int(int nu) {
 	return out;
 }
 
+bool num_eq(num x, num y) {
+	if (x.de == 0 || y.de == 0) {
+		return false;
+	}
+	range(i, 2) {
+		range(j, 2) {
+			range(k, 2) {
+				if (x.c[i][j][k] * y.de != y.c[i][j][k] * x.de) {
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
 num num_reduce(num x) {
 	int d = x.de;
 	range(i, 2) {
@@ -343,7 +359,7 @@ void mat_mul(int n, num *out, num *x, num *y) {
 		range (k, n) {
 			num sum = num_from_int(0);
 			range (j, n) {
-				sum = num_add(sum, num_mul(x[i*n+j], y[j*n+k]));
+				sum = num_reduce(num_add(sum, num_mul(x[i*n+j], y[j*n+k])));
 			}
 			out[i*n+k] = sum;
 		}
