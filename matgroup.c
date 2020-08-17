@@ -112,93 +112,207 @@ bool mat_print_order_ret_false(void *x) {
 	return false;
 }
 
-num omega12() {
-	num out = {};
-	out.c[0][0][1] = 1;
-	out.c[1][0][0] = 1;
-	out.de = 2;
-	return out;
-}
+#define SMALLEST_ROOT 24
+bool roots_initialized = false;
+num roots[SMALLEST_ROOT];
 
-enum {
-	GATE_X,
-	GATE_Z,
-	GATE_H,
-	GATE_D,
-	GATE_COUNT,
-};
-
-void clifford_gen(int n, num *out) {
-	if (12 % n != 0) {
-		printf("Tried to generate Clifford matrices for n = %d\n", n);
+num root_of_unity(int r, int d) {
+	if (SMALLEST_ROOT * r % d != 0) {
+		printf("Cannot calculate root of unity, %d does not divide %d\n",
+			d, SMALLEST_ROOT * r);
 		exit(1);
 	}
-	num roots_12[12];
-	num roots_2n[2*n];
-	num roots[n];
-	{
-		num curr = num_from_int(1);
-		num w = omega12();
-		range(i, 12) {
-			roots_12[i] = curr;
-			curr = num_reduce(num_mul(curr, w));
+
+	if (!roots_initialized) {
+		num x = num_from_int(1);
+		num y = num_from_int(0);
+		y.c[0][1][0] = 1;
+		y.c[0][1][1] = 1;
+		y.c[1][1][0] = -1;
+		y.c[1][1][1] = 1;
+		y.de = 4;
+
+		range(i, SMALLEST_ROOT) {
+			if (i > 0 && num_eq(x, num_from_int(1))) {
+				printf("Error while initializing roots:\n");
+				num_print(y);
+				printf("raised to %lu is already 1\n", i);
+				exit(1);
+			}
+			roots[i] = x;
+			x = num_reduce(num_mul(x, y));
 		}
-		range(i, 2*n) {
-			roots_2n[i] = roots_12[i*6/n];
+		if (!num_eq(x, num_from_int(1))) {
+			printf("Error while initializing roots:\n");
+			num_print(y);
+			printf("raised to %d is only ", SMALLEST_ROOT);
+			num_print(x);
+			printf("\n");
+			exit(1);
 		}
-		range(i, n) {
-			roots[i] = roots_12[i*12/n];
+
+		roots_initialized = true;
+	}
+	return roots[SMALLEST_ROOT * r / d % SMALLEST_ROOT];
+}
+
+enum Gate {
+	GATE_IDENT,
+	GATE_SHIFT,
+	GATE_CLOCK,
+	GATE_FOURIER,
+	GATE_CLIFF_DIAG,
+	GATE_CONTROL_0,
+	GATE_CONTROL_1,
+	GATE_CONTROL_N,
+};
+
+void initialize_single(int n, num *out, enum Gate gate) {
+	switch(gate) {
+		case GATE_IDENT:
+		{
+			mat_ident(n, out);
+			break;
+		}
+		case GATE_SHIFT:
+		{
+			mat_shift(n, out);
+			break;
+		}
+		case GATE_CLOCK:
+		{
+			num phase[n];
+			range(i, n) { phase[i] = root_of_unity(i, n); }
+			mat_clock(n, out, phase, n);
+			break;
+		}
+		case GATE_FOURIER:
+		{
+			num phase[n];
+			range(i, n) { phase[i] = root_of_unity(i, n); }
+			mat_fourier(n, out, phase, n);
+			break;
+		}
+		case GATE_CLIFF_DIAG:
+		{
+			num phase[2*n];
+			range(i, 2*n) { phase[i] = root_of_unity(i, 2*n); }
+			mat_cliff_diag(n, out, phase, 2*n);
+			break;
+		}
+		case GATE_CONTROL_0:
+		case GATE_CONTROL_1:
+		case GATE_CONTROL_N:
+		{
+			printf("Tried to initialize a single gate with a control specifier\n");
+			exit(1);
+		}
+		default:
+		{
+			printf("Unknown gate specifier %d\n", gate);
+			exit(1);
 		}
 	}
-	mat_fourier(n, out + 0*n*n, roots, n);
-	mat_cliff_diag(n, out + 1*n*n, roots_2n, 2*n);
-	mat_clock(n, out + 2*n*n, roots, n);
-	mat_shift(n, out + 3*n*n);
+}
+
+void initialize(num (*out)[MAT_DIM], enum Gate gate_a, enum Gate gate_b) {
+	num a[MAT_DIM_A][MAT_DIM_A];
+	if (gate_a < GATE_CONTROL_0) {
+		initialize_single(MAT_DIM_A, &a[0][0], gate_a);
+	}
+	num b[MAT_DIM_B][MAT_DIM_B];
+	if (gate_b < GATE_CONTROL_0) {
+		initialize_single(MAT_DIM_B, &b[0][0], gate_b);
+	}
+	if (gate_a < GATE_CONTROL_0 && gate_b < GATE_CONTROL_0) {
+		mat_kronecker(MAT_DIM_A, MAT_DIM_B, &out[0][0], &a[0][0], &b[0][0]);
+	} else if (gate_b < GATE_CONTROL_0) {
+		int control;
+		switch(gate_a) {
+			case GATE_CONTROL_0:
+				control = 0;
+				break;
+			case GATE_CONTROL_1:
+				control = 1;
+				break;
+			case GATE_CONTROL_N:
+				control = MAT_DIM_A - 1;
+				break;
+			default:
+				printf("Invalid control specifier %d\n", gate_a);
+				exit(1);
+		}
+		mat_control_target(MAT_DIM_A, MAT_DIM_B, &out[0][0], control, &b[0][0]);
+	} else if (gate_a < GATE_CONTROL_0) {
+		int control;
+		switch(gate_b) {
+			case GATE_CONTROL_0:
+				control = 0;
+				break;
+			case GATE_CONTROL_1:
+				control = 1;
+				break;
+			case GATE_CONTROL_N:
+				control = MAT_DIM_B - 1;
+				break;
+			default:
+				printf("Invalid control specifier %d\n", gate_b);
+				exit(1);
+		}
+		mat_target_control(MAT_DIM_A, MAT_DIM_B, &out[0][0], &a[0][0], control);
+	} else {
+		printf("Tried to initialize a gate with only control specifiers\n");
+		exit(1);
+	}
+	mat_reduce(MAT_DIM, &out[0][0]);
 }
 
 void find_group() {
-	num ident_a[MAT_DIM_A][MAT_DIM_A];
-	mat_ident(MAT_DIM_A, &ident_a[0][0]);
-	num gates_a[GATE_COUNT][MAT_DIM_A][MAT_DIM_A];
-	clifford_gen(MAT_DIM_A, &gates_a[0][0][0]);
+	char *gate_names[10] = {};
+	num gates[10][MAT_DIM][MAT_DIM];
+	int gate_count = 0;
 
-	num ident_b[MAT_DIM_B][MAT_DIM_B];
-	mat_ident(MAT_DIM_B, &ident_b[0][0]);
-	num gates_b[GATE_COUNT][MAT_DIM_B][MAT_DIM_B];
-	clifford_gen(MAT_DIM_B, &gates_b[0][0][0]);
+	gate_names[gate_count] = "X2";
+	initialize(gates[gate_count], GATE_SHIFT, GATE_IDENT);
+	gate_count += 1;
 
-	char gate_base_names[GATE_COUNT][2] = {"H", "D", "Z", "X"};
-	char gate_name_buffs[2*GATE_COUNT+2][8];
-	char *gate_names[2*GATE_COUNT+2];
-	range(i, 2*GATE_COUNT+2) {
-		gate_names[i] = gate_name_buffs[i];
-	}
-	num gates[2*GATE_COUNT+2][MAT_DIM][MAT_DIM];
-	range(i, GATE_COUNT) {
-		mat_kronecker(MAT_DIM_A, MAT_DIM_B,
-				&gates[2*i][0][0], &gates_a[i][0][0], &ident_b[0][0]);
-		mat_reduce(MAT_DIM, &gates[2*i][0][0]);
-		sprintf(gate_names[2*i], "%s%d", gate_base_names[i], MAT_DIM_A);
+	gate_names[gate_count] = "X3";
+	initialize(gates[gate_count], GATE_IDENT, GATE_SHIFT);
+	gate_count += 1;
 
-		mat_kronecker(MAT_DIM_A, MAT_DIM_B,
-				&gates[2*i+1][0][0], &ident_a[0][0], &gates_b[i][0][0]);
-		mat_reduce(MAT_DIM, &gates[2*i+1][0][0]);
-		sprintf(gate_names[2*i+1], "%s%d", gate_base_names[i], MAT_DIM_B);
-	}
-	int gate_count;
-	if (MAT_DIM_B == 1) {
-		gate_count = GATE_COUNT;
-	} else {
-		gate_count = 2*GATE_COUNT;
-		mat_sum_right(MAT_DIM_A, MAT_DIM_B, &gates[gate_count][0][0]);
-		sprintf(gate_names[gate_count], "C%d(X%d)", MAT_DIM_A, MAT_DIM_B);
-		gate_count += 1;
-		mat_sum_left(MAT_DIM_A, MAT_DIM_B, &gates[gate_count][0][0]);
-		sprintf(gate_names[gate_count], "C%d(X%d)", MAT_DIM_B, MAT_DIM_A);
-		gate_count += 1;
-	}
+	gate_names[gate_count] = "Z2";
+	initialize(gates[gate_count], GATE_CLOCK, GATE_IDENT);
+	gate_count += 1;
 
-	void *gen[2*GATE_COUNT+2];
+	gate_names[gate_count] = "Z3";
+	initialize(gates[gate_count], GATE_IDENT, GATE_CLOCK);
+	gate_count += 1;
+
+	gate_names[gate_count] = "H2";
+	initialize(gates[gate_count], GATE_FOURIER, GATE_IDENT);
+	gate_count += 1;
+
+	gate_names[gate_count] = "H3";
+	initialize(gates[gate_count], GATE_IDENT, GATE_FOURIER);
+	gate_count += 1;
+
+	gate_names[gate_count] = "D2";
+	initialize(gates[gate_count], GATE_CLIFF_DIAG, GATE_IDENT);
+	gate_count += 1;
+
+	gate_names[gate_count] = "D3";
+	initialize(gates[gate_count], GATE_IDENT, GATE_CLIFF_DIAG);
+	gate_count += 1;
+
+	gate_names[gate_count] = "C2X3";
+	initialize(gates[gate_count], GATE_CONTROL_1, GATE_SHIFT);
+	gate_count += 1;
+
+	gate_names[gate_count] = "C3X2";
+	initialize(gates[gate_count], GATE_SHIFT, GATE_CONTROL_1);
+	gate_count += 1;
+
+	void *gen[gate_count];
 	range(i, gate_count) {
 		gen[i] = gates[i];
 		printf("%s:\n", gate_names[i]);
@@ -208,7 +322,8 @@ void find_group() {
 
 	PathList paths = gen_paths(
 		gate_count, gen, gate_names, MAT_SIZE,
-		mat_mul_reduce, mat_print_default, mat_print_order_ret_false, SEARCH_BREADTH_FIRST);
+		mat_mul_reduce, mat_print_default, mat_print_order_ret_false, SEARCH_BREADTH_FIRST
+	);
 	printf("Total of %lu gates generated\n", paths.path_count);
 }
 

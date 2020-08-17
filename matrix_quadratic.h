@@ -417,22 +417,24 @@ void mat_fourier(int n, num *out, num *phase, size_t phase_len) {
 	}
 }
 
-// |i>|j> \mapsto |i>|i+j mod n>
-void mat_sum_right(int m, int n, num *out) {
-	mat_zero(m*n, out);
-	range(i1, m) {
-		range(i2, n) {
-			out[KRON_INDEX(m, n, i1, i1, (i1+i2)%n, i2)].c[0][0][0] = 1;
+// |control>|j> \mapsto |i>(y|j>)
+// |else>|j> \mapsto |else>|j>
+void mat_control_target(int m, int n, num *out, int control, num *y) {
+	mat_ident(m*n, out);
+	range(i, n) {
+		range(j, n) {
+			out[KRON_INDEX(m, n, control, control, i, j)] = y[i*n+j];
 		}
 	}
 }
 
-// |i>|j> \mapsto |i+j mod m>|j>
-void mat_sum_left(int m, int n, num *out) {
-	mat_zero(m*n, out);
-	range(i1, m) {
-		range(i2, n) {
-			out[KRON_INDEX(m, n, (i1+i2)%m, i1, i2, i2)].c[0][0][0] = 1;
+// |i>|control> \mapsto (x|i>)|control>
+// |i>|else> \mapsto |i>|else>
+void mat_target_control(int m, int n, num *out, num *x, int control) {
+	mat_ident(m*n, out);
+	range(i, m) {
+		range(j, m) {
+			out[KRON_INDEX(m, n, i, j, control, control)] = x[i*m+j];
 		}
 	}
 }
