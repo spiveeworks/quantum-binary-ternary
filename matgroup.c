@@ -72,9 +72,9 @@ bool mat_is_ident(num (*x)[MAT_DIM]) {
 	return true;
 }
 
-const int max_order = 28;
+const int max_precision = 100;
 
-int mat_calc_order(num (*x)[MAT_DIM]) {
+int mat_calc_order(num (*x)[MAT_DIM], bool print) {
 	if (mat_is_ident(x)) { return 0; }
 	num y[MAT_DIM][MAT_DIM];
 	range(i, MAT_DIM) {
@@ -86,30 +86,48 @@ int mat_calc_order(num (*x)[MAT_DIM]) {
 	while (!mat_is_ident(y)) {
 		num z[MAT_DIM][MAT_DIM];
 		mat_mul(MAT_DIM, &z[0][0], &x[0][0], &y[0][0]);
+		bool overprecise = false;
 		range(i, MAT_DIM) {
 			range(j, MAT_DIM) {
 				y[i][j] = num_reduce(z[i][j]);
+				if (y[i][j].de > max_precision) {
+					overprecise = true;
+				}
+				range(a, 2) {
+					range(b, 2) {
+						range(c, 2) {
+							int val = y[i][j].c[a][b][c];
+							if (val > max_precision || -val > max_precision) {
+								overprecise = true;
+							}
+						}
+					}
+				}
 			}
 		}
 		order += 1;
-		if (order >= max_order) {
-			printf("Matrix has order >= %d:\n", max_order);
-			mat_print(MAT_DIM, &x[0][0], ", ", "\n");
-			printf("\nraised to power %d:\n", order);
-			mat_print(MAT_DIM, &y[0][0], ", ", "\n");
-			return order;
+		if (overprecise) {
+			if (print) {
+				mat_print(MAT_DIM, &x[0][0], ", ", "\n");
+				printf("\nraised to power %d:\n", order);
+				mat_print(MAT_DIM, &y[0][0], ", ", "\n");
+			}
+			return -1;
 		}
 	}
 	return order;
 }
 
-bool mat_print_order_ret_false(void *x) {
-	int ord = mat_calc_order(x);
-	if (ord >= max_order) {
-		printf("Order = %d\n", ord);
+bool mat_print_order_ret_true(void *x) {
+	int ord = mat_calc_order(x, true);
+	if (ord == -1) {
 		return true;
+		//exit(0);
+	} else {
+		//printf("Order = %d\n", ord);
+		return false;
 	}
-	return false;
+	return true;
 }
 
 #define SMALLEST_ROOT 24
@@ -162,6 +180,7 @@ enum Gate {
 	GATE_CLOCK,
 	GATE_FOURIER,
 	GATE_CLIFF_DIAG,
+	GATE_TRANSPOSE,
 	GATE_CONTROL_0,
 	GATE_CONTROL_1,
 	GATE_CONTROL_N,
@@ -198,6 +217,17 @@ void initialize_single(int n, num *out, enum Gate gate) {
 			num phase[2*n];
 			range(i, 2*n) { phase[i] = root_of_unity(i, 2*n); }
 			mat_cliff_diag(n, out, phase, 2*n);
+			break;
+		}
+		case GATE_TRANSPOSE:
+		{
+			unsigned char p[n];
+			range(i, n) {
+				p[i] = i;
+			}
+			p[0] = 1;
+			p[1] = 0;
+			mat_perm(n, out, p);
 			break;
 		}
 		case GATE_CONTROL_0:
@@ -306,10 +336,14 @@ void find_group() {
 
 	gate_names[gate_count] = "C2X3";
 	initialize(gates[gate_count], GATE_CONTROL_1, GATE_SHIFT);
-	gate_count += 1;
+	//gate_count += 1;
 
 	gate_names[gate_count] = "C3X2";
 	initialize(gates[gate_count], GATE_SHIFT, GATE_CONTROL_1);
+	//gate_count += 1;
+
+	gate_names[gate_count] = "C2S3";
+	initialize(gates[gate_count], GATE_CONTROL_1, GATE_TRANSPOSE);
 	gate_count += 1;
 
 	void *gen[gate_count];
@@ -322,11 +356,84 @@ void find_group() {
 
 	PathList paths = gen_paths(
 		gate_count, gen, gate_names, MAT_SIZE,
-		mat_mul_reduce, mat_print_default, mat_print_order_ret_false, SEARCH_BREADTH_FIRST
+		mat_mul_phase, mat_print_default, mat_print_order_ret_true, SEARCH_BREADTH_FIRST
 	);
 	printf("Total of %lu gates generated\n", paths.path_count);
 }
 
+void test_perm_fourier_order() {
+	num h2[MAT_DIM][MAT_DIM];
+	initialize(h2, GATE_FOURIER, GATE_IDENT);
+
+	num h3[MAT_DIM][MAT_DIM];
+	initialize(h3, GATE_IDENT, GATE_FOURIER);
+
+	u8 m[MAT_DIM] = {};
+	int total_ph2 = 0;
+	int total_ph3 = 0;
+	int total_ph23 = 0;
+	bool done = false;
+	while (!done) {
+		bool invertible = true;
+		range(i, MAT_DIM) {
+			range(j, i) {
+				if (m[i] == m[j]) {
+					invertible = false;
+				}
+			}
+		}
+		if (invertible) {
+			num m_mat[MAT_DIM][MAT_DIM];
+			mat_perm(MAT_DIM, &m_mat[0][0], m);
+			num result[MAT_DIM][MAT_DIM];
+
+			mat_mul(MAT_DIM, &result[0][0], &m_mat[0][0], &h2[0][0]);
+			int order_ph2 = mat_calc_order(result, false);
+			mat_mul(MAT_DIM, &result[0][0], &h2[0][0], &m_mat[0][0]);
+			int order_h2p = mat_calc_order(result, false);
+			if (order_ph2 != -1 && order_h2p != -1) {
+				/*
+				printf("P H2 has order %d, and H2 P has order %d, where P:\n", order_ph2, order_h2p);
+				mat_print(MAT_DIM, &m_mat[0][0], ", ", "\n");
+				printf("\n");
+				*/
+				total_ph2 += 1;
+			}
+
+			mat_mul(MAT_DIM, &result[0][0], &m_mat[0][0], &h3[0][0]);
+			int order_ph3 = mat_calc_order(result, false);
+			mat_mul(MAT_DIM, &result[0][0], &h3[0][0], &m_mat[0][0]);
+			int order_h3p = mat_calc_order(result, false);
+			if (order_ph3 != -1 && order_h3p != -1) {
+				/*
+				printf("P H3 has order %d, and H3 P has order %d, where P:\n", order_ph3, order_h3p);
+				mat_print(MAT_DIM, &m_mat[0][0], ", ", "\n");
+				printf("\n");
+				*/
+				total_ph3 += 1;
+				if (order_ph2 != -1 && order_h2p != -1) {
+					printf("ord(P H2) = %d, ord(H2 P) = %d, ord(P H3) = %d, prd(H3 P) = %d\n",
+						order_ph2, order_h2p, order_ph3, order_h3p);
+					mat_print(MAT_DIM, &m_mat[0][0], ", ", "\n");
+					printf("\n");
+					total_ph23 += 1;
+				}
+			}
+		}
+
+		for (u8 x = 0; x < MAT_DIM; x++) {
+			m[x] += 1;
+			if (m[x] < MAT_DIM) { break; }
+			m[x] = 0;
+			if (x+1 == MAT_DIM) { done = true; }
+		}
+	}
+	printf("P H2 and H2 P were both finite order for %d distinct permutations P\n\n", total_ph2);
+	printf("P H3 and H3 P were both finite order for %d distinct permutations P\n\n", total_ph3);
+	printf("All four were finite order for %d distinct permutations P\n", total_ph23);
+}
+
 int main() {
-	find_group();
+	//find_group();
+	test_perm_fourier_order();
 }

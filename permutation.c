@@ -66,11 +66,11 @@ void findgen() {
 		{"cx3", {0,1,2,4,5,3}, false},
 		{"cx2", {0,4,2,3,1,5}, false},
 		{"x3", {1,2,0,4,5,3}, true},
-		{"s3", {1,0,2,4,3,5}, true},
+		{"s3", {1,0,2,4,3,5}, false},
 		{"x2", {3,4,5,0,1,2}, true},
 		{"x2x3", {4,5,3,1,2,0}, false},
 		{"g6", {1,2,3,4,5,0}, false},
-		{"cs3", {0,1,2,4,3,5}, false},
+		{"cs3", {0,1,2,4,3,5}, true},
 	};
 	size_t gen_len = 0;
 	void* gen[MAPS_LEN];
@@ -150,6 +150,6 @@ void findcliffordish() {
 
 int main() {
 	findgen();
-	findcliffordish();
+	//findcliffordish();
 }
 

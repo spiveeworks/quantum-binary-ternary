@@ -448,6 +448,14 @@ void mat_cliff_diag(int n, num *out, num *phase, size_t phase_len) {
 	}
 }
 
+// |i> \mapsto |\sigma(i)>
+void mat_perm(int n, num *out, const unsigned char *perm) {
+	mat_zero(n, out);
+	range(i, n) {
+		out[perm[i]*n+i].c[0][0][0] = 1;
+	}
+}
+
 
 void mat_reduce(int n, num *x) {
 	range (i, n) {
