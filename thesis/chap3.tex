@@ -32,39 +32,64 @@ Note that in order for $C_c(U)$ to be unitary, it is sufficient that the image $
 When we have a condition 
 
 Finally when $G_d$ is a unitary matrix acting on a $d$-dimensional object, and $G_p$ is the corresponding matrix acting on object $p$ of a composite system, it is sometimes useful for the set $c$ to impose a constraint on all but $d$ of the computational basis states of the composite system, in which case we can write $C_c(G_d)$ instead of $C_c(G_p)$.
-\section{Decomposing Operations into Circuits}
-[two sections? one on known 'multicontrolled are universal' and assume individual objects universal]
+\section{Universality of Composite Systems}
+Shall discuss decomposing operations by describing how arbitrary elements of a large set of matrices can be implemented by composing elements of a smaller set of matrices.
 
-We would like to show that the same finite bases/generators of universal computation in multi-qubit contexts can be used to achieve universal computation on mixed qubit-qutrit systems. The beginning and end of this process are the same as in the purely qubit case, however there are a few details in the middle which  must be verified explicitly.
+Arbitrary unitary into 2 level unitaries
+\\into transpositions + controlled unitary
+\\into local transpositions + arbitrary qubit unitary
+\\toffoli into local transpositions as well using square root of $S$
+\section{Universality for Classical Calculations}
+many local transpositions are equivalent up to single object permutation
+\\controlled qutrit operations are equivalent up to single object + controlled qubit
+\\non-mixed controlled operations can be implemented using these mixed ones, or directly using standard gate sets in sparse practical contexts
+\\single object permutation + controlled qubit + controlled qutrit is clearly universal for classical, via the previous argument/gray codes
+\\throw in single qubit unitaries and you get asymptotic universality as well
+\section{Porting Ternary Arithmetic to Mixed Systems}
+have found a useful set of basic gates for mechanized compilation
+\\let's look at specific algorithms that have been designed rather than compiled
+\\\cite{arithmetics} implements ternary addition as a permutation on computational basis states
+\\the ripple carry is designed so that the carry digit is always binary, which could be implemented in a mixed context
+\\(possibly draw up a circuit implementing the carry operations)
+\\the look ahead carry has ternary carry registers, but could be used for binary arithmetic, again giving a mixed algorithm
+\\(possibly draw up circuit for this as well)
+\\either of these would have less entropy than the pure ternary case, but many practical tradeoffs may render pure ternary to be superior, such as connectivity requirements, performance costs of mixed logic in general
+\\we have access to any method, lot of flexibility! add bits or trits with bit carry or trit carry
+\\(possibly mention mixed-string representations, here or in final discussion)
+\section{Clifford Operations}
+Bocharov et al. use non-clifford operations to measure the depth of their circuits, since these are the operations that will need asymptotic decomposition analogous to our arbitrary qubit operations.
+\\Clifford operations are powerful but form a simple and elegant finite group, with many uses in information and computation theoretic contexts (maybe this is calling back to background content)
+\\by \cite{tolar-clifford} we see that the Clifford operations available in mixed systems with objects of coprime dimension are simply the Clifford operations available in each individual object, so none of our controlled operations are Clifford!
+\\For a group to have some of the same power that the Clifford group has in computational contexts, we should want all of the following:
+\begin{itemize}
+	\item finite
+	\item can map computational basis to non-computational basis
+	\item can alter a qutrit dependant on a qubit and vice versa
+\end{itemize}
+Look at $6\times 6$ unitary matrices acting on a single qubit and a single qutrit
+\\Looking at $H_3 \times CX_2$ and $H_2 \times CX_3$ we see both are infinite order?? (haven't proven yet)
+\\$H_2 \times CS_3$ is finite order but $H_2 \times X_3 \times CS_3$ is infinite order as well.
+\\By previous equivalence statements that means that any finite group which has both Fourier transforms will fail to implement the controlled operations we need
+\\(possibly mention the quantum information implications of these gates, again maybe discussion)
+\\this probably means that Clifford + $CX_2$ + $CX_3$ is universal however
+\section{Programmatic Search for Finite Groups}
+finitely generated groups, can search programmatically
+\\can implement permutations as a lookup table, simple linear array of memory
+\\can implement matrices as arrays as well
+\\floats are not viable for this algebraic/symbolic problem, need exact comparison of square roots of numbers
+\\Mathematica would be suitable, but implementing the data type in C is easy enough, and as a bonus lets us explicitly manage the time and memory that these combinatoric group structures rapidly consume
+\\The 2x2 and 3x3 Fourier transforms require representation of $\sqrt{2}$ and $\sqrt{3}$, in addition to $i = \sqrt{-1}$. The typical representation of a complex number is as a pair of real numbers, and iterating this process we can represent such a number as 8 rational numbers. Collecting the denominator we end up with 9 integers.
+\\The set of real numbers that can be represented in this way (ignoring integer overflow) is closed under addition and multiplication, so we can multiply matrices of these numbers
+\\algorithm is to treat these numbers as polynomials of 3 variables, then reduce down the quadratic terms
+\\search algorithm is breadth first, but the output of the search is also the queue for which elements to search next
+\\for each new group element, compose it with each of the generators, and whichever of them are new get added to the list
+\\a quick implementation of a hash table can reduce the time taken to compare new group elements
+\\robin hood addressing is an interesting hash-table addressing scheme, and is high performance both in speed and memory, perfect for group search
+\\custom 
 
-Universal computation has a language ambiguity, in that it has two ways of being described, which are logically equivalent, but appear to be worded in the exact opposite way: Universal computation is a decomposition of arbitrary unitaries $U \in U(N)$ into an approximating sequence of operators chosen from some generator set, and equivalently the generation of a dense subset of $U(N)$ from such a generator set. It is common and perhaps most intuitive to adopt the former choice of language, which is what we shall do as well.
-
-Suppose then that we have an arbitrary unitary operator $U \in U(N)$, where $N$ is the overall number of computational basis states, $2^n3^m$. As is already demonstrated in \cite{textbook}, such a unitary can be decomposed into unitary operators acting on each of the $N(N-1)/2$ pairs of distinct computational basis states, so we refine our goal to the decomposition of an arbitrary such two-level unitary operator, acting on the basis states $\ket{i}$ and $\ket{j}$:
-\begin{align*}
-U_2 &= a\ket{i}\bra{i} + b\ket{j}\bra{i} + c\ket{i}\bra{j} + d\ket{j}\bra{j} + \sum_{k \neq i, j} \ket{k}\bra{k}
-\end{align*}
-
-After this we define $\ket{j'}$ to be the computational basis state that is equal to $\ket{i}$ in every qutrit, and all but one qubit $p$, say. Then if we can implement the permutation matrix $S_{j,j'}$ we can write $U_2 = S_{j,j'}U_2'S_{j,j'}$, where $U_2'$ will now be the following:
-\begin{align*}
-U_2' &= a\ket{i}\bra{i} + b\ket{j'}\bra{i} + c\ket{i}\bra{j'} + d\ket{j}\bra{j'} + \sum_{k \neq i, j'} \ket{k}\bra{k}
-\end{align*}
-Then we can observe that $U_2'$ is a controlled qubit operation $V = a\ket{0}\bra{0} + b\ket{1}\bra{0} + c\ket{0}\bra{1} + d\ket{1}\bra{1}$ acting on qubit $p$, with the control condition that all of the other qubits and qutrits are equal to that of $i$ and $j'$.
-
-From this point on we again refer to \cite{textbook} to implement $V$ as $AXBXC$ where $ABC=I$, and thus implement $U_2'$ as $A_pS_{i,j'}B_pS_{i,j'}C_p$, which will have no effect on any qutrits and on qubits except $p$, for which the effect shall be $V$ on states equal to $i$ or $j'$, and $ABC=I$ for all other states. This means that implementing arbitrary qubit operations, and arbitrary permutations on pairs of computational basis states is sufficient for universal computation.
-
-The permutation $S_{i,j'}$ is really a controlled $S_{0,1}$ operation targeting the qubit $p$ using the rest of the objects in the system as control objects of arbitrary control value. We shall now consider a general $i < j < N$ and decompose $S_{i,j}$ into such controlled single-object permutations.
-\\Define $j'$ to be $j$ but with one of the qubits or qutrits of $j$ that differ from $i$ changed to equal that of $i$ instead. Then $S_{i,j} = S_{j,j'}S_{i,j'}S_{j,j'}$, so by induction $S_{i,j}$ can be decomposed into a sequence of permutations swapping computational basis states that differ in only a single qubit or qutrit.
-
-Now in order to implement such a permutation operation $S_{i,j}$ where $i$ and $j$ differ in only a single object, we introduce some number of ancillary qubits initialised to 0, and proceed with the usual decomposition of multiple-control operations into double- or single-controlled operations, supposing that $i$ and $j$ differ at qubit $p$, and ancillary qubit $q$ is initialised to $\ket{0}$, and qubits $r$ and $s$ of $i$ and $j$ are equal to 1, we write $S_{i,j} = C(X_q\ |\ k_r=k_s=1)S_{i',j'}C(X_q\ |\ k_r=k_s=1)$ where $i'$ and $j'$ are the computational basis states on all qubits and qutrits, minus $r, s$, plus $q$, with $i'_q=j'_q=1$, thus we can remove digits until eventually everything has been implemented in terms of double-controlled qubit-not.
-
-Alternatively we can require an ancillary qutrit, and make the decomposition $S_{i,j} = C(S_{0,1}\ |\ k_r=1)C(S_{1,2}\ |\ k_s=1)S_{i',j'}C(S_{1,2}\ |\ k_s=1)C(S_{0,1}\ |\ k_r=1)$, thus requiring a single ancillary qutrit and the single controlled operations $CS_{0,1}$ and $CS_{1,2}$. Either way we need single-object permutations to map the appropriate control objects to $1$ before and after applying these decompositions.
-
-So this means that arbitrary single qubit operations + arbitrary single controlled single qutrit permutations are universal, or arbitrary single qubit operations + arbitrary double controlled single qubit negations are universal.
-
-\section{Implementing Small Permutations}
-[notation chapter before or after? notation would be some nice 'original work']
-We have reduced general unitary operators, to unitaries in 1 object plus permutations in 2 and 3 objects.
-
-These permutations and 
-
-\section{General Permutations? Clifford bases?}
+Call the group generated by X, Z, D the 'reduced Clifford group', RCG + H2 + H3 is the clifford group of course, which we confirm to be finite
+\\RCG + H2 + CX2 and RCG + H3 + CX3 are also finite
+\\RCG + CX2 + CX3 starts to use a lot of memory, but it has all of the permutations, and everything else is diagonal, so it ends up being a semidirect product of $\mathbb{Z}_6^6$ and $\mathcal{S}_6$.
+\\to find the infinite order H2 CX3 and H3 CX2 terms we attempt to calculate the order of all terms we find, and record any that lead to an integer overflow when raised to some power.
+\\only 24 permutation matrices did not have this property with either H2 or H3, 12 of which were the trivial Clifford permutations we already had, and 12 of which could be used to generate the $H_2 X_3 CS_2$ matrix which is itself infinite order.
+\\From this it seems likely that no group can have both Fourier transforms and any additional non-clifford permutation while being finite, but this shouldn't be surprising.
