@@ -234,16 +234,12 @@ num num_conj_3(num x) {
 }
 
 num num_mod_sq(num x) {
-	debug = true;
-	num y = num_mul(x, num_conj_i(x));
-	debug = false;
 	return num_mul(x, num_conj_i(x));
-	// return num_mul(x, num_conj_i(x));
 }
 
 num num_inv(num x) {
 	num out = {};
-	out.c[0][0][0] = x.de;
+	out.c[0][0][0] = (int)x.de;
 	out.de = 1;
 	x.de = 1;
 
@@ -284,14 +280,14 @@ num num_inv_sqrt(num x) {
 		i = 1;
 	}
 
-	int d = gcd(x_nu, x.de);
+	int d = gcd(x_nu, (int)x.de);
 	x_nu /= d;
 	x.de /= d;
 
 	num out = {};
 	out.de = int_quadpart(x_nu);
-	x_nu /= out.de * out.de;
-	int out_nu = int_quadpart(x.de);
+	x_nu /= (int)out.de * (int)out.de;
+	int out_nu = (int)int_quadpart(x.de);
 	x.de /= out_nu * out_nu;
 
 	int j = 0;
@@ -473,5 +469,232 @@ void mat_print(int n, num *x, char*sepcol, char*seprow) {
 		}
 		printf("%s", seprow);
 	}
+}
+
+#define SMALLEST_ROOT 24
+bool roots_initialized = false;
+num roots[SMALLEST_ROOT];
+
+num root_of_unity(int r, int d) {
+	if (SMALLEST_ROOT * r % d != 0) {
+		printf("Cannot calculate root of unity, %d does not divide %d\n",
+			d, SMALLEST_ROOT * r);
+		exit(1);
+	}
+
+	if (!roots_initialized) {
+		num x = num_from_int(1);
+		num y = num_from_int(0);
+		y.c[0][1][0] = 1;
+		y.c[0][1][1] = 1;
+		y.c[1][1][0] = -1;
+		y.c[1][1][1] = 1;
+		y.de = 4;
+
+		range(i, SMALLEST_ROOT) {
+			if (i > 0 && num_eq(x, num_from_int(1))) {
+				printf("Error while initializing roots:\n");
+				num_print(y);
+				printf("raised to %lu is already 1\n", i);
+				exit(1);
+			}
+			roots[i] = x;
+			x = num_reduce(num_mul(x, y));
+		}
+		if (!num_eq(x, num_from_int(1))) {
+			printf("Error while initializing roots:\n");
+			num_print(y);
+			printf("raised to %d is only ", SMALLEST_ROOT);
+			num_print(x);
+			printf("\n");
+			exit(1);
+		}
+
+		roots_initialized = true;
+	}
+	return roots[SMALLEST_ROOT * r / d % SMALLEST_ROOT];
+}
+
+bool mat_is_ident(int n, num *x) {
+	range(i, n) {
+		range(j, n) {
+			if (i != j && !num_eq(x[i*n+j], num_from_int(0))) {
+				return false;
+			}
+			if (i == j && !num_eq(x[i*n+j], num_from_int(1))) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+const int MAX_PRECISION = 100;
+
+int mat_calc_order(int n, num *x, bool print) {
+	if (mat_is_ident(n, x)) { return 0; }
+	num y[n][n];
+	range(i, n) {
+		range(j, n) {
+			y[i][j] = x[i*n+j];
+		}
+	}
+	int order = 1;
+	while (!mat_is_ident(n, &y[0][0])) {
+		num z[n][n];
+		mat_mul(n, &z[0][0], x, &y[0][0]);
+		bool overprecise = false;
+		range(i, n) {
+			range(j, n) {
+				y[i][j] = num_reduce(z[i][j]);
+				if (y[i][j].de > MAX_PRECISION) {
+					overprecise = true;
+				}
+				range(a, 2) {
+					range(b, 2) {
+						range(c, 2) {
+							int val = y[i][j].c[a][b][c];
+							if (val > MAX_PRECISION || -val > MAX_PRECISION) {
+								overprecise = true;
+							}
+						}
+					}
+				}
+			}
+		}
+		order += 1;
+		if (overprecise) {
+			if (print) {
+				mat_print(n, x, ", ", "\n");
+				printf("\nraised to power %d:\n", order);
+				mat_print(n, &y[0][0], ", ", "\n");
+			}
+			return -1;
+		}
+	}
+	return order;
+}
+
+enum Gate {
+	GATE_IDENT,
+	GATE_SHIFT,
+	GATE_CLOCK,
+	GATE_FOURIER,
+	GATE_CLIFF_DIAG,
+	GATE_TRANSPOSE,
+	GATE_CONTROL_0,
+	GATE_CONTROL_1,
+	GATE_CONTROL_N,
+};
+
+void initialize_single(int n, num *out, enum Gate gate) {
+	switch(gate) {
+		case GATE_IDENT:
+		{
+			mat_ident(n, out);
+			break;
+		}
+		case GATE_SHIFT:
+		{
+			mat_shift(n, out);
+			break;
+		}
+		case GATE_CLOCK:
+		{
+			num phase[n];
+			range(i, n) { phase[i] = root_of_unity(i, n); }
+			mat_clock(n, out, phase, n);
+			break;
+		}
+		case GATE_FOURIER:
+		{
+			num phase[n];
+			range(i, n) { phase[i] = root_of_unity(i, n); }
+			mat_fourier(n, out, phase, n);
+			break;
+		}
+		case GATE_CLIFF_DIAG:
+		{
+			num phase[2*n];
+			range(i, 2*n) { phase[i] = root_of_unity(i, 2*n); }
+			mat_cliff_diag(n, out, phase, 2*n);
+			break;
+		}
+		case GATE_TRANSPOSE:
+		{
+			unsigned char p[n];
+			range(i, n) {
+				p[i] = i;
+			}
+			p[0] = 1;
+			p[1] = 0;
+			mat_perm(n, out, p);
+			break;
+		}
+		case GATE_CONTROL_0:
+		case GATE_CONTROL_1:
+		case GATE_CONTROL_N:
+		{
+			printf("Tried to initialize a single gate with a control specifier\n");
+			exit(1);
+		}
+		default:
+		{
+			printf("Unknown gate specifier %d\n", gate);
+			exit(1);
+		}
+	}
+}
+
+void initialize(int m, int n, num *out, enum Gate gate_a, enum Gate gate_b) {
+	num a[m][m];
+	if (gate_a < GATE_CONTROL_0) {
+		initialize_single(m, &a[0][0], gate_a);
+	}
+	num b[n][n];
+	if (gate_b < GATE_CONTROL_0) {
+		initialize_single(n, &b[0][0], gate_b);
+	}
+	if (gate_a < GATE_CONTROL_0 && gate_b < GATE_CONTROL_0) {
+		mat_kronecker(m, n, out, &a[0][0], &b[0][0]);
+	} else if (gate_b < GATE_CONTROL_0) {
+		int control;
+		switch(gate_a) {
+			case GATE_CONTROL_0:
+				control = 0;
+				break;
+			case GATE_CONTROL_1:
+				control = 1;
+				break;
+			case GATE_CONTROL_N:
+				control = m - 1;
+				break;
+			default:
+				printf("Invalid control specifier %d\n", gate_a);
+				exit(1);
+		}
+		mat_control_target(m, n, out, control, &b[0][0]);
+	} else if (gate_a < GATE_CONTROL_0) {
+		int control;
+		switch(gate_b) {
+			case GATE_CONTROL_0:
+				control = 0;
+				break;
+			case GATE_CONTROL_1:
+				control = 1;
+				break;
+			case GATE_CONTROL_N:
+				control = n - 1;
+				break;
+			default:
+				printf("Invalid control specifier %d\n", gate_b);
+				exit(1);
+		}
+		mat_target_control(m, n, out, &a[0][0], control);
+	} else {
+		printf("Tried to initialize a gate with only control specifiers\n");
+		exit(1);
+	}
+	mat_reduce(m*n, out);
 }
 
