@@ -3,7 +3,7 @@
 \label{Chap:Math}
 In quantum mechanics it will turn out crucial to have a strong theory of unitary operations acting linearly on complex-valued objects, so to that end we shall define these concepts and their notation here. [And sketch some theorems?]
 \section{Hilbert Spaces}
-Cartesian coordinates provide a powerful abstract way of reasoning about physical space as the combination of 3 variables, or conversely a way of visualizing combinations of variables as planes or volumes within a physical space. Hilbert spaces are an alternative abstract description both of Cartesian coordinate systems, and of many other mathematical objects with similar geometric properties, and turn out to be very relevant to quantum mechanics.
+Cartesian coordinates provide a powerful abstract way of reasoning about physical space as the combination of 3 variables, or conversely a way of visualizing combinations of variables as planes or volumes within a physical space. Hilbert spaces are a description which abstracts the Cartesian coordinate system even further, describing a much larger class of mathematical objects with similar geometric properties, including the space of possible states that a quantum object can take.
 
 The abstract definition of a Hilbert space describes the following mathematical objects:
 \begin{itemize}
@@ -11,7 +11,7 @@ The abstract definition of a Hilbert space describes the following mathematical 
 	\item A (nonempty) set of `vectors' $\mathbb{H}$
 	\item A binary operation of vector addition: $\mathbb{H} \times \mathbb{H} \to \mathbb{H}$, written $u + v$ where $u$, $v$ are the vectors being added.
 	\item An operation that `scales' vectors by a scalar: $\mathbb{K} \times \mathbb{H} \to \mathbb{H}$, simply written $av$ where $a$ is the scalar and $v$ is the vector
-	\item An operation called the inner product, yielding a scalar for each pair of vectors: $\mathbb{H} \times \mathbb{H} \to \mathbb{K}$, written $(u, v)$ where $u$, $v$ are the vectors involved.
+	\item An operation called the inner product, yielding a scalar for each pair of vectors: $\mathbb{H} \times \mathbb{H} \to \mathbb{K}$, written for now as $(u, v)$ where $u$, $v$ are the vectors involved.
 	\item Well defined limits of any Cauchy sequence in $\mathbb{H}$, written $\lim_{n \to \infty} v_n$ where $(v_n)_{n=1}^\infty$ is the Cauchy sequence
 \end{itemize}
 Note that since $\mathbb{H}$ is non-empty, it must contain a `zero vector' acquired by scaling any element of $\mathbb{H}$ by 0. This vector is itself written as 0. When these objects are available, we say that $\mathbb{H}$ is a Hilbert space if it further satisfies the following algebraic properties, for any $a, b\in \mathbb{K}$, $u,v,w \in \mathbb{H}$:
@@ -24,11 +24,11 @@ Note that since $\mathbb{H}$ is non-empty, it must contain a `zero vector' acqui
 	\item scalar distribution: $(a+b)v = av + bv$
 	\item conjugate symmetry of inner products: $(u, v) = (v, u)^*$ (where $a^*$ is the complex conjugate of $a$)
 	\item right linearity: $(u, v+w) = (u, v) + (u, w)$
-	\item positive definite: $(v, v) > 0$ or $v = 0$
+	\item positive definite: $(v, v)$ real, and strictly positive whenever $v \neq 0$
 \end{itemize}
 Additionally Cauchy sequences must actually converge to their limits, a property whose formal definition and applications are beyond the scope of this thesis.
 
-The only Hilbert spaces discussed in this thesis are the sets of complex valued column vectors:
+The primary Hilbert spaces discussed in this thesis are the sets of complex valued column vectors:
 \[\mathbb{C}^n = \left\{\left[\begin{matrix} a_0\\a_1\\\vdots\\a_n\end{matrix}\right]\ |\ a_0, a_1, \dots a_n \in \mathbb{C}\right\}\]
 Adding and scaling of vectors of course take the usual definitions:
 \[
@@ -54,7 +54,7 @@ Inner products introduce a concept of orthogonality to a space of vectors, we sa
 \[
 \left(\left[\begin{matrix}1\\0\end{matrix}\right],\left[\begin{matrix}0\\1\end{matrix}\right]\right) = 0
 \]
-In general if two column vectors $v_i$ and $v_j$ have coordinates 0 except for their $i$th and $j$th coordinate respectively, then $(v_i, v_j) = \delta_{ij}$, 1 when $i = j$ and 0 otherwise. This condition is what it means for the set $\{v_0 \dots v_{n-1}\}$ to be an orthonormal basis of the vector space $\mathbb{C}^n$. It is a fundamental result of Hilbert spaces that if a countable set of vectors $v_i \in \mathbb{H}$ span the whole space, that is if every vector $w \in \mathbb{H}$ is an infinite linear combination of the vectors $v_i$, then $\mathbb{H}$ has an orthonormal basis. If this orthonormal basis is finite then we can observe any vector $v \in \mathbb{H}$ as the following column vector in $\mathbb{C}^n$:
+In general if two column vectors $v_i$ and $v_j$ have coordinates 0 except for their $i$th and $j$th coordinate respectively, then $(v_i, v_j) = \delta_{ij}$, 1 when $i = j$ and 0 otherwise. This condition is what it means for the set $\{v_0 \dots v_{n-1}\}$ to be an orthonormal basis of the vector space $\mathbb{C}^n$. It is a fundamental result of Hilbert spaces that if a countable set of vectors $v_i \in \mathbb{H}$ span the whole space, that is if every vector $w \in \mathbb{H}$ is an infinite linear combination of the vectors $v_i$, then $\mathbb{H}$ has an orthonormal basis. If this orthonormal basis is finite then we say that $\mathbb{H}$ is finite dimensional, and can observe any vector $v \in \mathbb{H}$ as analogous to the following column vector in $\mathbb{C}^n$:
 \[\left[\begin{matrix}
 (v_0, v)\\
 (v_1, v)\\
@@ -62,7 +62,7 @@ In general if two column vectors $v_i$ and $v_j$ have coordinates 0 except for t
 (v_n, v)
 \end{matrix}\right]\]
 Notice that the column vectors corresponding to the basis vectors $v_i$ have coordinate 0 everywhere except for their $i$th co-ordinate which is 1. Further the co-ordinates of these column vectors are exactly the co-ordinates of $v$ in $\mathbb{H}$:
-\[\left(v_i, \sum_{j=0}^{n-1} a_jv_j\right) = \sum_{j=0}^{n-1} a_j\left(v_i, v_j\right) = a_j\]
+\[\left(v_i, \sum_{j=0}^{n-1} a_jv_j\right) = \sum_{j=0}^{n-1} a_j\left(v_i, v_j\right) = a_i\]
 Finally the inner products of vectors $u, v \in \mathbb{H}$ are exactly the inner products of the corresponding column vectors:
 \begin{align*}
 (u, v) &= \left(\sum_{i=0}a_iv_i, \sum_{j=0} b_jv_j\right)
@@ -90,17 +90,15 @@ Finally the inner products of vectors $u, v \in \mathbb{H}$ are exactly the inne
 \end{align*}
 [could prove conjugate linearity earlier, or stop proving linear algebra results altogether!!]
 
-In this sense any finite dimensional [define?] Hilbert space is geometrically equivalent to the complex vector space $\mathbb{C}^n$ where $n$ is the dimension of $\mathbb{H}$.
+In this sense any finite dimensional Hilbert space is geometrically equivalent to the complex vector space $\mathbb{C}^n$ where $n$ is the size of any orthonormal basis of $\mathbb{H}$.
 
 As we shall describe in Chapter 1, quantum computation most commonly acts on Hilbert spaces that are finite dimensional, and while the specific space being considered can be important in practical contexts, this thesis is concerned with the theoretical and therefore only needs to understand the complex vector space $\mathbb{C}^n$.
 
-One caveat to this equivalence is the concept of basis-independence, that many concepts in linear algebra are made useful by the fact that they give the same result regardless of which basis is used for the space in question. To show that something is basis independent, it is sufficient to define it directly in terms of the inner product and vector operations, rather than the coordinate system induced by a given basis. As an example the $\ell^2$ norm in $\mathbb{C}^n$ does not depend on the basis used:
+One caveat to this equivalence is the concept of basis-independence, that many concepts in linear algebra are made useful by the fact that they give the same result regardless of which basis is used for the space in question. To show that something is basis independent, it is sufficient and often convenient to define it directly in terms of the inner product and vector operations, rather than the coordinate system induced by a given basis. As an example the $\ell^2$ norm in $\mathbb{C}^n$ does not depend on the basis used:
 \[\norm{v}_2 = \sqrt{(v, v)} = \sqrt{\sum_{i=0}^{n-1}\ord{v_i}^2}\]
 This cannot be done for any other $\ell^p$ norm.
 
 \subsection{Dirac Notation}
-[Dirac mechanics, indeces, inner products outer products]
-
 There are a number of notations available for reasoning about linear algebra and vector spaces, but we shall see [do we?] that in order to reason about quantum algorithms we will rely heavily on the following techniques:
 \begin{itemize}
 	\item linear operators defined in terms of inner products
@@ -125,28 +123,41 @@ The most common vectors used are the basis vectors, and in Dirac notation it is 
 \end{align*}
 
 The inner product of two vectors $(\ket{u}, \ket{v})$ is normally written $\braket{u}{v}$, called a `bra-ket'. This is inspired by the notation $\langle u, v\rangle$, used before Dirac, but allows an elegant representation of co-vectors. Co-vectors map a vector to a scalar, and in an inner product space every vector has a natural co-vector defined using the inner product. In Dirac notation we can simply omit the ket from an inner product to notate a co-vector:
-\[\bra{u} \equiv \ket{v} \mapsto \braket{u}{v}\]
+\begin{align*}
+\bra{u} &: \mathbb{C}^n \to \mathbb{C}
+\\\bra{u} &\equiv \ket{v} \mapsto \braket{u}{v}
+\end{align*}
 
 \section{Linear Operators}
 If $U$ and $V$ are Hilbert spaces, (or generally vector spaces) then a map $A: U \to V$ is a linear operator if it satisfies the following in general:
 \[A(a\ket{u} + b\ket{v}) = aA\ket{u} + bA\ket{v}\]
 If we have vectors $\ket{u} \in U$ and $\ket{v} \in V$ then we can define a simple linear operator using the inner product in $U$:
 \[\ket{v}\bra{u} \equiv \bra{u'} \mapsto \braket{u}{u'}\ket{v}\]
-The fact that this is linear is equivalent to the inner product being linear in its second argument, one of the defining properties of Hilbert spaces.
+The fact that this is linear is a consequence of the inner product being linear in its second argument, one of the defining properties of Hilbert spaces.
 
-Note that the application $\ket{v}\bra{u}(\ket{u'})$ looks like a reversal of the notation for scaling of vectors, $\ket{v}\braket{u}{u'}$ versus $\braket{u}{u'}\ket{v}$, which again equivocates the map with the object it produces, just as was done in defining co-vectors.
+Note that if we reverse the notation for scaling a vector we get the expression $\ket{v}\braket{u}{u'}$, which looks very similar to the application $\ket{v}\bra{u}(\ket{u'})$, again equivocating the map with the object it produces, just as was done in defining co-vectors.
 
-As we have discussed, when dealing with any finite dimensional Hilbert space we can assume the space is equivalent to some complex vector space $\mathbb{C}^n$, in which case matrix representations of a linear operator become available. First observe that linear operators are determined uniquely by the image of $\ket{v_i}$ of each basis vector $\ket{i}$:
-\[A\left(\sum_{i=0}^{n-1}a_i\ket{i}\right) = \sum_{i=0}^{n-1}a_iA\ket{i} = \sum_{i=0}^{n-1}a_i\ket{v_i}\]
-This means that any such linear operator, mapping from $\mathbb{C}^n \to V$ will be exactly the following:
-\[A = \sum_{i=0}^{n-1} \ket{v_i}\bra{i}\]
-Further if the codomain is also finite dimensional then we can repeat this process. First note that the outer product notation $\ket{v}\bra{u}$ is linear on $\ket{v}$:
-\[(a\ket{v_1}+b\ket{v_2})\braket{u}{u'} = a\ket{v_1}\braket{u}{u'}+b\ket{v_2}\braket{u}{u'}\]
-Now suppose the image vectors $\ket{v_i}$ are in $\mathbb{C}^m$ and have coordinates themselves, $\ket{v_i} = \sum_j^{m-1} a_{ij}\ket{j}$, then:
+As we have discussed, when dealing with any finite dimensional Hilbert space we can assume the space is equivalent to some complex vector space $\mathbb{C}^n$, in which case matrix representations of a linear operator become available. We derive matrix representation explicitly, since the relevant technology is readily available from Dirac notation. First observe that linear operators $A$ say, are determined uniquely by the image of each basis vector $\ket{j}$, say $A\ket{j} = \ket{v_j}$. First evaluate an arbitrary application of $A$:
 \begin{align*}
-A = \sum_{i,j} a_{ij}\ket{j}\bra{i}
+A\left(\sum_{j=0}^{n-1}u_j\ket{j}\right)
+&= \sum_{j=0}^{n-1}u_jA\ket{j}
+\\&= \sum_{j=0}^{n-1}u_j\ket{v_j}
 \end{align*}
-This means outer products between basis vectors are actually a basis for linear operators between finite dimensional Hilbert spaces. We have derived a way of representing linear operators $\mathbb{C}^n \to \mathbb{C}^m$ as an array of $n \times m$ scalar values, which sounds exactly like matrix representation, and in fact composing two such linear operations exhibits matrix multiplication:
+Then this turns out to be the same result that we get from applying the following:
+\begin{align*}
+	\left(\sum_{j=0}^{n-1}\ket{v_j}\bra{j}\right)\left(\sum_{i=0}^{n-1}u_i\ket{i}\right)
+	&= \sum_{i=0}^{n-1}\sum_{j=0}^{n-1}u_i\braket{j}{i}\ket{v_j}
+	\\&= \sum_{j=0}^{n-1}u_j\ket{v_j}
+\end{align*}
+Since these two maps are equal on their whole domain, they are the same:
+\[A = \sum_{j=0}^{n-1} \ket{v_j}\bra{j}\]
+Further if the codomain is also finite dimensional then we can repeat this process. First note that the outer product notation $\ket{v}\bra{u}$ is linear on $\ket{v}$, regardless of which vector $\ket{u'}$ it is applied to:
+\[(a\ket{v_1}+b\ket{v_2})\braket{u}{u'} = a\ket{v_1}\braket{u}{u'}+b\ket{v_2}\braket{u}{u'}\]
+Now suppose the image vectors $\ket{v_j}$ are in $\mathbb{C}^m$ and have coordinates themselves, $\ket{v_j} = \sum_i^{m-1} a_{ij}\ket{i}$, then:
+\begin{align*}
+A = \sum_{i,j} a_{ij}\ket{i}\bra{j}
+\end{align*}
+That is, all linear operators are a linear combination of outer products between basis vectors, making these outer products a basis for the (Hilbert) space of linear operators between finite dimensional Hilbert spaces. We have derived a way of representing linear operators $\mathbb{C}^n \to \mathbb{C}^m$ as an array of $n \times m$ scalar coordinates, which is the exact structure we want from a matrix representation, and matrix multiplication appears directly from composing the corresponding maps:
 \[\left(\sum_{i,j}a_{ij}\ket{i}\bra{j}\right)\left(\sum_{j',k}b_{j'k}\ket{j'}\bra{k}\right) = \sum_{i,k}\left(\sum_j a_{ij}b_{jk}\right)\ket{i}\bra{k}\]
 
 For example any linear operator $A: \mathbb{C}^2 \to \mathbb{C}^2$ can be written as follows:
@@ -177,10 +188,12 @@ For example any linear operator $A: \mathbb{C}^2 \to \mathbb{C}^2$ can be writte
 	\end{matrix}\right]
 	\\=&\  a\ket{0}\bra{0}+b\ket{0}\bra{1}+c\ket{1}\bra{0}+d\ket{1}\bra{1}
 \end{align*}
-\subsection{The Hermitian Adjoint and Diagonalizable Matrices}
-An aspect of linear algebra essential to quantum computation is diagonalization. We shall describe a number of properties that a linear operator can have, in terms of both its Hermitian Adjoint, and its eigenvalues, but first we must define these things.
 
-The Hermitian Adjoint of a linear operator $A$ is the unique linear operator $A^\dagger$ satisfying $\braket{u}{v'} = \braket{u'}{v}$ where $\ket{v'} = A\ket{v}$, and $\ket{u'} = A^\dagger \ket{u}$. It turns out that the matrix representation of $A^\dagger$ is exactly the complex conjugate of the transpose of $A$, so this is taken as the definition of the Hermitian Adjoint of a matrix. As an example observe the following matrix $A$ and its Hermitian adjoint:
+When defining a linear operator $L: \mathbb{C}^n \to \mathbb{C}^n$ we can define it as the `linear extension' of a more succinct map $\phi: \{\ket{i}\ |\ 0 \leq i < n\} \to \mathbb{C}^n$, by first defining $\ket{v_j} = \phi(\ket{j})$ and then setting $L = \sum_{j} \ket{v_j}\bra{j}$. This is simply a matrix whose columns are the vectors $\ket{v_j}$.
+\subsection{The Hermitian Adjoint and Diagonalizable Matrices}
+An aspect of linear algebra essential to quantum computation is diagonalization. We shall describe a number of properties that a square matrix can have, in terms of both its Hermitian Adjoint, and its eigenvalues, but first we define these concepts.
+
+The Hermitian Adjoint of a linear operator $A$ (square or otherwise) is the unique linear operator $A^\dagger$ that satisfies $\braket{u}{v'} = \braket{u'}{v}$ whenever $\ket{v'} = A\ket{v}$, and $\ket{u'} = A^\dagger \ket{u}$. It turns out that the matrix representation of $A^\dagger$ is exactly the complex conjugate of the transpose of $A$, so this is taken as the definition of the Hermitian Adjoint of a matrix. As an example observe the following matrix $A$ and its Hermitian adjoint:
 \begin{align*}
 	A = \left[\begin{matrix}
 		1 & 1+i\\
@@ -193,7 +206,7 @@ The Hermitian Adjoint of a linear operator $A$ is the unique linear operator $A^
 	\end{matrix}\right]
 \end{align*}
 
-We note that a property of matrix multiplication of vectors is that $\ket{u}^\dagger\times\ket{v} = \braket{u}{v}$. This means that our co-vectors $\bra{u}$ have the matrix representation $\ket{u}^\dagger$. For example, in the vector space $\mathbb{C}^2$ this looks like the following:
+Note now that in the vector space $\mathbb{C}^2$ the Hermitian adjoint of a vector has the same behaviour as a co-vector:
 \begin{align*}
 	\ket{u}^\dagger\ket{v}
 	=&\ 
@@ -205,7 +218,7 @@ We note that a property of matrix multiplication of vectors is that $\ket{u}^\da
 		c\\
 		d
 	\end{matrix}\right]
-	=&\ 
+	\\=&\ 
 	\left[\begin{matrix}
 		a^*&b^*
 	\end{matrix}\right]
@@ -213,43 +226,52 @@ We note that a property of matrix multiplication of vectors is that $\ket{u}^\da
 		c\\
 		d
 	\end{matrix}\right]
-	=&\ a^*c+b^*d
-	=&\ \braket{u}{v}
+	\\=&\ a^*c+b^*d
+	\\=&\ \braket{u}{v}
 \end{align*}
+This generalizes to any co-vector in any Hilbert space.
 
-Additionally the outer product $\ket{u}\bra{v}$ is exactly the matrix product $\ket{u}\ket{v}^\dagger$, which can be used to prove the following:
+Associativity of the matrix product also lets us represent the outer product $\ket{u}\bra{v}$ using the Hermitian adjoint, as the matrix product $\ket{u}\ket{v}^\dagger$. This can be used to prove that
 $(\ket{u}\bra{v})^\dagger = \ket{v}\bra{u}$
 
 Now we move on to the eigenvector problem, which is the problem of finding a scalar $\lambda$ and non-zero vector $\ket{v}$ so that $A\ket{v}=\lambda\ket{v}$. Such a $\lambda$ is called an eigenvalue of $A$, and such a $\ket{v}$ is called the corresponding eigenvector of $A$. For example if A has a non-trivial null-space, then $\lambda=0$ will be an eigenvalue of $A$, and any vector in the null-space of $A$ will be a corresponding eigenvector of $A$: $A\ket{v} = 0\ket{v}$.
 
-If $\ket{v}$ is normalized, then the matrix $B=\lambda\bra{v}\ket{v}$ will also satisfy the eigenvalue problem $B\ket{v}=\lambda\ket{v}$, and any vector orthogonal to $\ket{v}$ will be in the null-space of $B$. This means that if all of the eigenvectors of $A$ are orthogonal to eachother, then we can write $A$ as a sum of such $B$ vectors, which we call the diagonal representation of $A$, and therefore say that $A$ is diagonalizable.
+If $\ket{v}$ is normalized, then the matrix $B=\lambda\ket{v}\bra{v}$ will also satisfy the eigenvalue problem $B\ket{v}=\lambda\ket{v}$, and any vector orthogonal to $\ket{v}$ will be in the null-space of $B$. This means that if all of the eigenvectors of $A$ are orthogonal to eachother, then we can write $A$ as a sum of such $B$ vectors. This structure $A = \sum_i \lambda_i \ket{v_i}\bra{v_i}$ tells us that $A$ acts like a diagonal matrix on its eigenvalues, which we call the diagonal representation of $A$, and for this reason call any such $A$ `diagonalizable'.
 
-As an example, the following matrix $Z$ has the following diagonal representation:
+As an example, the following matrix $Z$ is already diagonal and so has a straight-forward diagonal representation:
 \begin{align*}
 	Z = \left[\begin{matrix}
 		1&0\\
 		0&-1
 	\end{matrix}\right] = 1\ket{0}\bra{0} - 1\ket{1}\bra{1}
 \end{align*}
-The name comes from the fact that such a matrix can be decomposed into the form $A = U^{-1}\Lambda U$ where $\Lambda$ is a diagonal matrix whose diagonal entries are the eigenvalues of $A$.
-[spectral theorem]
 
-It turns out that a matrix is diagonalizable if and only if it has the property $A^\dagger A = AA^\dagger$, such matrices are called ``normal'' matrices. The following classes of normal matrix exist, each defined by a property of the matrix, and by an equivalent property of all of its eigenvalues:
+Having orthogonal eigenvectors is closely related to the Hermitian adjoint through a class of matrices called `normal' matrices, where a matrix $A$ is normal if it satisfies $A^\dagger A = AA^\dagger$. A major result of linear algebra called the spectral theorem of normal matrices, is that a matrix is diagonalizable if and only if it is normal. What follows is a list of different classes of normal operator, each defined by a property of the matrix, and by an equivalent property of all of its eigenvalues:
 \begin{align*}
 	\text{Hermitian matrix:\ }&&& A^\dagger = A & \iff& \lambda \in \mathbb{R} \\
 	\text{Unitary matrix:\ }&&& A^\dagger = A^{-1} & \iff& \ord{\lambda}=1 \\
-	\text{Positive matrix:\ }&&& \bra{v}A\ket{v} \in \mathbb{R}, \geq 0 & \iff& \lambda \in \mathbb{R}, \geq 0 \\
-	\text{Positive definite matrix:\ }&&& \bra{v}A\ket{v} \in \mathbb{R}, > 0 & \iff& \lambda \in \mathbb{R}, > 0 \\
+	\text{Positive normal:\ }&&& \bra{v}A\ket{v} \in \mathbb{R}, \geq 0 & \iff& \lambda \in \mathbb{R}, \geq 0 \\
+	\text{Positive definite normal:\ }&&& \bra{v}A\ket{v} \in \mathbb{R}, > 0 & \iff& \lambda \in \mathbb{R}, > 0 \\
 	\text{Projection matrix:\ }&&& A^2 = A & \iff& \lambda \in \{0, 1\} \\
 \end{align*}
-[note positive and positive definite are more general in other contexts]
 
-Finally, it is easy to show that if $P$ is a polynomial, and $A\ket{v} = \lambda\ket{v}$ then $P(A)\ket{v} = P(\lambda)\ket{v}$. [P(A) in detail, maybe how this works in normal matrices]
+Finally, if $P$ is a polynomial then we can evaluate it on a square matrix $A$ as well, and it is easy to show that this polynomial `applies itself' to the eigenvalues of $A$, i.e.\ if $A\ket{v} = \lambda\ket{v}$ then $P(A)\ket{v} = P(\lambda)\ket{v}$.
 
-Motivated by this we can apply any analytic function to a normal matrix, by applying that function to each of its eigenvalues. [some explanation of convergence using power series, reversing  and generalizing the previous property] This can be very useful for solving certain matrix equations as well as controlling the above properties of of different kinds of normal matrix. A useful example of this is that whenever $H$ is a Hermitian matrix, then $e^{iH}$ will be a unitary matrix.
+Now any analytic function will be a limit of some polynomials, most notably the exponential:
+\[e^x = \sum_n^\infty \frac{x^n}{n!}\]
+This motivates us to apply such analytic functions directly to normal matrices, simply by applying it to each eigenvalue:
+\begin{align*}
+f\left(\sum_i \lambda_i\ket{i}\bra{i}\right)
+&= \lim_{L \to \infty} \sum_{n=0}^L P_i\left(\sum_i \lambda_i\ket{i}\bra{i}\right)
+\\&= \lim_{L \to \infty} \sum_{n=0}^L \sum_i P_i(\lambda_i)\ket{i}\bra{i}
+\\&= \sum_i \lim_{L \to \infty} \left(\sum_{n=0}^L  P_i(\lambda_i)\right)\ket{i}\bra{i}
+\\&= \sum_i f(\lambda_i)\ket{i}\bra{i}
+\end{align*}
+
+This can be very useful for solving certain matrix equations such as $A^2 = B$ having the solution $A = \sqrt{B}$. It is also useful for mapping between Hermitian and unitary matrices with the map $U = e^{iH}$.
 
 \section{Kronecker Products}
-We have made explicit the way in which vectors, co-vectors, and linear operators are represented as matrices, that is as arrays of complex numbers. An operation that is useful for all of these objects is the tensor product, and while the tensor product can be described in the abstract as an operation between Hilbert spaces, we might as well ignore this and focus on the case of complex-valued matrices, whose tensor products are described by a much more concrete operation called the Kronecker product.
+We have made explicit the way in which vectors, co-vectors, and linear operators are represented as matrices, that is as arrays of complex numbers. An operation that is useful for all of these objects is the tensor product, and while the tensor product can be described in the abstract as an operation between Hilbert spaces, the only cases of interest here are complex-valued matrices, whose tensor products are described by a much more concrete operation called the Kronecker product.
 
 The Kronecker product has a fairly simple definition, if $A$ is an $m_1$ by $n_1$ matrix with elements $a_{ij}$, and $B$ is an $m_2$ by $n_2$ matrix with elements $b_{ij}$ then the Kronecker product $A \otimes B$ will be an $m_1m_2$ by $n_1n_2$ matrix and in block matrix form will look like the following:
 \begin{align*}
@@ -287,39 +309,58 @@ a_1b_0 & a_1b_1 & \dots & a_1b_n\\
 a_mb_0 & a_mb_1 & \dots & a_mb_n
 \end{matrix}\right]
 \]
-On the other hand if $A$ and $B$ are both vectors, in $\mathbb{C}^{m_1}$ and $\mathbb{C}^{m_2}$ respectively, then their Kronecker product will be a vector in the larger space $\mathbb{C}^{m_1\times m_2}$, and in particular if $A$ and $B$ are canonical basis vectors $\ket{j_1}$ and $\ket{j_2}$ then their tensor product will be one of the canonical basis vectors $\ket{m_2j_1 + j_2}$, allowing the whole space $\mathbb{C}^{m_1 \times m_2}$ to be spanned by Kronecker products of $\mathbb{C}^{m_1}$ and $\mathbb{C}^{m_2}$.
+On the other hand if $A$ and $B$ are both vectors, in $\mathbb{C}^{m_1}$ and $\mathbb{C}^{m_2}$ respectively, then their Kronecker product will be a vector in the larger space $\mathbb{C}^{m_1\times m_2}$, and in particular if $A$ and $B$ are canonical basis vectors $\ket{j_1}$ and $\ket{j_2}$ then their tensor product will be another canonical basis vector, $\ket{m_2j_1 + j_2}$. This allows the whole space $\mathbb{C}^{m_1 \times m_2}$ to be spanned by Kronecker products of $\mathbb{C}^{m_1}$ and $\mathbb{C}^{m_2}$.
 
 The Kronecker product satisfies the following algebraic properties, all of which follow directly from their relevant definitions:
 \begin{itemize}
-	\item $(A\otimes B) \times (C \otimes D) = (A\times C) \otimes (B \times D)$
-	\item more specifically $(A\otimes B) \times (\ket{u} \otimes \ket{v}) = (A\ket{u})\otimes (B\ket{v})$
+	\item $(A\otimes B)(C \otimes D) = (AC) \otimes (BD)$
+	\item in particular $(A\otimes B)(\ket{u} \otimes \ket{v}) = (A\ket{u})\otimes (B\ket{v})$
 	\item $I_{n_1} \otimes I_{n_2} = I_{n_1\times n_2}$
 	\item $(A\otimes B)^\dagger = A^\dagger \otimes B^\dagger$
-	\item more specifically $(\ket{u}\otimes \ket{v})^\dagger = \bra{u} \otimes \bra{v}$
+	\item in particular $(\ket{u}\otimes \ket{v})^\dagger = \bra{u} \otimes \bra{v}$
 	\item if $\lambda$ is a scalar then $\lambda (A \otimes B) = (\lambda A) \otimes B = A \otimes (\lambda B)$
-	\item more specifically $\lambda (\ket{u} \otimes \ket{v}) = (\lambda \ket{u}) \otimes \ket{v} = \ket{u} \otimes (\lambda \ket{v})$
+	\item in particular $\lambda (\ket{u} \otimes \ket{v}) = (\lambda \ket{u}) \otimes \ket{v} = \ket{u} \otimes (\lambda \ket{v})$
 \end{itemize}
 With these properties we can show that the Kronecker product of two unitary matrices will be unitary:
 \begin{align*}
-(A \otimes B) \times (A \otimes B)^\dagger
-&= (A \otimes B) \times (A^\dagger \otimes B^\dagger)
+(A \otimes B)(A \otimes B)^\dagger
+&= (A \otimes B)(A^\dagger \otimes B^\dagger)
 \\&= AA^\dagger \otimes BB^\dagger
 \\&= I \otimes I
 \\&= I
 \end{align*}
-\section{Factoring Kronecker Products}
-Suppose that we have a matrix $A$ and we want to factor it into the Kronecker product of two smaller matrices. By thinking about the degrees of freedom involved in an $m_1 \times n_1$ and $m_2 \times n_2$ dimensional space vs an $m_1m_2 \times n_1n_2$ dimensional one it should be clear that such a factoring isn't possible in general. Nonetheless we shall provide some simple characterizations of when this is possible and what the factorization looks like.
 
-Given that in any case a Kronecker product is simply an array containing products of arbitrary pairs from two smaller arrays, we shall focus on the simplest case discussed earlier, of a vector Kronecker with a co-vector, treating all other cases as rearranged versions of this. Consider now an outer product $\ket{u}\bra{v}$ which may or may not be equal to a given matrix $A$. The rows of this outer product will correspond to the blocks $a_{ij}B$ of a more general Kronecker product.
-
-The rows of $\ket{u}\bra{v}$ are all multiples of each-other, and so are the columns, so either way these rows or columns will span a space that is at most 1-dimensional, that is, this matrix $\text{rank}(\ket{u}\bra{v}) \leq 1$. Conversely if $A$ is rank 0 then it's simply $0\ket{u}\bra{v}$, and if it is rank 1 then its rows are all multiples of some co-vector $\bra{v}$ or its columns are all multiples of some vector $\ket{u}$, and in either case we can take the scale factors of each row/column of $A$ and as the coordinates of the vector $\ket{u}$ or co-vector $\bra{v}$ respectively.
-
-Further any pair of rows or columns will be multiples of each-other exactly when the ratio between $a$ in one row for example, and the corresponding element $c$ in the other row, is the same as the ratio between any other element $b$ and its corresponding element $d$:
-\[a:c = b:d \iff ad = bc \iff \det\left[\begin{matrix}a&b\\c&d
-\end{matrix}\right] = 0\]
-
-In the case where $\ket{u}$ and $\bra{v}$ are both 2-dimensional, there will only be 1 subset of coordinates to check, so in this case $A$ is an outer product if and only if $\det(A) = 0$.
-
-Returning to the more general case of any vector/co-vector/matrix Kronecker with any other, we shall show that a matrix can be factored by taking a scalar multiple of any of its non-zero blocks as the second term of the Kronecker, and exhibit what the first term will be that makes this work. Inversely we shall show that a matrix can't be factored by simply pointing out two blocks that aren't multiples of each-other.
+Considering the degrees of freedom involved, we expect that in general there are many $m_1m_2 \times n_1n_2$ matrices that are not the Kronecker product of an $m_1 \times n_1$ matrix with an $m_2 \times n_2$ matrix. Written in block matrix form it is easy to tell whether or not a matrix $C$ is a Kronecker product $A \otimes B$, by checking that every block $B_{ij}$ is a scalar multiple of any non-zero block $B$. The entries of $A$ are simply these scalar multiples, solving $B_{ij} = a_{ij}B$, and hence $C = A \otimes B$. (and if there are no non-zero blocks then $C = 0 = 0 \otimes 0$)
 \section{The Unitary Group}
-[describe what a group is, how the unitaries form one, how permutations appear as a finite subgroup of unitaries, define normalizer of a group perhaps with an example of a group and its normalizer, normal subgroups and semidirect products. excessive definition stuff can go in axiomata appendix]
+[how permutations appear as a finite subgroup of unitaries, define normalizer of a group perhaps with an example of a group and its normalizer, normal subgroups and semidirect products. excessive definition stuff can go in axiomata appendix]
+
+So far we have discussed a number of useful algebraic properties exhibited by unitary matrices, but the most basic properties of unitary matrices are of course their forming a group:
+\begin{itemize}
+	\item Product of unitaries is unitary: ${(AB)}^\dagger = B^\dagger A^\dagger = B^{-1}A^{-1} = {(AB)}^{-1}$
+	\item Matrix products are always associative (since composition of any operator will be associative)
+	\item The identity matrix is unitary: $I^\dagger = I = I^{-1}$
+	\item $A^{-1} = A^\dagger$ always exists and is unitary
+\end{itemize}
+
+Quantum computation deals extensively with unitary operators, and so subgroups formed by particular sets of unitary operators will be a frequent point of discussion. A subgroup of a group is simply a subset that is still a group when equipped with the same group operation. Our group operation is matrix multiplication, and so the group of $n \times n$ unitaries written $U(n)$ is actually a subgroup of the much larger general linear group $GL(n, \mathbb{C})$, of $n \times n$ matrices with non-zero determinant.
+
+A further subgroup of the set of unitary matrices $U(n)$ is the symmetric group $\mathcal{S}_n$, which we represent as the set of $n \times n$ permutation matrices. A permutation is an invertible function mapping a set to itself, and given a permutation on the canonical basis $\{\ket{i}\ |\ 0 \leq i < n\} \to \{\ket{i}\ |\ 0 \leq i < n\}$, we can extend this linearly to an invertible matrix $\mathbb{C}^n \to \mathbb{C}^n$ whose columns are all canonical basis vectors. We call such a matrix a permutation matrix, and note that the adjoint of its outer product form $P = \sum_i \ket{\sigma(i)}\bra{i}$ will be $P^{\dagger} = \sum_i \ket{i}\bra{\sigma{i}}$, giving the following:
+\begin{align*}
+PP^\dagger = \sum_{i,j} \ket{\sigma(i)}\braket{i}{j}\bra{\sigma(j)} = \sum_i \ket{\sigma(i)}\bra{\sigma(i)} = I
+\end{align*}
+
+The symmetric group of any finite set is always finite, and is typically the first group considered when exploring finite subgroups of $U(n)$.
+\subsection{Group Quotients, Normal Subgroups, Normalisers}
+Given an equivalence relation $\sim$ on a set $S$ it is often useful to consider equivalence classes, the subsets $[x] = \{y\ |\ x \sim y\}$, since these will be equal exactly when their representatives are equivalent, i.e. $[x] = [y] \iff x \sim y$. The set of all such equivalence classes is called the set quotient, and is written $S/\sim$. It provides a concrete object with the same structural properties that would come from `identifying' $x$ with $y$ whenever $x \sim y$. If $S$ is actually a group $G$ then its group operation sometimes induces an operation in the set quotient $[x][y] = [xy]$, but if this is well defined then we immediately find $[e]$ is a subgroup of $S$:
+\[e \sim x \sim y \implies [e] = [e][e] = [x][y] = [xy] \implies e \sim xy\]
+\[e \sim x \implies [x^{-1}] = [e][x^{-1}] = [x][x^{-1}] = [xx^{-1}] = [e] \implies e \sim x^{-1}\]
+Further if $x \in [e]$ and $z \in S$ then $zxz^{-1} \in [e]$ as well:
+\[e \sim x \implies [z][x][z^{-1}] = [z][e][z^{-1}] = [e] \implies e \sim zxz^{-1}\]
+
+In general if a subgroup $H$ of $G$ satisfies this condition, that for any $h \in H$ and $g \in G$, $ghg^{-1} \in H$, then $H$ is said to be a normal subgroup of $G$. It turns out that not only is the equivalence class $[e]$ a normal subgroup, but whenever $H$ is a normal subgroup of $G$, the equivalence relation $x \sim y \iff xy^{-1} \in H$ gives a well defined group operation on the set quotient $G/\sim$. We call this group the group quotient $G/H$. When available, this is a powerful tool for understanding the structure of groups, since the group quotient $G/H$ may have convenient algebraic properties emerging from its corresponding equivalence relation.
+
+As an example of a normal subgroup, take $G \subset GL(n, \mathbb{R})$ to be any group formed by matrix multiplication, and $H$ to be the set of scalars in $G$, that is the set $\{\lambda I\ |\ \lambda \in \mathbb{C}\} \cap G$. Since scalars are commutative, it is straight-forward that $g\lambda I g^{-1} = \lambda gg^{-1} = \lambda I \in H$.
+
+The subgroup relation and the normal subgroup relation can be thought of as a partial order, and are often written as $\leq$ and $\trianglelefteq$ respectively, since both are transitive, reflexive, and anti-symmetric. While these relations are each transitive, we must be careful when mixing them; if $H$ is a normal subgroup of $N$, and $N$ is a subgroup of $G$, $H$ is not necessarily a normal subgroup of $G$, which is surprising when stated more succinctly as ``$H$ is normal in $N$ but is not normal in $G$''.
+
+With this subtlety in mind we can find exactly such a group $N$, given any subgroup $H$ of $G$. We call this the normaliser of $H$ with respect to $G$, defined as the set $N_G(H) = \{g\ |\ g \in G,\ gHg^{-1} \subseteq H\}$. This is the maximal such $N$, any other $N'$ with $H$ normal will sit inside $N_G(H)$. Clearly the group quotient $N_G(H)/H$ will exist for any subgroup $H$ of $G$, which will be useless in the case that $N_G(H) = H$, but otherwise can be an interesting group, and can even inform interesting structure about the normaliser itself, making normalisers a useful and novel tool for exploratory algebraic work.
