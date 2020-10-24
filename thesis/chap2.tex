@@ -1,6 +1,6 @@
 % chap2.tex (Chapter 2 of the thesis)
 
-\chapter[BACKGROUND AND LITERATURE REVIEW]{Background and Literature Review}
+\chapter[LITERATURE REVIEW AND DISCUSSION]{Literature Review and Discussion}
 [background already implies a revision/summary of the literature, should I just call this chapter one or the other]
 
 In classical computation data is represented in the voltage levels of conductive materials, and logic is implemented using transistors as digital switches, whose behaviour is more responsive and more consistent to the difference between 0 voltage and high voltage, than to the difference between different levels of high voltage. [multiplication thing is more how amplifiers work than switches, so I've ended up being more vague. Not sure what is necessary here.] This means that hardware for classical computation deals almost exclusively with Boolean algebra and binary arithmetic.
@@ -11,61 +11,255 @@ In practice the problem of implementing higher logic systems than binary is much
 
 While there is a lot of potential in the topic of non-binary quantum computation, and a lot of novelty already described, even this has the implicit assumption that all quantum objects need to have the same dimension. [bring in quantum number when talking about physical things] In theory this isn't necessary either, and it might be possible to have a quantum computer with a mixture of objects of different dimension. Writing algorithms for such a device could allow one to economise on the strengths and weaknesses of each individual number system, potentially requiring even less physical complexity for the same level of computational power. Further, although we won't discuss fault-tolerant computation anywhere else in this thesis, it is worth noting that in order to mitigate noise in real world quantum computers, information-theoretic encoding schemes are used that embed a certain number of `logical' qubits in a larger number of `physical' qubits, so we may one day find quantum computation acting on logically mixed systems, regardless of the quantum number of the physical objects involved.
 
-To these ends we shall review some of the literature that makes up the current understanding of quantum computation in ternary and higher forms of logic, as well as what little is currently known about mixed systems with a combination of qubits, qutrits, and higher objects. Of note also are the textbook ``Quantum Computation and Quantum Information''\cite{textbook} and the general audience paper ``Quantum Algorithm Implementations for Beginners''\cite{algos} which provide extensive discussion of the foundational aspects of qubit computation. Much of non-binary and mixed logic research is a direct generalization of the techniques collected in these two texts. [maybe stop framing it as a multi-valued logic review now, it's just the background content of our own results... a lot of this is good material for an abstract though]
+To these ends we shall review some of the literature that makes up the current understanding of quantum computation in ternary and higher forms of logic, as well as what little is currently known about mixed systems with a combination of qubits, qutrits, and higher objects. Of note also are the textbook ``Quantum Computation and Quantum Information''\cite{textbook} and the general audience paper ``Quantum Algorithm Implementations for Beginners''\cite{algos} [not cited anywhere else, remove? though it might come up in ternary arithmetic discussion, or as a supplementary reference for Shor's algorithm] which provide extensive discussion of the foundational aspects of qubit computation. Much of non-binary and mixed logic research is a direct generalization of the techniques collected in these two texts. [maybe stop framing it as a multi-valued logic review now, it's just the background content of our own results... a lot of this is good material for an abstract though]
 
+\section{Universal Computation}
+A foundational result in quantum computation is that of universal computation, that certain combinations of quantum gate can be used to implement any quantum algorithm to some accuracy, given sufficient circuit depth. The resulting circuits are generally too long to use in practice, compared to compilation techniques that rely on specific properties of the algorithm in question, but the result is still useful since it proves that it's not impossible, i.e.\ its necessary and sufficient conditions provide a starting point for designing and using quantum computers in practice.
+
+Universal computation for qubit computers is described in full detail in \cite{textbook}, based on the approach described in the paper \cite{universal-qubit}, [and the one it references, for permutation things] which requires only 3 gates to achieve universality:
+\begin{align*}
+H_2 = \frac{1}{\sqrt{2}}\left[\begin{matrix}
+1 & 1 \\
+1 & -1
+\end{matrix}\right]
+\\
+T_2 = \left[\begin{matrix}
+	1 & 0 \\
+	0 & \frac{1}{\sqrt{2}}\left(1+ i\right)
+\end{matrix}\right]
+\\
+C_{p_0=1}(X_2) = \left[\begin{matrix}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 \\
+\end{matrix}\right]
+\end{align*}
+If a quantum computer has these operations available as elementary gates on every qubit in the system, and has $C(X)$ implemented as an elementary gate on enough pairs of qubits, so that $C(X)$ can be implemented indirectly for all remaining pairs, then this quantum computer will satisfy universal computation. In practice a quantum computer can implement more than just these operations, and doing so will generally allow more efficient implementation of quantum algorithms, but this set of 3 gates is a theoretically interesting sufficient condition for quantum universality.
+
+Although quantum universality is ultimately a way of arranging these gates into algorithms that approximately implement some unitary operation, the algorithm itself is easier to describe in the reverse direction, decomposing a given unitary operation into sequences of increasingly basic operations.
+
+In full detail the process has 6 steps:
+\begin{enumerate}
+	\item Unitary into unitaries on axis aligned planes
+	\item axis aligned plane unitary into multi-controlled operation on any qubit + 2 copies of a transposition
+	\item transposition into controlled operations by Gray codes
+	\item controlled operations into Toffoli + single control operation
+	\item Toffoli gate into $C(V)$ where $V^2 = X$
+	\item single control operation into $AC(X)BC(X)C$
+	\item single qubit operation into sequence of $H$, $T$ operations
+\end{enumerate}
+We will later extend this process to work for systems with at least one qubit, and any number of qutrits, so long as controlled increment operations $C_{p_i=1}(X)$ are also available between qutrit-qutrit pairs, and qubit-qutrit pairs. Since we assume to have a qubit available, we can leverage the same structure as described above, and in doing so avoid thinking about the geometry of the qutrit state space altogether. As a result the only steps that require our modification are steps 3 and 4, so we shall describe how they work in the qubit case here, for the rest of the steps the sources \cite{textbook} and \cite{universal-qubit} explain in plenty of detail.
+\subsection{Decomposing Transpositions}
+A transposition is a permutation that swaps two elements of a set, but leaves all other elements unchanged, and so when we say transposition in the context of quantum computation we mean a linear operation that swaps two computational basis states, and leaves the others unchanged, i.e. the linear extension of
+\[S_{p_1\dots p_n, q_1\dots q_n}(\ket{r_1}\dots\ket{r_n}) = \begin{cases}
+\ket{p_1}\dots\ket{p_n} & \text{if\ } r_i = q_i \forall i \in \mathbb{Z}, 1 \leq i \leq n \\
+\ket{p_1}\dots\ket{q_n} & \text{if\ } r_i = p_i \forall i \in \mathbb{Z}, 1 \leq i \leq n \\
+\ket{p_1}\dots\ket{p_n} & \text{otherwise}
+\end{cases}
+\]
+For example in a system with 2 qubits the transposition $S_{10,11}$ is simply the controlled not operation $C_{p_1 = 1}(X)$.
+
+We also write $S_{p_i, q_i}$ rather than the full $S_{p_1\dots p_n, q_1\dots q_n}$ when possible.
+
+[later, for ternary and mixed systems: We also take $S_{0,1}$, $S_{1,2}$, and $S_{0,2}$ to be defined operations acting on a single qutrit, and further define $S_{0,1} = X_2$ acting on single qubits, even in composite systems where other operations exist.]
+
+In step 2 of the process described earlier, we needed transpositions in order to transform one of the axes of an axis aligned plane into an axis whose indices match the other axis, except for one qubit index, which we shall take to be the first object in the system. (though this may be less efficient than other choices) In other words we have some pair of computational basis states $\ket{1-p_1}\ket{p_2}\dots\ket{p_n}$ and $\ket{q_1}\dots\ket{q_2}$ upon which the original unitary was acting, and as such we would like to generate a transposition that swaps $\ket{p_1}\dots \ket{p_n}$ with $\ket{q_1}\dots\ket{q_n}$ so that the plane unitary now acts only on $\ket{1-p_1}\ket{p_2}\dots \ket{p_n}$ and $\ket{p_1}\ket{p_2}\dots \ket{p_n}$.
+
+In order to implement these transpositions, the first step is to decompose them using what are called Gray codes, sequences of bit strings where each bit string differs from its neighbours by only by a single digit. Put more formally, we implement $S_{p_i,q_i}$ by induction on the number of indeces $i$ where $p_i \neq q_i$. If there are no states where they differ then $S_{p_i,q_i} = I$ so there is nothing to be done. If they differ by only one state, i.e. $p_j = 1 - q_j$, then the transposition is exactly the controlled-increment operation $C_c(X_j)$ where $c$ is the following set of condition vectors:
+\begin{align*}
+c &= \{\ket{r_1}\dots\ket{r_n}\ |\ r_i = p_i = q_i \text{\ whenever\ } i \neq j\}
+\\&= \{\ket{p_1}\dots\ket{p_n}, \ket{q_1}\dots\ket{q_n}\}
+\end{align*}
+
+In the inductive case where there is more than one value $i$ for which $p_i$ and $q_i$ differ, we can pick just one, call it $j$, and decompose $S_{p_i, q_i}$ into two transpositions $S_{p_i, p'_i}S_{p'_i, q_i}$ defining
+\[p'_i = \begin{cases}
+q_i = 1 - p_j & \text{if\ } i = j \\
+p_i & \text{otherwise}
+\end{cases}\]
+Then we have $S_{p_i, p'_i} = C_c(X_j)$ similar to above, and $S_{p'_i, q_i}$ as some product of such controlled operations by the inductive hypothesis.
+
+At this point we will have composed some unitary acting on a plane, into as many as $2n$ multi-controlled increment operations, sandwiching a single multi-controlled unitary acting on some qubit. Our next step will be to decompose all of these multi-controlled unitaries into Toffoli gates sandwiching a single-controlled unitary.
+
+\subsection{Multi-control Gates}
+We would like to implement a controlled operation $C_c(U_j)$ with a very strict control condition, specifying the value of every single qubit in the system except for the target qubit with index $j$. In general it is hard enough to implement elementary gates that act on 2 or 3 qubits, and even then it is rare that a quantum computer will be able to implement these for arbitrary combinations of qubits, so we definitely need to decompose these multi-controlled operations in order to work with any realistic elementary gate set.
+
+The approach is to introduce $n-2$ auxiliary qubits to the system, indexed $n+1$ through $2n-2$, which begin and end this process in the computational basis state $\ket{0}$. We then use these auxiliary qubits to check an increasing number of our condition qubits, the first auxiliary qubit state $r_{n+1}$ will indicate whether $r_1$ and $r_2$ are both in the desired states $p_1$ and $p_2$ respectively. The second will indicate the first 3, up until the final auxiliary state $r_{2n-2}$ which indicates whether all $n-1$ qubits apart from $r_j$ are in the correct state. At this point we can implement the desired gate as $C_{r_{2n-2}=1}(U_j)$, and then undo the process of setting $r_{n+1} \dots r_{2n-2}$ so that they may be used again.
+
+The key to this process is the Toffoli gate, which is simply a controlled $X$ operation with two control bits, $C_{r_{i_1}=p_{i_1},r_{i_2}=p_{i_2}}(X_j)$
+
+Once again our formal description will be inductive. Take $I$ to be the set of indeces $i$ for which our control operation $C_c(U_j)$ has a constraint $r_i = p_i$, so that
+\[c = \{\ket{r_1}\dots\ket{r_n}\ |\ r_i = p_i \text{\ whenever} i \in I\}\]
+Then we shall perform induction on the size of $I$, implementing any control operation as $2\ord{I}-2$ Toffoli gates, sandwiching a single control operation $C_{r_k=p_k}(U_j)$. When $I$ is a singleton set $\{k\}$, then we introduce no auxiliary bits, and simply yield the operation $C_{r_k=p_k}(U_j)$ as is. Otherwise, we choose two indeces $i_1$ and $i_2$ from $I$, introduce an auxiliary qubit $r_k$ which starts and ends in the state $\ket{0}$, and reduce $I$ to
+\[I' = (I \backslash \{i_1, i_2\})\cup \{k\}\]
+Correspondingly, define $p_k = 1$ and reduce the condition set $c$ to
+\[c' = \{\ket{r_1}\dots\ket{r_n}\ |\ r_i = p_i \text{\ whenever} i \in I'\}\]
+Now we simply put all of these constructions together, reducing as
+\[C_c(U_j) = C_{r_{i_1}=p_{i_1},r_{i_2}=p_{i_2}}(X_k)
+C_{c'}(U_j)
+C_{r_{i_1}=p_{i_1},r_{i_2}=p_{i_2}}(X_k)\]
+Since the middle of these is a controlled operation with a smaller index set $I'$, we can invoke the inductive hypothesis, decomposing $C_c(U_j)$ as required.
+
+As a small optimization, if $U_j$ is the increment operation $X_j$ then we can implement $C_c(X_j)$ directly as $2\ord{I} - 3$ Toffoli gates, by taking as a base case $\ord{I} = 2$ where $C_c(X_j)$ is already a Toffoli gate, saving one controlled operation and one Toffoli gate.
+\subsection{Multi-Valued Logic}
+When the final operation $U_j$ in the above decomposition acts on a qutrit or higher, rather than a qubit, the remaining steps become much more difficult, simply because the geometry of $U(n)/U(1)$ is more complicated than that of $U(2)/U(1)$. In order to overcome this the paper \cite{multi-valued-logic} uses a different approach, by outlining a way of implementing a family of gates with arbitrarily many elements, depending on the required accuracy of implementation, and presents a separate proof that this family of gates is universal.
+
+The family of gates they describe and utilize are a generalization of the controlled $X$ and controlled $Z$ gates, in a $d$-dimensional quantum computer, the following:
+\[\Gamma X(\ket{\phi}) = C_{p_1 = d-1}(\ket{d-1}\bra{\phi} + \dots)\]
+\[\Gamma Z(\theta) = C_{p_1 = d-1}\left(e^{i\theta}\ket{d-1}\bra{d-1} + \dots\right)\]
+That is, the $\Gamma X$ family conditionally maps some state $\ket{d-1}\ket{\phi}$ to $\ket{d-1}\ket{d-1}$, and the $\Gamma Z$ family applies some relative phase factor to the state $\ket{d-1}\ket{d-1}$. When the control object is in state $\ket{d-1}$ the effect on all other states are arbitrary, so long as the resulting operation is unitary. When the control object is not in state $\ket{d-1}$ the operation has no effect.
+
+This paper is a very promising theoretical and practical foundation for working with quantum systems with multiple objects all of one arbitrary dimension, especially systems based on the linear ion trap, but due to how different its approach is to ours, we only take one thing from it, which is a way of decomposing control operations $C_c(U_j)$ using auxiliary qutrits (or higher) instead of auxiliary qubits.
+
+The process is identical to what we just described using Toffoli gates, except by introducing an auxiliary qutrit with index $k$, as opposed to the qubit with index $k$, and defining $p_k = 2$, we can use two single-controlled increments instead of one double-controlled (i.e.\ Toffoli) gate:
+\[
+C_c(U_j) = C_{r_{i_1}=p_{i_1}}(X_k)^{-1}
+C_{r_{i_2}=p_{i_2}}(X_k)^{-1}
+C_{c'}(U_j)
+C_{r_{i_2}=p_{i_2}}(X_k)
+C_{r_{i_1}=p_{i_1}}(X_k)
+\]
+Since $X_k$ is an increment operation acting on a qutrit, it will not be involutory the way that a qubit increment is, so we need to invert it explicitly.
+
+In \cite{multi-valued-logic} this was done more efficiently, effectively setting $p_k = d-1$ rather than $p_k = 2$, and performing $d-1$ separate controlled operations for each auxiliary object added, but since we only consider qutrits this is equivalent.
+
+\section{Finite Gate Sets in Higher Dimensions}
+In the previous chapter we outlined the Pauli matrices, and defined the related Weyl-Heisenberg and Clifford groups, including the matrix $H$ satisfying $H^{-1}ZH = X$. We saw above that $H$ was one of 3 gates needed for universal computation in a binary quantum computer, but the other two are also directly related to the Pauli matrices. $C(X)$ is of course the controlled version of the $X$ gate, and $T$ when applied four times is equivalent to $Z$:
+\[
+T^4 = \left[\begin{matrix}
+1 & 0 \\
+0 & \frac{1}{\sqrt{2}}(1+i)
+\end{matrix}\right]^4 = \left[\begin{matrix}
+1 & 0 \\
+0 & -1
+\end{matrix}\right] = Z\]
+
+It turns out that generalizing the Pauli matrices to $d$-dimensional quantum objects as we have done previously proves very useful in describing higher dimensional systems as well, and the relationships that different quantum gates have with each other in these systems.
+
+First of all, the Clifford group formed by taking the normaliser of the Weyl-Heisenberg group lets us generalize the algebraic relationships of $H$ as well as $D = T^2$ to higher dimensions, and looking at \cite{tolar-clifford} will tell us how this group will behave in quantum computers with multiple objects of different dimension.
+
+Additionally the $T$ gate, which does not directly appear in the Clifford group, proves essential to the generalization of universal computation to other quantum systems. In the qubit case the produce $TH^{-1}TH$ is an infinite order matrix, which was proven in \cite{pi-over-eight}, so we outline the technique used to show this, since this means that $T$ and $H$ generate [define this] an infinite group, even with scale factors removed, a property that is necessary for universal computation, and that distinguishes $T$ from the rest of the Clifford group. Additionally we discuss a paper \cite{pi-over-eight} which generalizes this gate $T$ to higher dimensions based on other algebraic relationships it has with the Clifford group.
 \subsection{On Clifford Groups}
-The first paper studying higher forms of computation that we shall look at is the paper ``On Clifford groups in Quantum Computing''\cite{tolar-clifford}, which aims to understand an important group of unitary matrices -- the Clifford group. This group is generally defined as being the normalizer of the Weyl-Heisenberg group. (or sometimes the Pauli group, especially in cases where this is equivalent such as $n=3$)
+The paper \cite{tolar-clifford} describes the Clifford group associated with quantum systems with just a single object, as well as the Clifford group associated with arbitrary composite quantum systems, with multiple objects each of different dimension, and in particular for a system with two objects of different dimension. This last case is of particular interest since, as with the $C(X_2)$ gate used in binary quantum computers, gates that only interact with 1 or 2 objects are often easier to implement than those that interact with more. [and might generate the rest anyway, don't know how to justify that though]
 
-The first thing that Tolar does is develop a way of proving a known isomorphism between Clifford groups on single objects, and finite groups acting on ring modules. Specifically he analyses conjugation of the Pauli group as a group action of the Clifford group. Since this group action is unaffected by scalar factors, it turns out to be a very algebraically powerful, in particular the Pauli group is Abelian up to scale factors, forming a convenient Abelian subgroup of these Ad-actions.
+Tolar removes the scalar factors from both the Weyl-Heisenberg group, and the Clifford group, not just by taking the group quotient $G/U(1)$, but also by looking at the group conjugation action, mapping the Weyl-Heisenberg group to itself under the map
+\[\text{Ad}_A(X^jZ^k) = AX^jZ^kA^{-1}\]
+\ [note Tolar uses $\text{Ad}_X$ and uses $Q$ and $P$ for clock and shift respectively] These conjugation maps form a group under function composition, and are isomorphic to the corresponding quotient groups $H(n)/U(1)$ and $N(H(n))/U(1)$. When applied to the Weyl-Heisenberg group associated with a single quantum object of arbitrary dimension, it was shown that $N(H(n))/U(1)$ was isomorphic to
+\[(\mathbb{Z}_n\times\mathbb{Z}_n)\rtimes\text{SL}(2,\mathbb{Z}_n)\]
 
-In any case the technique turns out to be amenable to analysing systems of multiple objects as well, allowing a general understanding of Clifford groups in composite quantum systems in terms of the same kinds of groups that single object Clifford groups are isomorphic to.
+This isomorphism by itself is not new, [can I reference something older then?] and can be used to generate the Clifford group (up to global phase) with the four matrices $X_d$, $Z_d$, $D_d$, and $H_d$, [apparently I'm using $d$ now] defined by:
+[insert definition... maybe put these generators up in preliminaries, with an older reference]
 
-In particular, for single object Clifford groups the isomorphism was to the group $(\mathbb{Z}_n\times\mathbb{Z}_n)\rtimes\text{SL}(2,\mathbb{Z}_n)$, which is a finite group generated by less than $4$ group elements; for systems with $k$ objects of the same dimension $n$ the Clifford group was further isomorphic to $\mathbb{Z}_n^{2k}\rtimes\text{SL}(2k, \mathbb{Z}_n)$. For pairs of objects with co-prime dimension the Clifford group was essentially the Clifford group of single objects with the same dimension, but for systems with an object of dimension $ap^k$ and an object of dimension $bp^{k+r}$ for some $a, b, p, k, r$ positive and $p$ prime, no decomposition of this form was found, an interesting place left to explore by this analysis.
+The more significant result of the paper however, was the extension to Clifford groups for arbitrary composite systems. The Weyl-Heisenberg group of a composite system $C^{d_1}\otimes \dots \otimes C^{d_n}$ [have we defined Kronecker products of spaces?] is taken to be the product of Weyl-Heisenberg groups acting on each individual system:
+\[H(d_1, \dots, d_n) = \{A_1 \otimes \dots \otimes A_n\ |\ A_i \in H(d_i)\} \cong H(d_1) \times \dots \times H(d_n)\]
+\ [this isn't the notation used in Tolar, it's our own.]
 
-This paper thus presents a technique for analyzing Clifford groups of arbitrary and mixed dimension, a presentation of how many Clifford groups are isomorphic to subsets of different ring modules, and finally a novel unexplored possibility within mixed-level objects of particular dimensions.
+While this composite Weyl-Heisenberg group consists only of Kronecker products, [I want to use the word dependent, need to mention that in the Kronecker product section] its normalizer can contain operations that are not Kronecker products, for example
+\[\text{CNOT} = C(X) = \left[\begin{matrix}
+	1 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 0 & 1 \\
+	0 & 0 & 1 & 0
+\end{matrix}\right] \in N(H(2, 2))\]
+
+The Clifford groups of non-mixed composite systems have been explored elsewhere, [have they? where?] but here Tolar showed a number of results for mixed systems, the most important of these for us was that in a composite system $\mathbb{C}^m \otimes \mathbb{C}^n$ with $gcd(m, n) = 1$, the quotient of the Clifford group is simply the direct product of the corresponding single-object Clifford groups:
+\[N(H(m, n))/U(1) \cong N(H(m))/U(1) \times N(H(n))/U(1) \]
+This means that the Clifford group is \emph{not} capable of acting dependently between quantum objects, making it much less powerful than in non-mixed systems.
+
+The same paper also showed that when $m$ and $n$ have square or cubic divisors in common, that the corresponding Clifford groups are novel in a way unlike any non-mixed quantum system. This is interesting in the broader context of mixed logic, but will not be relevant to our later discussion of $\mathbb{C}^2 \otimes \mathbb{C}^3$.
 
 This is the only paper we found that looks at quantum systems with objects of differing dimension.
 
-\subsection{Universal Computation}
-[I should be talking about the difference between gates and circuits MUCH earlier than this, directly in the quantum mechanics section maybe.]
+\subsection{Infinite-Order Gates}
+In our outline of how universal computation is achieved for binary quantum computers, the last step was to decompose unitary operations acting on one qubit, into a sequence of $H$ and $T$ operations. The technique for doing this was described in \cite{universal-qubit}, and involved constructing a pair of operations which each rotate the Bloch sphere by irrational portions of a full $2\pi$ rotation each in a different, orthogonal plane. By iterating one of these rotations, one can approximate any angle in the unit circle, and thus with each of these rotations implemented, one can implement any rotation of the Bloch sphere as 3 successive rotations made using these gates.
 
-A foundational result in quantum computation is that of universal computation, that certain combinations of quantum gate can be used to implement any quantum algorithm to some accuracy, given sufficient circuit depth. The resulting circuits are generally too long to use in practice, compared to compilation techniques that rely on specific properties of the algorithm in question, but the result is still useful since it proves that it's not impossible, i.e.\ its necessary and sufficient conditions provide a starting point for designing and using quantum computers in practice.
+One of the facts that makes the Clifford group algebraically and theoretically significant is that up to scale factors it is finite, whereas any group containing both $T$ and $H$ must not be finite, or else the rotations that were generated with them would be finite order, i.e.\ a rational fraction of a $2\pi$ rotation in their respective planes. This means the technique by which these rotations were shown to be irrational/infinite order are significant in both of these contexts, in working out alternate conditions for universal computation in different quantum systems, and in analysing the order of different subgroups of $U(n)$ in search of finite groups.
 
-Universal computation for qubit computers is described in full detail in \cite{textbook}, where it is done in 3 steps: Arbitrary unitary matrix decomposed into gates with multiple control bits and a single target bit, then into operations acting on a single object, plus the Toffoli gate, and finally these single object operations into a finite set of gates using the asymptotic techniques given in \cite{universal-qubit}.
+The technique they use for showing this is to generate an expression for the angle of rotation, $2\pi \theta$ say, then to show that the unit complex number $e^{i2\pi \theta}$ is not a root of unity, i.e. that $\theta$ is rational. This can be done by leveraging the algebraic number theory of cyclotomic polynomials, with the following theorem proven in an appendix of their paper:
 
-When dealing with objects other than qubits the last step of this process becomes much more difficult, simply because the geometry of $U(n)/U(1)$ is more complicated than that of $U(2)/U(1)$. [Have we talked about global phase and $G/U(1)$ yet?] In order to overcome this the paper \cite{multi-valued-logic} uses a different approach, by proposing a device that extends the most common technique for implementing qubits, the linear ion trap, to arbitrary quantum number, along with a description of how such a device could implement a family of objects which is not discrete, but which in the first half of the paper they had already shown to be universal.
+[capital T theorem] For any $\theta \in \mathbb{R}$, $\theta$ is rational if and only if $e^{i2\pi \theta}$ is the root of a minimal [vs irreducible?] polynomial with rational coefficients.
 
-[discontinuity -- remainder of this section is old] The first half of the paper is focused on an intuitive scheme for decomposing an arbitrary unitary matrix based on its spectral decomposition, where objects analogous to the generalized $X$ and $Z$ Pauli matrices are used to implement gradually larger classes of unitary operator, until eventually all unitary operators have been implemented using only these $X$ and $Z$ like objects acting on one or two digits at a time.
+This analysis works well in the Bloch sphere all unitary matrices will represent a single rotation in some plane, but when dealing with more complicated geometries we can still apply this kind of analysis if we look at the eigenvalues of a given matrix instead. Given a unitary matrix $A$, we already know that its eigenvalues are unit complex numbers $e^{i 2\pi\theta}$, so then
 
-The $X$ and $Z$ like gates are not really individual gates, but families of gates, so this result is not general to any quantum computer; typically a theoretical proof of arbitrary (or universal) quantum computation relies on a very small set of individual gates, such as $\{H, \text{Toffoli}\}$, whereas this paper relies on families of gates with $2d$ real-valued parameters, and a similar number of degrees of freedom in how each of these families might be chosen, making for a computational basis that is easy to work with, but vague to implement.
+[capital P proposition?] the following are equivalent:
+\begin{itemize}
+	\item $A$ is finite order
+	\item Every eigenvalue of $A$ is finite order under multiplication, i.e.\ is a root of unity
+	\item Every eigenvalue of $A$ is a root of a cyclotomic polynomial
+\end{itemize}
 
-The paper gets away with this by proposing a physical implementation of this family of gates, through direct control of physical parameters of the device, relating the implementation of these basic gates to known problems of quantum device control in linear trapped ion systems, where the $n$-dimensional computational basis corresponds to the various excitation levels of the ion.
+Now the eigenvalues of $A$ will be roots of the characteristic polynomial $det(A - \lambda I)$, so if the characteristic polynomial has rational coefficients then we can work directly with this to show that $A$ is of finite or infinite order.
 
-This paper is a very promising theoretical and practical foundation for working with quantum systems with multiple objects all of one arbitrary dimension.
-
+Now $e^{i 2\pi\theta}$ and $e^{-i 2\pi\theta}$ are both eigenvalues of the rotation
+\[R(2\pi \theta) = \left[\begin{matrix}
+\cos(2\pi\theta) & -\sin(2\pi\theta) \\
+\sin(\theta) & \cos(\theta)
+\end{matrix}\right]\]
+so in this way \cite{universal-qubit} was already dealing with eigenvalues, and we simply generalize this. That said \cite{universal-qubit} deals with rotations of the Bloch sphere, which means the eigenvalues of the original operation being considered might be different to this. Further, the Bloch sphere is designed to remove global phase factors, and so an operation like $e^{i2\pi\theta}I$ will act trivially on the Bloch sphere, whereas under our eigenvalue analysis this operation might have infinite order despite being trivial in practice. This means that if we want to show that a matrix has infinite order, then we must show that some scalar multiple of it has some eigenvalues which are roots of unity, and others which are not. For example let $\theta$ be irrational, so that the unit complex number $e^{i2\pi\theta}$ is not a root of unity, then
+\[A = \left[\begin{matrix}
+e^{i2\pi\theta} & 0 \\
+0 & e^{-i2\pi\theta}
+\end{matrix}\right]\]
+will be infinite order, but so will any non-zero scalar multiple $\lambda A$, since if $\lambda e^{i2\pi\theta}$ is a root of unity, then $\lambda = e^{i2\pi(\phi - \theta)}$ with $\phi$ rational, meaning that $\lambda e^{-i2\pi\theta}$ still won't be a root of unity, and vice versa.
 \subsection{Qudit versions of the qubit ``pi-over-eight'' gate}
-\begin{itemize}
-	\item A standard basis for asymptotically universal quantum computation in binary contexts is the Hadamard gate, and the ``pi-over-eight'' phase gate, which is a unitary operation that is diagonal in the computational basis
-	\item this paper generalizes the latter gate to a family of gates with similar properties, acting on any quantum object with a prime number of basis states.
-	\item first the basic properties of the phase gate are described, and solved algebraically, giving a discrete family of diagonal unitary matrices in the same level of the Clifford hierarchy as the phase gate in 2 dimensions.
-	\item this family of gates is then understood as a finite Abelian group, and is therefore reduced to the direct product of cyclic groups
-	\item the different number of states gave different group structure, depending on whether there were 2, 3, or more states. These 3 cases were each given a small generator of diagonal phase-like gates.
-	\item these gates turn out to share important geometric properties with the phase gate, in addition to being diagonal, they are maximally distinct from any Clifford gate, which has implications for how accurate they will be in the presence of noise.
-	\item \ [something something magic state distillation]
-\end{itemize}
+In searching for a generalization of the $T$ gate from binary to higher dimensions, there are a number of properties that could be used to find such gates. For example one could naively define the family of gates:
+\[T_n = Z_n^{1/4} = \left[\begin{matrix}
+1 & 0 & 0 & \dots & 0 \\
+0 & \omega_{4n} & 0 & \dots & 0 \\
+0 & 0 & \omega_{4n}^2 & \dots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+0 & 0 & 0 & \dots & \omega_{4n}^{n-1} \\
+\end{matrix}\right]\]
 
+This takes the defining property of $T$ and generalizes it, which is exactly what we do to define the rest of the objects defined in this thesis. In this case however, it is much more useful to generalize two other properties that $T$ has, properties which are not unique to $T$, but which are essential for its power in discussions of universal computation. The first property is that $T$ is diagonal. The equation $T^4 = Z$ seems to be a coincidence of low dimension, rather than a general property of the diagonal matrices of interest to us. The second property is that $T$ is in the second level of the Clifford hierarchy, as defined in \cite{clifford-hierarchy}:
+
+[capital D definition] The Clifford hierarchy is an infinite sequence of sets $\mathcal{C}_i$ where $\mathcal{C}_1$ is the Pauli group, $\mathcal{C}_2$ is the Clifford group, and generalizing this
+\[\mathcal{C}_{i+1} = \{A\ |\ A\mathcal{C}_1A^{-1} \subseteq \mathcal{C}_i\}\]
+Note that only the first two levels of this hierarchy form groups, the rest are simply different sets of unitary matrices.
+[do we have cosets and double cosets?]
+
+We see that for qubits, $T \in \mathcal{C}_3$, and so to generalize $T$ to any prime dimension $p$, the paper \cite{pi-over-eight} finds the full (finite) solution set $\{U_v\}$ satisfying $U_v \in \mathcal{C}_3$, $U_v$ diagonal. Global phase is also removed by assuming that $U_v\ket{0} = \ket{0}$. They also show that this solution set forms a group, analyze this group to determine its structure and minimum number of generators. Additionally they explore the geometric properties of these generalized gates, and use this to argue for the strength of these generalized gates as being optimally resistant to multiple forms of noise in physical implementations.
+
+When exploring the group theoretic structure of these solution sets, they found that $p = 2$ and $p = 3$ gave groups that were generated by $1$ and $2$ elements respectively, whereas for $p \geq 5$ there were always $3$ generator elements. This also appears to be a coincidence of low dimension akin to the relation $T^4 = Z$. In addition to both of these properties of low dimension, the paper \cite{arithmetics} shows that $P_9 \in \mathcal{C}_3$ along with the rest of the Clifford group $\mathcal{C}_2$ can be used to exactly generate \emph{all} of the permutation matrices in a system made of multiple qutrits, and interestingly $P_9$ can be scaled to satisfy the relation $P_9^3 = Z_3$.
+\subsection{Supermetaplectic Basis}
+The set of matrices generated by $\{X_3, H_3, D_3, \text{SUM}, P_9\}$, [define SUM, give as an example of a Clifford gate in any dimension, alongside SWAP] or equivalently by $\mathcal{C}_2 \cup \{P_9\}$, asymptotically [define this in the universal computation discussions] cover all of the matrices in $U\left(3^n\right)$, but were shown in \cite{arithmetics} to exactly implement all permutation matrices, as opposed to the metaplectic basis demonstrated in \cite{topological-anyon-thing}, [if this paper is the one that proves that $\mathcal{C}_3 + 1$ is always universal for qutrits (or more?) then that could be relevant, since what we show later is an example of $\mathcal{C}_3 + 2$ being universal for qubit qutrit hybrids, which seems worse, suggesting optimization] which was universal but is conjectured to implement some permutation matrices asymptotically but not exactly. Due to its increased coverage of matrices this new basis was called the supermetaplectic basis, a highly decorated name.
+
+In order to show that this generator set exactly implements the permutation matrices in $U\left(3^n\right)$ they decompose these matrices in 3 steps.
+\begin{enumerate}
+\item It seems to have been taken implicitly that with an implementation of $C_{i_1 = 2}(X)$, other permutations acting on more than 2 qutrits can be decomposed in a manner similar to the qubit process described previously.
+\item Various permutations acting on 2 or 3 qutrits that are not in $\mathcal{C}_2$, including arbitrary transpositions on qutrit pairs, were shown to be equivalent to each other
+\item Two of these qutrit permutations including $C_{i_1=2}(X)$ itslef, were each shown to be the Fourier transform of diagonal matrices in the supermetaplectic basis, meaning the permutations themselves are in this basis.
+\end{enumerate}
+
+Both of these explicit steps were derived through analysis of the permutation and diagonal matrices as polynomial expressions, first interpreting permutation matrices as acting on the computational basis, e.g.
+\[C_{i_1=0}(X)(\ket{i}\ket{j}) = \ket{i}\ket{j+1-i^2 \mod 3}\]
+then interpreting diagonal matrices as acting on the phase factors of the computational basis, e.g.
+\[C_{i_1=0}(Z)(\ket{i}\ket{j}) = \omega_{3}^{j(1-i^2)}\ket{i}\ket{j}\]
+While the exact details of these proofs are interesting, the only thing relevant to say in this context is that this technique will not map to mixed contexts in any straight forward way. The key to making each of these formulations work is that $1 - i^2 \mod 3$ is 0 if $i$ is \emph{either} 1 or 2. In a mixed context where say $i$ is binary and $j$ is ternary, we can write expressions like $\ket{i}\ket{j} \mapsto \ket{i}\ket{i + j \mod 3}$, but we cannot compose these polynomial expressions meaningfully. [It's been a while since I have thought about this topic, can't remember the details. not sure where zero divisors came up exactly. would be good just to get a couple examples down, maybe more detail on what \cite{arithmetics} actually needed, and then a concise example of how that goes wrong in mixed contexts. I think the argument is: 1. you can't work mod 2 or mod 3 because of composition, 2. you can't work mod 6 because of zero divisors... if the reasoning is this drawn out it seems more like a secondary result, so I think I'll end up putting it in an appendix.]
+\section{Ternary Logic}
+Although these techniques about the polynomial algebra of ternary logic are novel and powerful, they were a secondary result of \cite{arithmetics}, whereas the main goal was to provide concrete circuits that could implement addition of ternary integers, since integer addition is central to arithmetic. [``Factoring with Qutrits'' is a big deal here, and has a lot of results that are hard to parse... they are surprising (metaplectic performs better than supermetaplectic, binary performs better than ternary in width-limited systems) but might be quite specific to the metaplectic architectures being considered by this group... I don't know if I have time to account for that paper properly, but it's a good one so it would be ideal if I did!] They provide two algorithms that both perform addition, but one requiring a larger amount of physical time to compute, [should define width vs depth] where the other uses parallel computation on a larger number of qutrits in order to perform the calculation faster.
+
+These algorithms are implemented in ways that leverage coincidences of having exactly 3 dimensions, and exemplify what efficient ternary algorithms should look like, but they also raise the question of whether a mixed binary-ternary quantum computer could implement these algorithms more efficiently. In this section we give an overview of these algorithms as presented in \cite{arithmetics}, [their performance in the context of Shor's factoring algorithm as presented in ``Factoring with Qutrits'', and raise some basic questions about how all of these algorithms would look if implemented in a fault tolerant, mixed logic system. [ultimately providing motivation for the universality argument we give in chapter 3, and I think also providing motivation for fault tolerant implementation of our basis in a system that is physically ternary] [this is such a strong motivator, but I want to be careful that they haven't already talked about fault tolerance, like in the topological-anyon-thing paper, or if they have then be mindful of what they have said... post-hoc justification of things takes a lot of last minute reading!]
+
+\ [also what part of it was `improved'? I think leveraging the binary nature of some of the variables was actually the main advantage!]
 \subsection{Improved Ternary Arithmetics}
-\begin{itemize}
-	\item Opens with a description of two implementations of ternary addition
-	\item First is a "modified ripple-carry adder" which uses only a single ancillary qutrit to compute a sum in-place
-	\item Next is a "carry look-ahead adder" which implements a divide-and-conquer algorithm of addition in order to implement addition with many more ancillary qubits, but logarithmic circuit depth through parallelism
-	\item both of these algorithms are fairly unsurprising, but their implementation takes advantage of the specifics of qutrits in order to minimize the memory and computational overhead as described
-	\item addition is foundational to implementing modular arithmetic, which the paper discusses in the context of Shor's period finding algorithm
-	\item modular addition, subtraction, and integer comparison are discussed, including the positive or negative effects they have on the computational cost of the circuit
-	\item the carry look-ahead adder also demonstrates a non-numerical variable which takes 3 values, well leveraged in this algorithm, and very interesting in the discussion of different number schemes and their relative trade-offs.
-	\item the technology that was used to optimize each algorithm is given, where gates that permute the computational basis are understood as polynomials acting on the digits of this basis, and algebraic manipulation is used to understand which gates are equivalent to which
-	\item further this technology was used to construct important gates exactly (as opposed to asymptotically) using a diagonal unitary gate described in ``Qudit versions of the qubit ``pi-over-eight'' gate.''
-	\item the technology of this paper is very well attuned to the goal of understanding quantum computation in different number systems, both from algorithmic perspective of efficiently implementing useful computations, and from the more foundational perspective of choosing a basis/generator in which to do these computations.
-	\item further the clear communication of which kinds of non-clifford gate are used allows one to apply the algorithms to any other basis, finding a more suitable compilation of these operations. This was done well in that the gates required were all well justified, and their equivalence to each-other was made clear.
-\end{itemize}
+The classical implementation of binary addition is first to define a ``half adder'' which calculates the sum of two bits $a_0 + b_0$ as a number between 0 and 2, in binary either $00$, $01$, or $10$. We can observe that the least significant digit is simply $s_0 = a_0 + b_0 \mod 2$, and in the binary case the most significant digit is $a_0b_0$. This low digit is output directly, but the high digit is now named $c_1$ and `carried'. This leads to the ``full adder'' which calculates the sum of 3 bits $a_1 + b_1 + c_1$ as a number between 0 and 3. Both of these are classical operations which could be implemented as permutations in the usual way. In the ternary case the same logic applies, a ternary full adder would add 3 trits $a_1 + b_1 + c_1$ to get a number between 0 and 6, represented as two trits $c_2, s_1$, returning $s_1$ as a result, and carrying $c_2$ forward.
 
+The first algorithm presented by \cite{arithmetics} leverages the fact that the only way $c_{i+1}$ can be 2 is if $a_i = b_i = c_i = 2$, but since $c_1$ comes from a half adder, or from $c_0$ which was initialized to 0, we know that $c_i$ will never be 0. This means that the carry operation implemented only needs to calculate $c_{i+1}$ in situations where $c_i$ is 0 or 1, the other 9 inputs can essentially produce garbage. Additionally they allow the circuit they implement $U_c$ to transform the registers containing $a_i$ and $b_i$, allowing all calculations to be made in place. The carry `trits' are calculated up to the highest trit $c_{l+1}$, which is yielded as is as $s_{l+1}$, then this calculation is reversed to recover $a_l$, $b_l$, and $c_l$, setting $s_l = a_l + b_l + c_l \mod 3$, and so on, overwriting $b_l$ with this value since it is no longer needed, down to $s_0 = a_0 + b_0 + c_0 \mod 3$. This algorithm acts on $2l+2$ qutrits, the digits $a_i$ and $b_i$, along with $c_0$ which is generally going to be 0, and $s_{l+1}$ which is initially also 0. This is only one or two qutrits more than the logical input of the algorithm, which is hard to beat, and uses $2n$ non-Clifford operations. (the ones implemented either asymptotically [or fault tolerantly using magic states])
+
+The second algorithm aims to parallelise the calculation of the carry trits by observing three cases of $a_i + b_i + c_i$:
+\begin{itemize}
+	\item $a_i = b_i = 0 \implies c_{i+1} = 0$, denoted $C[i, i+1] = 0$
+	\item $a_i + b_i = 1 \implies c_{i+1} = c_i$, denoted $C[i, i+1] = 2$
+	\item $a_i + b_i \geq 2 \implies c_{i+1} = 1$, denoted $C[i, i+1] = 1$
+\end{itemize}
+These three cases can be calculated up front and stored in trit registers, without knowing any carry digits. This allows the calculations to be done in parallel, requiring $l$ Clifford gates, but taking the same amount of time that would be needed if $l = 1$.
+
+Next a merge algorithm is defined, if $C[i, j] = C[j, k] = 2$ then $c_i = c_j = c_k$, so $C[i, k] = 2$ also. In fact whenever $C[j, k] = 2$ we will have $C[i, k] = C[i, j]$. On the other if $C[j, k] \neq 2$ then $c_k$ will be $C[j, k]$, 0 or 1 respectively, so $C[i, k]$ is simply $C[j, k]$. This is another classical operation, which can be implemented as a permutation. This allows for what is called a `divide and conquer' algorithm, where different $C[i, k]$ values are merged one layer at a time, taking $l - \omega(l) - \left\lfloor \log l \right\rfloor$ additional trits on top of the $2l$ needed for the input of the algorithm, where $\omega(l)$ is the number of 1s in the binary expansion of $l$. The `layers' add up to a circuit depth of $\left\lfloor \log l \right\rfloor + \left\lfloor \log \frac{n}{3} \right\rceil + 2$, despite the algorithm using $3l - 2\omega(l) - 2\left\lfloor \log l \right\rfloor - 1$ non-Clifford operations in total.
+
+In addition to describing both of these algorithms in full, in a manner generic to any ternary quantum computer, the paper goes on to describe the standard ways of extending addition to implement addition mod $3^n$, as well as subtraction and comparison, and the efficiency gains that can be made by not calculating the data these calculations would only discard. Then of course the paper moves on to discuss the supermetaplectic basis as described previously.
+
+While the algorithms it described are presented as ternary algorithms, it is interesting that the main optimization of the first algorithm was to recognize that the carry digit is actually a binary piece of data, making this algorithm a piece of mixed binary-ternary logic, simply embedded inside a ternary computer! Additionally the second algorithm has carry information $C[i, k]$ which is ternary, but this algorithm could be implemented for addition of binary integers as well! This means both of these algorithms could be interpreted as being intrinsically mixed, but as being embedded in a ternary quantum computer, even though they were intended to be intrinsically ternary algorithms. This makes the specific implementation of these algorithms in a mixed context an excellent starting point for thinking about real applications of mixed logic[, and also makes the efficiency discussions of ``Factoring with Qutrits'' a very interesting place to look for the tradeoffs between the binary and ternary roles of mixed quantum data].
+
+\subsection{Fault Tolerance and Mixed Logic}
+[outline fault tolerant computing in more detail, and outline how the ternary arithmetics algorithms act on physical qutrits, whereas a realistic algorithm would act on logical qutrits, and hence could be mixed.... I assume the topological quantum systems still need fault tolerant computing?]

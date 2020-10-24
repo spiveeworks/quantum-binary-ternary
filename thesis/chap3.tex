@@ -1,37 +1,6 @@
 % chap3.tex (Chapter 3 of the thesis)
 \chapter[CALCULATION IN BINARY-TERNARY]{Calculation in Binary-Ternary}
 
-\section{Notation for Mixed Systems}
-[move to preliminaries and make sure that I am actually using this notation]
-
-A very ergonomic notation for gates in quantum algorithms is to subscript the gate with relevant information about that gate such as the dimension of the object or system on which it acts, the index of the individual object or part of the composite system on which it acts, or the computational basis states that it affects.
-
-Many discussions of quantum algorithms vary only one property of a given quantum gate at a time, making this notation unambiguous. Unfortunately we must have gates acting on distinct objects of a composite system, each with a dimension that could be different, which requires us to take extra care. Lest we lose the ergonomics of putting all the necessary information in small and descriptive subscripts, we continue to place variables in these subscripts, but avoid numerals unless the meaning is clear. We will now enumerate in advance the exact index sets that could be used for a variable in a subscript, a preferred letter in the alphabet for representing such a variable, and what that subscript means when this variable is used.
-
-In composite quantum systems we define $N$ to be the number of computational basis states, and either $n$ to be the number of individual objects in the composite system, or $n$ to be the number of qubits and $m$ to be the number of qutrits. For example we could use these variables to index the Quantum Fourier Transform $\text{QFT}_N$ or a general unitary matrix $U_N$ acting on $N$ computational basis states, or $H^{\otimes n}$ for the Kronecker product of the $H$ matrix with itself $n$ times.
-
-In quantum systems of a single finite-dimensional object we instead call the dimension of this object $n$, and index each of the computational basis states $0$ through to $n-1$, represented by variables such as $i$, $j$, and $k$. For example we will frequently distinguish between $X_2$, $X_3$, and generally $X_n$ in the context of a single quantum object. This is the one case where we will use both numerals and variables for subscripts, since we very often want to say specific things about the $n=2$ and $n=3$ cases.
-
-Note that we change the meaning of $n$ based on context, for the sole purpose of reminding ourselves of the cyclic group formed by the set $\mathbb{Z}_n = \mathbb{Z}/n\mathbb{Z}$ equipped with addition, a very familiar object which appears repeatedly in finite groups of quantum gates acting on single quantum objects.
-[do we actually talk about single objects outside of the preliminary discussion of Pauli matrices? Won't know until later in semester]
-
-When we want to talk about an individual object in a composite system, we index each object $1$ through to $n$, (or $1$ through to $n+m$) and use variables such as $p$, $q$, and $r$ to represent such an index. We then define $d_p$ to be the dimension of the object indexed by $p$. This allows us to extend some unitary matrix $G_d$ acting on a single quantum object of dimension $d$ to a unitary matrix $G_p$ acting on some composite system satisfying $d_p = d$. Written as a Kronecker product, $G_p$ looks like the following:
-\[G_p = I_{d_1}\otimes \dots \otimes I_{d_{p-1}} \otimes G_d \otimes I_{d_{p+1}} \otimes \dots \otimes I_{d_n}\]
-
-When indexing computational basis states in a composite system, we use the integers $0$ through to $N-1$ much like in single systems, [unless I removed that paragraph/notation] and variables such as $i$, $j$, and $k$ to represent such indeces. This is particularly useful for the special class of permutation matrices that represent a transposition, where we can write $S_{i,j}$ to represent the matrix that exchanges the computational basis states $\ket{i}$ and $\ket{j}$, while leaving all others unchanged.
-
-When we introduce a variable such as $i$, satisfying $0 \leq i \leq N-1$, we assume implicitly that the sequence of digits $i_1i_2\dots i_p \dots i_n$ exists and that each variable $i_p$ is understood to refer to the corresponding digit in this sequence. We also identify all such integers $0\dots N-1$ with their corresponding sequences of digits whenever we discuss the computational basis states.
-
-When we have a unitary matrix $U$ acting on a composite system with $N$ computational basis states, and a set $c \subseteq \{0\dots N-1\}$, our final subscript notation will be to define the controlled operation $C_c(U)$ which has the following action on the computational basis:
-\[C_c(U)\ket{i} = \begin{cases}
-U\ket{i} & \text{if\ }i \in c \\
-\ket{i} & \text{if\ }i \notin c
-\end{cases}\]
-Note that in order for $C_c(U)$ to be unitary, it is sufficient that the image $U\ket{i}$ of any computational basis vector $\ket{i}$ satisfying $i \in c$ be a linear combination of basis vectors $\ket{j}$ themselves satisfying $j \in c$. For example if we have a gate $G_p$ acting only on object $p$ of the system, then $C_c(G_p)$ will be unitary whenever $c$ is a set whose defining predicate $i_1\dots i_n \in c$ does not depend on the digit $i_p$.
-
-When we have a condition 
-
-Finally when $G_d$ is a unitary matrix acting on a $d$-dimensional object, and $G_p$ is the corresponding matrix acting on object $p$ of a composite system, it is sometimes useful for the set $c$ to impose a constraint on all but $d$ of the computational basis states of the composite system, in which case we can write $C_c(G_d)$ instead of $C_c(G_p)$.
 \section{Universality of Composite Systems}
 Shall discuss decomposing operations by describing how arbitrary elements of a large set of matrices can be implemented by composing elements of a smaller set of matrices.
 
