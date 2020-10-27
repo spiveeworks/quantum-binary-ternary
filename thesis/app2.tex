@@ -1,11 +1,24 @@
 % app2.tex (will be Appendix B)
 
-\chapter[ADDITIONAL TABLES AND FIGURES]{Additional Tables and Figures}
-%\newpage
-\section{Some Tables}
+\section{Appendix B, Porting ``Improved Ternary Arithmetics''}
+[this was going to be right after the universality discussion, but I think now I should combine it with the appendix I'll be writing on why the polynomial analysis doesn't work, since they're both related to the same improved ternary arithmetics paper. I might explain a little more in the background chapter then, or at least state that it does work quite easily.]
+We have discussed how the algorithms for arithmetic described in \cite{arithmetics} could naturally be ported to a mixed logic system, by using qubits for binary carry bits, or by using 
 
-Place additional tables here.
+\begin{quantikz}
+	\lstick{$c_i$} & \qw & \qw & \phase{1} \vqw{2} & \gate{S_{0,1}} & \qw \rstick{$c_{i+1}$} \\
+	\lstick{$a_i$} & \gate[wires=2]{S_{00,22}} & \octrl{1} & \qw & \qw & \qw \\
+	\lstick{$b_i$} & \qw & \targ{} & \gate{X_3^{-1}} & \phase{0} \vqw{-2} & \qw \\
+\end{quantikz}
 
-\section{Some Figures}
+[don't know how to do $\oplus^\dagger$ so ugly box for now.]
 
-Place additional figures here.
+have found a useful set of basic gates for mechanized compilation
+\\let's look at specific algorithms that have been designed rather than compiled
+\\\cite{arithmetics} implements ternary addition as a permutation on computational basis states
+\\the ripple carry is designed so that the carry digit is always binary, which could be implemented in a mixed context
+\\(possibly draw up a circuit implementing the carry operations)
+\\the look ahead carry has ternary carry registers, but could be used for binary arithmetic, again giving a mixed algorithm
+\\(possibly draw up circuit for this as well)
+\\either of these would have less entropy than the pure ternary case, but many practical tradeoffs may render pure ternary to be superior, such as connectivity requirements, performance costs of mixed logic in general
+\\we have access to any method, lot of flexibility! add bits or trits with bit carry or trit carry
+\\(possibly mention mixed-string representations, here or in final discussion)

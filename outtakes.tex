@@ -15,6 +15,42 @@
 
 \begin{document}
 
+\section{Discussion}
+We have found that having access to the 2- and 3-dimensional Fourier transforms, along with any permutation that acts dependently on a qubit-qutrit pair, seem to be enough to produce infinite order operations, and in particular we found the gates $H_2 C(X_3)$ and $H_3 C(X_2)$ are infinite order. This means that $C(X_2)$ and $C(X_3)$ are analogous to the phase gate $Z^{\frac{1}{4}}$ in that they are finite order but with a Fourier transform become infinite order. It was seen in \cite{universal-qubit} that the phase gate and the Fourier transform are therefore universal for single qubit operations, which may have an analogue for mixed-logic using these gates, meaning that the same gates we use to implement permutations are likely universal as well when combined with the Clifford operations. [Clifford+1 maybe this is obvious? not sure whether that result is dimension-specific or not general]
+
+Additionally there is a technique called magic state distillation which uses repeated transformation and measurement to approximate states that are normally only available using non-Clifford gates such as the phase gate, which when available can be used to implement the phase gate directly. Analogous to this we can construct states with these Fourier transformations, controlled operations, and measurement that can't be constructed using Clifford gates alone. [allude to other states or to techniques for using these states, worth exploring but I don't know how to do any of it. also show how to construct the embedded + state.]
+
+\section{Thing}
+
+Bocharov et al. use non-clifford operations to measure the depth of their circuits, since these are the operations that will need asymptotic decomposition analogous to our arbitrary qubit operations.
+\\Clifford operations are powerful but form a simple and elegant finite group, with many uses in information and computation theoretic contexts (maybe this is calling back to background content)
+\\by \cite{tolar-clifford} we see that the Clifford operations available in mixed systems with objects of coprime dimension are simply the Clifford operations available in each individual object, so none of our controlled operations are Clifford!
+\\For a group to have some of the same power that the Clifford group has in computational contexts, we should want all of the following:
+\begin{itemize}
+	\item finite
+	\item can map computational basis to non-computational basis
+	\item can alter a qutrit dependant on a qubit and vice versa
+\end{itemize}
+Look at $6\times 6$ unitary matrices acting on a single qubit and a single qutrit
+\\Looking at $H_3 \times CX_2$ and $H_2 \times CX_3$ we see both are infinite order?? (haven't proven yet)
+\\$H_2 \times CS_3$ is finite order but $H_2 \times X_3 \times CS_3$ is infinite order as well.
+\\By previous equivalence statements that means that any finite group which has both Fourier transforms will fail to implement the controlled operations we need
+\\(possibly mention the quantum information implications of these gates, again maybe discussion)
+\\this probably means that Clifford + $CX_2$ + $CX_3$ is universal however
+
+$C(X_3)\ H_2\ C(X_3)\ H_2$:
+\[\left[\begin{matrix}
+	1/2 & 0 & 1/2 & 1/2 & 0 & -1/2\\
+	1/2 & 1/2 & 0 & -1/2 & 1/2 & 0\\
+	0 & 1/2 & 1/2 & 0 & -1/2 & 1/2\\
+	0 & -1/2 & 1/2 & 0 & 1/2 & 1/2\\
+	1/2 & 0 & -1/2 & 1/2 & 0 & 1/2\\
+	-1/2 & 1/2 & 0 & 1/2 & 1/2 & 0
+\end{matrix}\right]\]
+Entering this directly into Wolfram Mathematica we get the following characteristic polynomial:
+\[1/4 (\lambda - 1)^2 (4 \lambda^4 + 2 \lambda^3 - 3 \lambda^2 + 2 \lambda + 4)\]
+Since the main factor of this polynomial is irreducible, but not monic/integral, we can conclude that this matrix has eigenvalues that aren't roots of unity, much like the $Z^{\frac{1}{4}}X^{\frac{1}{4}}$ matrix used in \cite{universal-qubit} and \cite{algos}, meaning this matrix and any group containing it must be infinite order.
+
 \subsection{Pauli Group and Displacement Operators}
  Further, noting the following identity:
 \[x^n=1 \implies x = 1 \text{\ or\ } \sum_{i=0}^{n-1}x^i = 0\]

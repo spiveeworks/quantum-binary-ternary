@@ -20,12 +20,16 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 
+\usepackage{tikz}
+\usetikzlibrary{quantikz}
+
 \renewcommand\thesection{}
 \renewcommand\thesubsection{}
 
-\newcommand{\bra}[1]{\langle #1 |}
-\newcommand{\ket}[1]{| #1 \rangle}
-\newcommand{\braket}[2]{\langle #1 | #2 \rangle}
+% went the whole year without tikz, had to uncomment this when I started using it, worked without any further modification!
+%\newcommand{\bra}[1]{\langle #1 |}
+%\newcommand{\ket}[1]{| #1 \rangle}
+%\newcommand{\braket}[2]{\langle #1 | #2 \rangle}
 
 \newcommand{\ord}[1]{\left| #1 \right|}
 \newcommand{\norm}[1]{\left\Vert #1 \right\Vert}
@@ -41,7 +45,6 @@
 % You will need to make sure your LaTeX installation has these packages
 % installed...else it wont work :(
 \usepackage{MathPhysHonoursThesis}
-
 
 %\include{newcommands}
 %\include{newcommands_ThomasHindle}
@@ -90,8 +93,9 @@
 \include{chap3}
 %\include{chap4}
 \appendix % switches to appendix mode. Do this instead of \include{app0}
-%\include{app1}
-%\include{app2}
+\include{app1}
+\include{app2}
+\include{app3}
 %\bibliographystyle{style} \bibliography{bibFIle} 
 \include{biby}
 %\include{index}

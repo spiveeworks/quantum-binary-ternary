@@ -670,13 +670,13 @@ The Clifford group contains arbitrary scale factors, making it uncountably infin
 
 
 \section{Notation for Mixed Systems}
-[move to preliminaries and make sure that I am actually using this notation]
+[make sure that I am actually using this notation, also maybe throw some references in even though this is mostly standard]
 
 A very ergonomic notation for gates in quantum algorithms is to subscript the gate with relevant information about that gate such as the dimension of the object or system on which it acts, the index of the individual object or part of the composite system on which it acts, or the computational basis states that it affects.
 
 Many discussions of quantum algorithms vary only one property of a given quantum gate at a time, making this notation unambiguous. Unfortunately we must have gates acting on distinct objects of a composite system, each with a dimension that could be different, which requires us to take extra care. Lest we lose the ergonomics of putting all the necessary information in small and descriptive subscripts, we continue to place variables in these subscripts, but avoid numerals unless the meaning is clear. We will now enumerate in advance the exact index sets that could be used for a variable in a subscript, a preferred letter in the alphabet for representing such a variable, and what that subscript means when this variable is used.
 
-In composite quantum systems we define $N$ to be the number of computational basis states, and either $n$ to be the number of individual objects in the composite system, or $n$ to be the number of qubits and $m$ to be the number of qutrits. For example we could use these variables to index the Quantum Fourier Transform $\text{QFT}_N$ or a general unitary matrix $U_N$ acting on $N$ computational basis states, or $H^{\otimes n}$ for the Kronecker product of the $H$ matrix with itself $n$ times.
+In composite quantum systems we define $N$ to be the number of computational basis states, and either $n$ to be the number of individual objects in the composite system, or $n$ to be the number of qubits and $m$ to be the number of qutrits.[we don't use this $n$ vs $m$ discussion, all qubit qutrit discussions are in 2 or 3 objects] For example we could use these variables to index the Quantum Fourier Transform $\text{QFT}_N$ or a general unitary matrix $U_N$ acting on $N$ computational basis states, or $H^{\otimes n}$ for the Kronecker product of the $H$ matrix with itself $n$ times.
 
 In quantum systems of a single finite-dimensional object we instead call the dimension of this object $n$, and index each of the computational basis states $0$ through to $n-1$, represented by variables such as $i$, $j$, and $k$. For example we will frequently distinguish between $X_2$, $X_3$, and generally $X_n$ in the context of a single quantum object. This is the one case where we will use both numerals and variables for subscripts, since we very often want to say specific things about the $n=2$ and $n=3$ cases.
 

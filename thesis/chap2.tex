@@ -39,7 +39,7 @@ If a quantum computer has these operations available as elementary gates on ever
 
 Although quantum universality is ultimately a way of arranging these gates into algorithms that approximately implement some unitary operation, the algorithm itself is easier to describe in the reverse direction, decomposing a given unitary operation into sequences of increasingly basic operations.
 
-In full detail the process has 6 steps:
+In full detail the process has 7 steps:
 \begin{enumerate}
 	\item Unitary into unitaries on axis aligned planes
 	\item axis aligned plane unitary into multi-controlled operation on any qubit + 2 copies of a transposition
@@ -54,8 +54,8 @@ We will later extend this process to work for systems with at least one qubit, a
 A transposition is a permutation that swaps two elements of a set, but leaves all other elements unchanged, and so when we say transposition in the context of quantum computation we mean a linear operation that swaps two computational basis states, and leaves the others unchanged, i.e. the linear extension of
 \[S_{p_1\dots p_n, q_1\dots q_n}(\ket{r_1}\dots\ket{r_n}) = \begin{cases}
 \ket{p_1}\dots\ket{p_n} & \text{if\ } r_i = q_i \forall i \in \mathbb{Z}, 1 \leq i \leq n \\
-\ket{p_1}\dots\ket{q_n} & \text{if\ } r_i = p_i \forall i \in \mathbb{Z}, 1 \leq i \leq n \\
-\ket{p_1}\dots\ket{p_n} & \text{otherwise}
+\ket{q_1}\dots\ket{q_n} & \text{if\ } r_i = p_i \forall i \in \mathbb{Z}, 1 \leq i \leq n \\
+\ket{r_1}\dots\ket{r_n} & \text{otherwise}
 \end{cases}
 \]
 For example in a system with 2 qubits the transposition $S_{10,11}$ is simply the controlled not operation $C_{p_1 = 1}(X)$.
@@ -79,7 +79,9 @@ p_i & \text{otherwise}
 \end{cases}\]
 Then we have $S_{p_i, p'_i} = C_c(X_j)$ similar to above, and $S_{p'_i, q_i}$ as some product of such controlled operations by the inductive hypothesis.
 
-At this point we will have composed some unitary acting on a plane, into as many as $2n$ multi-controlled increment operations, sandwiching a single multi-controlled unitary acting on some qubit. Our next step will be to decompose all of these multi-controlled unitaries into Toffoli gates sandwiching a single-controlled unitary.
+[would be clearer to have a lemma: $S_{(p_i), (p'_i)}S_{(p'_i), (q_i)}=S_{(p_i), (q_i)}$]
+
+At this point we will have decomposed some unitary acting on a plane, into as many as $2n$ multi-controlled increment operations, sandwiching a single multi-controlled unitary acting on some qubit. Our next step will be to decompose all of these multi-controlled unitaries into Toffoli gates sandwiching a single-controlled unitary.
 
 \subsection{Multi-control Gates}
 We would like to implement a controlled operation $C_c(U_j)$ with a very strict control condition, specifying the value of every single qubit in the system except for the target qubit with index $j$. In general it is hard enough to implement elementary gates that act on 2 or 3 qubits, and even then it is rare that a quantum computer will be able to implement these for arbitrary combinations of qubits, so we definitely need to decompose these multi-controlled operations in order to work with any realistic elementary gate set.
@@ -119,7 +121,7 @@ C_{c'}(U_j)
 C_{r_{i_2}=p_{i_2}}(X_k)
 C_{r_{i_1}=p_{i_1}}(X_k)
 \]
-Since $X_k$ is an increment operation acting on a qutrit, it will not be involutory the way that a qubit increment is, so we need to invert it explicitly.
+Since $X_k$ is an increment operation acting on a qutrit, it will not be involutory the way that a qubit increment is, so we need to invert it explicitly. [Muthukrishnan used transpositions, and we will be using transpositions as well, so we should move the single-object transpositions up to this section or earlier, and change this to C(S) instead of C(X). Then have a note about how you could use C(X) instead if that is available more directly, since we will eventually implement C(S) in terms of C(X). maybe that note should go in chapter 3 when we make that implementation of C(S)?]
 
 In \cite{multi-valued-logic} this was done more efficiently, effectively setting $p_k = d-1$ rather than $p_k = 2$, and performing $d-1$ separate controlled operations for each auxiliary object added, but since we only consider qutrits this is equivalent.
 
