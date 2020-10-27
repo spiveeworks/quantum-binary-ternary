@@ -1,3 +1,20 @@
 % app1.tex (will be Appendix A)
 
-\section{Appendix A, Axiomata}
+\chapter[AXIOMATA]{Axiomata}
+
+\section{Group Quotients, Normal Subgroups, Normalisers}
+[perhaps an example of a group and its normalizer, group isomorphisms, and semidirect products. excessive definition stuff can go in axiomata appendix]
+
+Given an equivalence relation $\sim$ on a set $S$ it is often useful to consider equivalence classes, the subsets $[x] = \{y\ |\ x \sim y\}$, since these will be equal exactly when their representatives are equivalent, i.e. $[x] = [y] \iff x \sim y$. The set of all such equivalence classes is called the set quotient, and is written $S/\sim$. It provides a concrete object with the same structural properties that would come from `identifying' $x$ with $y$ whenever $x \sim y$. If $S$ is actually a group $G$ then its group operation sometimes induces an operation in the set quotient $[x][y] = [xy]$, but if this is well defined then we immediately find $[e]$ is a subgroup of $S$:
+\[e \sim x \sim y \implies [e] = [e][e] = [x][y] = [xy] \implies e \sim xy\]
+\[e \sim x \implies [x^{-1}] = [e][x^{-1}] = [x][x^{-1}] = [xx^{-1}] = [e] \implies e \sim x^{-1}\]
+Further if $x \in [e]$ and $z \in S$ then $zxz^{-1} \in [e]$ as well:
+\[e \sim x \implies [z][x][z^{-1}] = [z][e][z^{-1}] = [e] \implies e \sim zxz^{-1}\]
+
+In general if a subgroup $H$ of $G$ satisfies this condition, that for any $h \in H$ and $g \in G$, $ghg^{-1} \in H$, then $H$ is said to be a normal subgroup of $G$. It turns out that not only is the equivalence class $[e]$ a normal subgroup, but whenever $H$ is a normal subgroup of $G$, the equivalence relation $x \sim y \iff xy^{-1} \in H$ gives a well defined group operation on the set quotient $G/\sim$. We call this group the group quotient $G/H$. When available, this is a powerful tool for understanding the structure of groups, since the group quotient $G/H$ may have convenient algebraic properties emerging from its corresponding equivalence relation.
+
+As an example of a normal subgroup, take $G \subset GL(n, \mathbb{R})$ to be any group formed by matrix multiplication, and $H$ to be the set of scalars in $G$, that is the set $\{\lambda I\ |\ \lambda \in \mathbb{C}\} \cap G$. Since scalars are commutative, it is straight-forward that $g\lambda I g^{-1} = \lambda gg^{-1} = \lambda I \in H$.
+
+The subgroup relation and the normal subgroup relation can be thought of as a partial order, and are often written as $\leq$ and $\trianglelefteq$ respectively, since both are transitive, reflexive, and anti-symmetric. While these relations are each transitive, we must be careful when mixing them; if $H$ is a normal subgroup of $N$, and $N$ is a subgroup of $G$, $H$ is not necessarily a normal subgroup of $G$, which is surprising when stated more succinctly as ``$H$ is normal in $N$ but is not normal in $G$''.
+
+With this subtlety in mind we can find exactly such a group $N$, given any subgroup $H$ of $G$. We call this the normaliser of $H$ with respect to $G$, defined as the set $N_G(H) = \{g\ |\ g \in G,\ gHg^{-1} \subseteq H\}$. This is the maximal such $N$, any other $N'$ with $H$ normal will sit inside $N_G(H)$. Clearly the group quotient $N_G(H)/H$ will exist for any subgroup $H$ of $G$, which will be useless in the case that $N_G(H) = H$, but otherwise can be an interesting group, and can even inform interesting structure about the normaliser itself, making normalisers a useful and novel tool for exploratory algebraic work.

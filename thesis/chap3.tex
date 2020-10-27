@@ -1,8 +1,117 @@
 % chap3.tex (Chapter 3 of the thesis)
-\chapter[CALCULATION IN BINARY-TERNARY]{Calculation in Binary-Ternary}
-[seems like the chapters we really want are universal computation, finite groups, and then maybe the ternary arithmetic/magic state/fault tolerant stuff?? might be a big restructure, and hides the fact that understanding the background material is not just a means to an end in this document, but an end of this document in itself.]
+\chapter[UNIVERSAL COMPUTATION]{Universal Computation}
 
-[explain the context we infer from the previous discussion: interesting work on non-binary computation, esp. ternary, but very small amounts on mixed computation, meaning we ought to start with the absolute basics... maybe also speculate on what the trade-offs of the different number systems seem to be?]
+A foundational result in quantum computation is that of universal computation, that certain combinations of quantum gate can be used to implement any quantum algorithm to some accuracy, given sufficient circuit depth. The resulting circuits are generally too long to use in practice, compared to compilation techniques that rely on specific properties of the algorithm in question, but the result is still useful since it proves that it's not impossible, i.e.\ its necessary and sufficient conditions provide a starting point for designing and using quantum computers in practice.
+
+\section{Universal Computation in Qubit Contexts}
+Universal computation for qubit computers is described in full detail in \cite{textbook}, based on the approach described in the paper \cite{universal-qubit}, [and the one it references, for permutation things] which requires only 3 gates to achieve universality:
+\begin{align*}
+	H_2 = \frac{1}{\sqrt{2}}\left[\begin{matrix}
+		1 & 1 \\
+		1 & -1
+	\end{matrix}\right]
+	\\
+	T_2 = \left[\begin{matrix}
+		1 & 0 \\
+		0 & \frac{1}{\sqrt{2}}\left(1+ i\right)
+	\end{matrix}\right]
+	\\
+	C_{p_0=1}(X_2) = \left[\begin{matrix}
+		1 & 0 & 0 & 0 \\
+		0 & 1 & 0 & 0 \\
+		0 & 0 & 0 & 1 \\
+		0 & 0 & 1 & 0 \\
+	\end{matrix}\right]
+\end{align*}
+If a quantum computer has these operations available as elementary gates on every qubit in the system, and has $C(X)$ implemented as an elementary gate on enough pairs of qubits, so that $C(X)$ can be implemented indirectly for all remaining pairs, then this quantum computer will satisfy universal computation. In practice a quantum computer can implement more than just these operations, and doing so will generally allow more efficient implementation of quantum algorithms, but this set of 3 gates is a theoretically interesting sufficient condition for quantum universality.
+
+Although quantum universality is ultimately a way of arranging these gates into algorithms that approximately implement some unitary operation, the algorithm itself is easier to describe in the reverse direction, decomposing a given unitary operation into sequences of increasingly basic operations.
+
+In full detail the process has 7 steps:
+\begin{enumerate}
+	\item Unitary into unitaries on axis aligned planes
+	\item axis aligned plane unitary into multi-controlled operation on any qubit + 2 copies of a transposition
+	\item transposition into controlled operations by Gray codes
+	\item controlled operations into Toffoli + single control operation
+	\item Toffoli gate into $C(V)$ where $V^2 = X$
+	\item single control operation into $AC(X)BC(X)C$
+	\item single qubit operation into sequence of $H$, $T$ operations
+\end{enumerate}
+We will later extend this process to work for systems with at least one qubit, and any number of qutrits, so long as controlled increment operations $C_{p_i=1}(X)$ are also available between qutrit-qutrit pairs, and qubit-qutrit pairs. Since we assume to have a qubit available, we can leverage the same structure as described above, and in doing so avoid thinking about the geometry of the qutrit state space altogether. As a result the only steps that require our modification are steps 3 and 4, so we shall describe how they work in the qubit case here, for the rest of the steps the sources \cite{textbook} and \cite{universal-qubit} explain in plenty of detail.
+\subsection{Decomposing Transpositions}
+A transposition is a permutation that swaps two elements of a set, but leaves all other elements unchanged, and so when we say transposition in the context of quantum computation we mean a linear operation that swaps two computational basis states, and leaves the others unchanged, i.e. the linear extension of
+\[S_{p_1\dots p_n, q_1\dots q_n}(\ket{r_1}\dots\ket{r_n}) = \begin{cases}
+	\ket{p_1}\dots\ket{p_n} & \text{if\ } r_i = q_i \forall i \in \mathbb{Z}, 1 \leq i \leq n \\
+	\ket{q_1}\dots\ket{q_n} & \text{if\ } r_i = p_i \forall i \in \mathbb{Z}, 1 \leq i \leq n \\
+	\ket{r_1}\dots\ket{r_n} & \text{otherwise}
+\end{cases}
+\]
+For example in a system with 2 qubits the transposition $S_{10,11}$ is simply the controlled not operation $C_{p_1 = 1}(X)$.
+
+We also write $S_{p_i, q_i}$ rather than the full $S_{p_1\dots p_n, q_1\dots q_n}$ when possible.
+
+[later, for ternary and mixed systems: We also take $S_{0,1}$, $S_{1,2}$, and $S_{0,2}$ to be defined operations acting on a single qutrit, and further define $S_{0,1} = X_2$ acting on single qubits, even in composite systems where other operations exist.]
+
+In step 2 of the process described earlier, we needed transpositions in order to transform one of the axes of an axis aligned plane into an axis whose indices match the other axis, except for one qubit index, which we shall take to be the first object in the system. (though this may be less efficient than other choices) In other words we have some pair of computational basis states $\ket{1-p_1}\ket{p_2}\dots\ket{p_n}$ and $\ket{q_1}\dots\ket{q_2}$ upon which the original unitary was acting, and as such we would like to generate a transposition that swaps $\ket{p_1}\dots \ket{p_n}$ with $\ket{q_1}\dots\ket{q_n}$ so that the plane unitary now acts only on $\ket{1-p_1}\ket{p_2}\dots \ket{p_n}$ and $\ket{p_1}\ket{p_2}\dots \ket{p_n}$.
+
+In order to implement these transpositions, the first step is to decompose them using what are called Gray codes, sequences of bit strings where each bit string differs from its neighbours by only by a single digit. Put more formally, we implement $S_{p_i,q_i}$ by induction on the number of indeces $i$ where $p_i \neq q_i$. If there are no states where they differ then $S_{p_i,q_i} = I$ so there is nothing to be done. If they differ by only one state, i.e. $p_j = 1 - q_j$, then the transposition is exactly the controlled-increment operation $C_c(X_j)$ where $c$ is the following set of condition vectors:
+\begin{align*}
+	c &= \{\ket{r_1}\dots\ket{r_n}\ |\ r_i = p_i = q_i \text{\ whenever\ } i \neq j\}
+	\\&= \{\ket{p_1}\dots\ket{p_n}, \ket{q_1}\dots\ket{q_n}\}
+\end{align*}
+
+In the inductive case where there is more than one value $i$ for which $p_i$ and $q_i$ differ, we can pick just one, call it $j$, and decompose $S_{p_i, q_i}$ into two transpositions $S_{p_i, p'_i}S_{p'_i, q_i}$ defining
+\[p'_i = \begin{cases}
+	q_i = 1 - p_j & \text{if\ } i = j \\
+	p_i & \text{otherwise}
+\end{cases}\]
+Then we have $S_{p_i, p'_i} = C_c(X_j)$ similar to above, and $S_{p'_i, q_i}$ as some product of such controlled operations by the inductive hypothesis.
+
+[would be clearer to have a lemma: $S_{(p_i), (p'_i)}S_{(p'_i), (q_i)}=S_{(p_i), (q_i)}$]
+
+At this point we will have decomposed some unitary acting on a plane, into as many as $2n$ multi-controlled increment operations, sandwiching a single multi-controlled unitary acting on some qubit. Our next step will be to decompose all of these multi-controlled unitaries into Toffoli gates sandwiching a single-controlled unitary.
+
+\subsection{Multi-control Gates}
+We would like to implement a controlled operation $C_c(U_j)$ with a very strict control condition, specifying the value of every single qubit in the system except for the target qubit with index $j$. In general it is hard enough to implement elementary gates that act on 2 or 3 qubits, and even then it is rare that a quantum computer will be able to implement these for arbitrary combinations of qubits, so we definitely need to decompose these multi-controlled operations in order to work with any realistic elementary gate set.
+
+The approach is to introduce $n-2$ auxiliary qubits to the system, indexed $n+1$ through $2n-2$, which begin and end this process in the computational basis state $\ket{0}$. We then use these auxiliary qubits to check an increasing number of our condition qubits, the first auxiliary qubit state $r_{n+1}$ will indicate whether $r_1$ and $r_2$ are both in the desired states $p_1$ and $p_2$ respectively. The second will indicate the first 3, up until the final auxiliary state $r_{2n-2}$ which indicates whether all $n-1$ qubits apart from $r_j$ are in the correct state. At this point we can implement the desired gate as $C_{r_{2n-2}=1}(U_j)$, and then undo the process of setting $r_{n+1} \dots r_{2n-2}$ so that they may be used again.
+
+The key to this process is the Toffoli gate, which is simply a controlled $X$ operation with two control bits, $C_{r_{i_1}=p_{i_1},r_{i_2}=p_{i_2}}(X_j)$
+
+Once again our formal description will be inductive. Take $I$ to be the set of indeces $i$ for which our control operation $C_c(U_j)$ has a constraint $r_i = p_i$, so that
+\[c = \{\ket{r_1}\dots\ket{r_n}\ |\ r_i = p_i \text{\ whenever} i \in I\}\]
+Then we shall perform induction on the size of $I$, implementing any control operation as $2\ord{I}-2$ Toffoli gates, sandwiching a single control operation $C_{r_k=p_k}(U_j)$. When $I$ is a singleton set $\{k\}$, then we introduce no auxiliary bits, and simply yield the operation $C_{r_k=p_k}(U_j)$ as is. Otherwise, we choose two indeces $i_1$ and $i_2$ from $I$, introduce an auxiliary qubit $r_k$ which starts and ends in the state $\ket{0}$, and reduce $I$ to
+\[I' = (I \backslash \{i_1, i_2\})\cup \{k\}\]
+Correspondingly, define $p_k = 1$ and reduce the condition set $c$ to
+\[c' = \{\ket{r_1}\dots\ket{r_n}\ |\ r_i = p_i \text{\ whenever} i \in I'\}\]
+Now we simply put all of these constructions together, reducing as
+\[C_c(U_j) = C_{r_{i_1}=p_{i_1},r_{i_2}=p_{i_2}}(X_k)
+C_{c'}(U_j)
+C_{r_{i_1}=p_{i_1},r_{i_2}=p_{i_2}}(X_k)\]
+Since the middle of these is a controlled operation with a smaller index set $I'$, we can invoke the inductive hypothesis, decomposing $C_c(U_j)$ as required.
+
+As a small optimization, if $U_j$ is the increment operation $X_j$ then we can implement $C_c(X_j)$ directly as $2\ord{I} - 3$ Toffoli gates, by taking as a base case $\ord{I} = 2$ where $C_c(X_j)$ is already a Toffoli gate, saving one controlled operation and one Toffoli gate.
+\subsection{Multi-Valued Logic}
+When the final operation $U_j$ in the above decomposition acts on a qutrit or higher, rather than a qubit, the remaining steps become much more difficult, simply because the geometry of $U(n)/U(1)$ is more complicated than that of $U(2)/U(1)$. In order to overcome this the paper \cite{multi-valued-logic} uses a different approach, by outlining a way of implementing a family of gates with arbitrarily many elements, depending on the required accuracy of implementation, and presents a separate proof that this family of gates is universal.
+
+The family of gates they describe and utilize are a generalization of the controlled $X$ and controlled $Z$ gates, in a $d$-dimensional quantum computer, the following:
+\[\Gamma X(\ket{\phi}) = C_{p_1 = d-1}(\ket{d-1}\bra{\phi} + \dots)\]
+\[\Gamma Z(\theta) = C_{p_1 = d-1}\left(e^{i\theta}\ket{d-1}\bra{d-1} + \dots\right)\]
+That is, the $\Gamma X$ family conditionally maps some state $\ket{d-1}\ket{\phi}$ to $\ket{d-1}\ket{d-1}$, and the $\Gamma Z$ family applies some relative phase factor to the state $\ket{d-1}\ket{d-1}$. When the control object is in state $\ket{d-1}$ the effect on all other states are arbitrary, so long as the resulting operation is unitary. When the control object is not in state $\ket{d-1}$ the operation has no effect.
+
+This paper is a very promising theoretical and practical foundation for working with quantum systems with multiple objects all of one arbitrary dimension, especially systems based on the linear ion trap, but due to how different its approach is to ours, we only take one thing from it, which is a way of decomposing control operations $C_c(U_j)$ using auxiliary qutrits (or higher) instead of auxiliary qubits.
+
+The process is identical to what we just described using Toffoli gates, except by introducing an auxiliary qutrit with index $k$, as opposed to the qubit with index $k$, and defining $p_k = 2$, we can use two single-controlled increments instead of one double-controlled (i.e.\ Toffoli) gate:
+\[
+C_c(U_j) = C_{r_{i_1}=p_{i_1}}(X_k)^{-1}
+C_{r_{i_2}=p_{i_2}}(X_k)^{-1}
+C_{c'}(U_j)
+C_{r_{i_2}=p_{i_2}}(X_k)
+C_{r_{i_1}=p_{i_1}}(X_k)
+\]
+Since $X_k$ is an increment operation acting on a qutrit, it will not be involutory the way that a qubit increment is, so we need to invert it explicitly. [Muthukrishnan used transpositions, and we will be using transpositions as well, so we should move the single-object transpositions up to this section or earlier, and change this to C(S) instead of C(X). Then have a note about how you could use C(X) instead if that is available more directly, since we will eventually implement C(S) in terms of C(X). maybe that note should go in chapter 3 when we make that implementation of C(S)?]
+
+In \cite{multi-valued-logic} this was done more efficiently, effectively setting $p_k = d-1$ rather than $p_k = 2$, and performing $d-1$ separate controlled operations for each auxiliary object added, but since we only consider qutrits this is equivalent.
 \section{Universality of Composite Systems}
 Earlier we outlined how 7 techniques can be used in order to decompose any unitary in $U(N)$ into an approximating series of gates from the finite generator set $\{H, T, C(X)\}$. In order to make sense of computation in mixed systems we ought to propose at least one gate set that is universal. Recall our definition of transposition matrices:
 \[S_{p_1\dots p_n, q_1\dots q_n}(\ket{r_1}\dots\ket{r_n}) = \begin{cases}
@@ -53,9 +162,9 @@ Since when the condition is not satisfied the left hand side will have the effec
 
 This lets us remove most of the control objects targeting qutrits:
 \begin{align*}
-C_d(S_{0, 2}) = C_d(X_3^{-1}S_{0,1}X_3) = X_3^{-1}C_d(S_{0,1})X_3
-\\
-C_d(S_{1, 2}) = C_d(X_3S_{0,1}X_3^{-1}) = X_3C_d(S_{0,1})X_3^{-1}
+	C_d(S_{0, 2}) = C_d(X_3^{-1}S_{0,1}X_3) = X_3^{-1}C_d(S_{0,1})X_3
+	\\
+	C_d(S_{1, 2}) = C_d(X_3S_{0,1}X_3^{-1}) = X_3C_d(S_{0,1})X_3^{-1}
 \end{align*}
 We have now reduced our generator set to 7:
 \[H_2, T, X_3, C_2(X_2), C_2(S_{0, 1}), C_3(X_2), C_3(S_{0, 1})\]
@@ -72,233 +181,3 @@ or the increment based set
 [we haven't given an argument for $C_3(S_{0,1})$ in terms of $C_3(X_3)$, hopefully I'll start using increments the whole way through the universality argument, but otherwise you can use an auxiliary qubit and do $C_3(X_2)C_2(S_{0,1})C_3(X_2)$]
 
 Either way we would have 7 gates to implement and then work with. All of the examples we have seen of universal computation for qubits or qutrits has involved some number of Clifford gates, and a single non-Clifford gate, but in order to generalize the standard binary model of quantum computation we find we require 3 additional control gates, none of which are Clifford. [I should probably show that $C_3(X_3)$ is not Clifford..........] As we saw in \cite{tolar-clifford}, there are no Clifford operations that act dependently between a qubit and a qutrit, so it is not clear how easy or valuable it would be to minimize the number of non-Clifford gates used in a mixed logic systems. This prompts a search for other finite groups that act on mixed qubit-qutrit systems.
-
-\section{Finite Groups}
-Normally the Clifford group is an excellent tool for reasoning about quantum systems, since it is finite, (up to scalar factors [I should be careful about my previous statements about generators of the Clifford group, maybe define what a `finite Clifford group' is]) and cheap to implement, but somehow maximal in that one can add just a single gate to achieve universal computation. We saw in \cite{tolar-clifford}, however, that the Clifford group only introduces operations that act dependently between objects when the dimensions of those objects have a common factor, which 2 and 3 do not share, essentially splitting a mixed binary-ternary quantum computer into two separate computers, with two separate Clifford groups, only able to communicate via non-Clifford operations. There is no reason why this can't be done, but there isn't a clear advantage either, so in this section we will take the generators of the Clifford group,
-\[X_2, Z_2, H_2, D_2, X_3, Z_3, H_3, D_3,\]
-[have I defined $H_d$ and $D_d$?]
-and different combinations of permutation matrix, starting with $C_2(X_3)$ and $C_3(X_2)$, to create different generators of subgroups of $U(6)$. We implement a breadth first search in the groups generated by these sets using the C programming language, and find some combinations which yield finite groups, and others that cannot be fully enumerated without crashing due to integer overflow, which we will present and discuss.
-
-The first group we will discuss is the one generated by removing $H_2$ and $H_3$ from the generator set, and adding both $C_2(X_3)$ and $C_3(X_2)$ in their place. All of these generators sit inside of the generalized symmetric group
-\[\{AB\ |\ A\text{\ diagonal}, A^6 = I, A \in U(6), B \in \mathcal{S}_6\}\]
-[define in general, and prove this is a group, presumably in the groups discussion where we needed examples of normal subgroups anyway]
-which means that they generate some subgroup of this.
-
-In fact $X_2$, $X_3$, $C_2(X_3)$ and $C_3(X_2)$ will turn out to generate the whole symmetric group on 6 elements, so having them all would be quite powerful for computation, but now we run into a conjugate problem, which is that our group has a way of doing nontrivial things with entangled states, but no longer any way of creating states other than simple multiples of the computational basis! This generalized permutation group provides essential operations, but isn't much more powerful than the Pauli group without $H_2$ or $H_3$, so our primary focus will be understanding the trade-offs between different combinations of $H_2$, $H_3$, $C_3(X_2)$, and $C_2(X_3)$.
-\subsection{Representing Complex Matrices in C}
-It would be standard to use some algebraic program or package such as Magma to solve this problem, but because our goal is simple enough to implement in a handful of sittings, it was just as easy to implement it from scratch in C, yielding a program that is simple, high performance, and easy to customize. The full source code of this program is given in Appendix C, and was tested using the Tiny C Compiler, but run using the Clang compiler with optimization level 2. We will now outline the techniques used, since they are of independent interest. 
-
-The first obstacle in not using an algebraic package is the exact representation of numbers whose binary expansion never terminates or repeats, for example the sixth root of unity
-\[\omega_6 = e^{\frac{i\pi}{3}} = \frac{\sqrt{3}}{2} + \frac{1}{2}i\]
-To solve this we aim to represent the field extension
-\begin{align*}
-\text{Num} = \mathbb{Q}[\sqrt{-1}, \sqrt{2}, \sqrt{3}]
-&= \left\{ \sum_{j,k,l = 0}^1 n_{jkl}\ i^j\left(\sqrt{2}\right)^k\left(\sqrt{3}\right)^l
-\ \middle|\ n_{jkl} \in \mathbb{Q}\right\}
-\end{align*}
-using an array of 32-bit integers, eight signed integers representing the numerator in $\mathbb{Z}[\dots]$, and one unsigned ineger for the denominator.
-
-We have a few basic operations to define in Num, the most significant of which are multiplication, and inverses. We implement these algorithms naively, and since these are the most fundamental building blocks of our program, this will lead to very bad performance without optimization, (in fact we found the program runs four times worse, 20 seconds vs 5 seconds) but when the search is going to take numerous seconds anyway, the additional second or two of optimization is less painful than it would be in other projects.
-
-For multiplication in Num, we implement multiplication in $\mathbb{Z}[X, Y, Z]$, [oh no do I have to define field extensions? Might as well throw it in the appendix I guess] iterating 6 variables over the range ${0, 1}$ according to the equality
-\begin{align*}
-\left(\sum_{j,k,l = 0}^1 a_{jkl}X^jY^kZ^l\right)\left(\sum_{j,k,l = 0}^1 b_{jkl}X^jY^kZ^l\right)
-\\= \sum_{j_1,k_1,l_1=0}^1\sum_{j_2,k_2,l_2=0}^1 a_{j_1k_1l_1}b_{j_2k_2l_2}X^{j_1+j_2}Y^{k_1+k_2}Z^{l_1+l_2}
-\end{align*}
-, then we make three reductions, according to the rules $x^2 = -1$, $y^2 = 2$, and $z^2 = 3$, returning us to Num. When calculating the product of two elements of Num we generally also divide out any common factors of the nine integers in our representation, so that each number has a unique 36 byte representation in memory.
-
-To calculate the inverse of $a \in \text{Num}$, we set $x_0 = a$ and $y_0 = 1$, make repeated modifications of the form $x_{j+1} = x_jc_j$, $y_{j+1} = y_jc_j$. In this way we eventually get $x_k = 1$, while preserving the identity $x_j = ay_j$, meaning $y_k = a^{-1}$. We set $c_0$ to the denominator of $x_0$ so that $x_1 \in \mathbb{Z}[i, \sqrt{2}, \sqrt{3}]$, then remove each radical by setting $c_k$ to the conjugate of $x_k$. That is $c_1$ is $x_1$ but with $i$ replaced by $-i$, so that $x_2 \in \mathbb{Z}[\sqrt{2}, \sqrt{3}]$. Repeating for $\sqrt{2}$ gives $x_3 \in \mathbb{Z}[\sqrt{3}]$, and then repeating for $\sqrt{3}$ gives $x_4 \in \mathbb{Z}$. Now we can set $c_4 = 1/x_4$ to get $x_5 = 1$ and hence $y_5 = a^{-1}$. For example if $a = \omega_{6} = (\sqrt{3} + i)/2$, then the process looks like this:
-\begin{align*}
-x_0 &= (\sqrt{3} + i)/2 & y_0 &= 1 & c_0 &= 2 \\
-x_1 &= \sqrt{3} + i & y_1 &= 2 & c_1 &= \sqrt{3}-i \\
-x_2 &= 4 & y_2 &= 2\sqrt{3}-2i & c_2 &= 4 \\
-x_3 &= 16 & y_3 &= 8\sqrt{3}-8i & c_3 &= 16 \\
-x_4 &= 256 & y_4 &= 128\sqrt{3}-128i & c_4 &= 1/256 \\
-x_5 &= 1 & y_5 &= (\sqrt{3}-i)/2 & \\
-\end{align*}
-In practice we could have stopped earlier, in fact for any root of unity it will be enough to multiply by the complex conjugate, but checking for these conditions for early termination is very likely to be slower for a CPU than to simply finish the calculation as we have above.
-
-Next we represent a complex matrix as a $6\times 6$ array of Num, taking a total of 1296 bytes per matrix! Matrix multiplication is defined in the usual way, by setting $c_{ik} = \sum_j a_{ij}b_{jk}$, but reduced matrix multiplication was also defined, where the matrix is scaled so that the first non-zero entry of the matrix is exactly 1. We also represent a permutation in $\mathcal{S}_6$ as 6 bytes, representing a lookup table of a map $\{1\dots 6\} \to \{1 \dots 6\}$.
-
-\subsection{The Search Algorithm}
-We now have an implementation of two groups, $GL(6, \text{Num})$, [define $GL$] and $\mathcal{S}_6$, so now we can implement the search itself. The search has six non-optional parameters:
-\begin{enumerate}
-	\item \verb`gen_len` the amount of `letters' in the generator set
-	\item \verb`gen`, the array of letters, each of type \verb`void*`
-	\item \verb`names`, string data to print when describing new words that were found
-	\item \verb`elem_size`, the size in memory of an element of the group
-	\item \verb`compose`, a binary operation acting on group elements
-	\item \verb`print_elem`, a procedure to display the group element (matrix or permutation) that has been generated
-\end{enumerate}
-The search then generates an array of \verb`PathNode`s, (named after the geometric interpretation of groups as `Cayley graphs' [I could change the source code so that I don't need to explain the weird names!]) which are tuples containing
-\begin{itemize}
-	\item the word length of the corresponding element generated
-	\item a pointer to an earlier \verb`PathNode`, called the predecessor; may be \verb`NULL`
-	\item the leftmost letter of the word, which when added to the predecessor gives the current word in question
-	\item a \verb`void*` pointer to the unique group element that was found, called \verb`result`
-\end{itemize}
-The procedure also prints each object as it generates them, for example:
-\begin{verbatim}
- X3 D2 X2:
-0, 0, 0, 0, 0, -i, 
-0, 0, 0, -i, 0, 0, 
-0, 0, 0, 0, -i, 0, 
-0, 0, 1, 0, 0, 0, 
-1, 0, 0, 0, 0, 0, 
-0, 1, 0, 0, 0, 0, 
-\end{verbatim}
-
-The algorithm itself is a breadth first search, where the array of \verb`PathNode`s is also used as the queue of elements not yet searched. The array is initialized to contain the letters themselves, as words of length 1 with no predecessor, and a pointer \verb`curr` is initialized to the start of the array. Then new group elements are generated via \verb`compose(gen[i], curr->result)`, checked for uniqueness, and if they are unique they are appended to the array. Once \verb`curr` reaches the end of the array, we will have proven that the group is finite, and have enumerated all of its elements.
-
-Checking uniqueness becomes quite slow, the biggest group that was exhaustively generated had 165888 matrix elements, meaning the minimum number of matrix comparisons needed would have been 13759331328, which is like comparing 16 terabytes of data, one kilobyte at a time. In order to overcome this we also implement an open addressed hash map, using a technique called Robin Hood hashing. [quick reference for this I guess!] The hash map takes the \verb`void*` corresponding to the group element in question, and generates a hash by literally shuffling bits around using the XOR and SHIFT operations offered in C. The hash is then used as an offset into an additional array, called the hash table, where another pointer to the group element will be stored. When a new group element is calculated, rather than search for that group element within a whole megabyte of existing elements, we simply calculate its hash, and check if the element we are looking for is in the correct location in the hash table.
-
-Things are complicated when two group elements correspond to the same location in the hash table, which is where the lookup algorithm must `probe' for other locations near the offset associated with the hash, to store the new entries there instead. Robin hood hashing/probing is a small optimization on this concept, allowing entries to be moved again after being written the first time, to make room for other entries that would otherwise end up too far from their original offset; minimizing this `probe distance' from the original offset of a hash entry makes lookups faster, especially as the hash table becomes full. Another technical detail is the fact that since we never remove entries from the hash table, and only run the program once before exiting, we don't need to allocate, reallocate, ore remove entries from the hash table; we simply use a global block of memory, and implement lookup and insert procedures, and we are done.
-
-With this technology in place, all that remains is to wire it together, with definitions for \verb`compose`, and \verb`print_elem`. For permutations, we compose $x$ and $y$ by setting \verb`xy[i] = x[y[i]]`, and for matrices we multiply, and divide out the first non-zero scale factor, essentially implementing the quotient group $U(6)/U(1)$. We also check the order of the matrix, as a simple heuristic for detecting infinite order groups; If we can calculate the order without causing an integer overflow then we continue generating the group, but if any of the 324 integers in our matrix representation are above some threshold, we assume the order is infinite, represented by \verb`-1`, and print this fact, to indicate that the search is unlikely to terminate. We actually continue regardless of the order, since it might be worth knowing which words of similar size have infinite order as well.
-
-\subsection{Results}
-Call the six generators of the Clifford group other than $H_2$ and $H_3$ the reduced generator set $R$. [we haven't defined generators at all!] Then $\langle R, H_2, H_3 \rangle$ is a finite Clifford group, and $\langle R, C_2(X_3), C_3(X_2) \rangle$ is a subgroup of the generalized symmetric group and therefore finite as described previously, but additionally, $\langle R, H_2, C_3(X_2)\rangle$ and $\langle R, H_3, C_2(X_3)\rangle$ are finite. [suddenly realizing that the orbits of these groups would be easier to analyze than the groups themselves, since the orbits implicitly quotient out permutations on the computational basis, and by removing global phase matrices will have no effect on their eigenvectors as well]
-
-The last two generators we could consider, $\langle R, H_2, C_2(X_3)\rangle$, and $\langle R, H_3, C_3(X_2)\rangle$, both trigger an integer overflow when calculating the order of the products $C_2(X_3)H_2$, and $C_3(X_2)H_3$.
-
-The exact values of these matrices are
-\begin{align*}
-	C_2(X_3)H_2 &=
-	\frac{1}{\sqrt{2}}
-	\begin{bmatrix}
-		1&0&0&0&0&0\\
-		0&1&0&0&0&0\\ 
-		0&0&1&0&0&0\\ 
-		0&0&0&0&0&1\\ 
-		0&0&0&1&0&0\\ 
-		0&0&0&0&1&0
-	\end{bmatrix}
-	\begin{bmatrix}
-		1&0&0&1&0&0\\ 
-		0&1&0&0&1&0\\ 
-		0&0&1&0&0&1\\ 
-		1&0&0&-1&0&0\\ 
-		0&1&0&0&-1&0\\ 
-		0&0&1&0&0&-1
-	\end{bmatrix}
-	\\&=
-	\frac{1}{\sqrt{2}}
-	\begin{bmatrix}
-		1&0&0&1&0&0\\ 
-		0&1&0&0&1&0\\ 
-		0&0&1&0&0&1\\ 
-		0&0&1&0&0&-1\\ 
-		1&0&0&-1&0&0\\ 
-		0&1&0&0&-1&0
-	\end{bmatrix}
-\end{align*}
-For a $6\times6$ matrix this seems fairly innocuous, and the other doesn't look much worse
-\begin{align*}
-C_3(X_2)H_3 &=
-\frac{1}{\sqrt{3}}
-\begin{bmatrix}
-	1&0&0&0&0&0\\
-	0&1&0&0&0&0\\ 
-	0&0&0&0&0&1\\ 
-	0&0&0&1&0&0\\ 
-	0&0&0&0&1&0\\ 
-	0&0&1&0&0&0
-\end{bmatrix}
-\begin{bmatrix}
-	1&1&1&0&0&0\\ 
-	1&\omega_3&\omega_3^2&0&0&0\\ 
-	1&\omega_3^2&\omega_3&0&0&0\\ 
-	0&0&0&1&1&1\\ 
-	0&0&0&1&\omega_3^2&\omega_3\\ 
-	0&0&0&1&\omega_3&\omega_3^2
-\end{bmatrix}
-\\&=
-\frac{1}{\sqrt{3}}
-\begin{bmatrix}
-	1&0&0&0&0&0\\
-	0&1&0&0&0&0\\ 
-	0&0&0&0&0&1\\ 
-	0&0&0&1&0&0\\ 
-	0&0&0&0&1&0\\ 
-	0&0&1&0&0&0
-\end{bmatrix}
-\begin{bmatrix}
-	1&1&1&0&0&0\\ 
-	1&\frac{-1 +\sqrt{3}i}{2}&\frac{-1 -\sqrt{3}i}{2}&0&0&0\\ 
-	1&\frac{-1 -\sqrt{3}i}{2}&\frac{-1 +\sqrt{3}i}{2}&0&0&0\\ 
-	0&0&0&1&1&1\\ 
-	0&0&0&1&\frac{-1 +\sqrt{3}i}{2}&\frac{-1 -\sqrt{3}i}{2}\\ 
-	0&0&0&1&\frac{-1 -\sqrt{3}i}{2}&\frac{-1 +\sqrt{3}i}{2}
-\end{bmatrix}
-\\&=
-\frac{1}{\sqrt{3}}
-\begin{bmatrix}
-1&1&1&0&0&0\\ 
-1&\omega_3&\omega_3^2&0&0&0\\
-0&0&0&1&\omega_3^2&\omega_3\\ 
-0&0&0&1&1&1\\ 
-0&0&0&1&\omega_3&\omega_3^2\\
-1&\omega_3^2&\omega_3&0&0&0
-\end{bmatrix}
-\end{align*}
-[keeping the middle entry for now for Symbolab]
-
-But if we raise the simpler of these to the fourth power, it becomes quite chaotic:
-\[\left(C_2(X_3)H_2\right)^4 =
-\frac{1}{4}
-\begin{bmatrix}
-	2&-1&3&0&-1&1\\ 
-	3&2&-1&1&0&-1\\ 
-	-1&3&2&-1&1&0\\ 
-	-1&1&0&3&-1&2\\ 
-	0&-1&1&2&3&-1\\ 
-	1&0&-1&-1&2&3
-\end{bmatrix}
-\]
-
-The second power is $C_2(X_3)H_2C_2(X_3)H_2$, which resembles the infinite order term from \cite{universal-qubit}, a non-Clifford matrix, times the Fourier transform of that matrix, [I haven't explained why I call it the Fourier transform of the matrix] and when we ask Wolfram Mathematica for its characteristic polynomial we get
-\[1/4 (\lambda - 1)^2 (4 \lambda^4 + 2 \lambda^3 - 3 \lambda^2 + 2 \lambda + 4)\]
-This rational polynomial has an irreducible factor that is cyclotomic and another that is non-cyclotomic, which by the reasoning used in \cite{universal-qubit} tells us that as we expected, one of its eigenvalues is a root of unity, and another is not, meaning no scale multiple of this matrix is finite order, and so $\langle R, H_2, C_2(X_3) \rangle$ really is an infinite group. Further $C_2(X_3)H_2$ is also infinite order, since two of its eigenvalues will square to roots of unity, and are therefore also roots of unity, whereas the other four will square to non-roots of unity, and are therefore also not roots of unity.
-
-Inspired by this, we could calculate
-\[C_3(X_2) H_3^{-1} C_3(X_2) H_3 =
-\frac{1}{3} \begin{bmatrix}
-2 & \omega_6 & \omega_6^2 & 1 & \omega_6^4 & \omega_6^5 \\
-\omega_6^2 & 2 & \omega_6 & \omega_6^5 & 1 & \omega_6^4 \\
-\omega_6^4 & \omega_6^5 & 1 & \omega_6 & \omega_6^2 & 2 \\
-1 & \omega_6^4 & \omega_6^5 & 2 & \omega_6 & \omega_6^2 \\
-\omega_6^5 & 1 & \omega_6^4 & \omega_6^2 & 2 & \omega_6 \\
-\omega_6 & \omega_6^2 & 2 & \omega_6^4 & \omega_6^5 & 1
-\end{bmatrix}
-\]
-[a. I still need Mathematica up before I can get a polynomial for this b. this doesn't necessarily have the novelty of the $H_2$ case? I don't know the geometry]
-
-There are 720 different permutations in $\mathcal{S}_6$, 12 of which are already in the Clifford group, and we have shown manually that one of the remaining 708 is infinite order when multiplied with $H_2$. It is quite difficult to prove that a matrix is infinite order using this method, especially when it isn't sparse the way $H_2$ is, and often the characteristic polynomial has $\sqrt{2}$ or $\sqrt{3}$ coefficients which would require deeper number theory than we have presented here, so we return now to the search for matrices that we can prove are finite order. We can write another C program extending the existing codebase to exhaustively generate all $6^6$ tables of integers, and generate matrices for the $720$ that are permutations. Then we attempt to calculate the order of $P H_2$ and $P H_3$, and report when either or both have a finite order that we could calculate. Other than the 12 Clifford permutations, the only $P$ for which both $P H_2$ and $P H_3$ were finite order were the 12 matrices of the form
-\[X_2^a C_2(S_{p,q}) X_2^b\text{\ where\ }a, b \in \{0, 1\}, p, q \in \{0, 1, 2\}, p \neq q.\]
-This seems promising, but in fact such $P$ will still have $\langle P, H_2, H_3\rangle$ infinite order, since $P H_3^2 = P S_{1,2}$ will not be in the above form, meaning $\langle P, H_2, H_3 \rangle$ is still infinite order, and so the only time where $\langle P, H_2, H_3 \rangle$ can be finite is if $P \in \mathcal{C}_2$ anyway, meaning $P$ is simply the Kronecker product of a qubit operation and a qutrit operation. [need to emphasise this a little more, maybe just theorem it, something I'm going to do anyway]
-
-The final result of this program is that we can use it to check that
-\[\langle X_2, C_3(X_2), X_3, C_2(X_3) \rangle = \mathcal{S}_6,\]
-This is how we know that
-\[C_2(S_{p,q}) \in \langle X_2, C_3(X_2), X_3, C_2(X_3) \rangle\]
-which is where we found the word for $C_2(S_{p,q})$ given in \ref{}. Additionally since we have $C_2(X_3) = C_2(S_{0,1})X_3C_2(S_{0,1})X_3$, we can infer that
-\[\langle X_2, C_3(X_2), X_3, C_2(S_{0,1})\rangle = \mathcal{S}_6\]
-also. These results are interesting but it is important not to forget about the qubit-qubit and qutrit-qutrit control gates which were essential for universal computation, which are concealed by this myopic discussion of $U(6)$.
-
-\subsection{Non-Clifford States}
-[I should be talking about magic states sooner as a part of fault tolerance computation and as a motivation for having finite gate sets, I could write some stuff about the following circuits but I need to know what I've actually set up at this point]
-
-\begin{quantikz}
-\lstick{qubit $\ket{0}$} & \gate{H} & \gate{T} & \targ{} & \qw \rstick{$\ket{0}+\omega_4\ket{1}$}\\
-\lstick{qubit $\ket{\phi}$} & \qw & \qw & \phase{0}\vqw{-1} & \qw \rstick{$\omega_4^3T\ket{\phi}$}
-\end{quantikz}
-
-\begin{quantikz}
-\lstick{qubit $\ket{0}$} & \gate{H_2} & \phase{1} \vqw{1} & \gate{H_2} & \meter{0/1} & \qw\rstick{$\ket{0}$ or $\ket{1}$}\\
-\lstick{qutrit $\ket{0}$} & \qw & \targ{} & \qw & \qw & \qw \rstick{$\ket{+_{0,1}}$ or $\ket{-_{0,1}}$}
-\end{quantikz}
-
-\begin{quantikz}
-\lstick{qubit $\ket{0}$} & \qw & \targ{} & \meter{0/1} & \qw \rstick{$\ket{0}$ or $\ket{1}$} \\
-\lstick{qutrit $\ket{0}$} & \gate{H_3} & \phase{2} \vqw{-1} & \qw & \qw \rstick{$\ket{+_{0,1}}$ or $\ket{2}$}
-\end{quantikz}
