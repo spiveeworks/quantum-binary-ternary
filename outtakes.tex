@@ -15,6 +15,90 @@
 
 \begin{document}
 
+
+\subsection{Multi-Valued Logic}
+When the final operation $U_j$ in the above decomposition acts on a qutrit or higher, rather than a qubit, the remaining steps become much more difficult, simply because the geometry of $U(n)/U(1)$ is more complicated than that of $U(2)/U(1)$. In order to overcome this the paper \cite{multi-valued-logic} uses a different approach, by outlining a way of implementing a family of gates with arbitrarily many elements, depending on the required accuracy of implementation, and presents a separate proof that this family of gates is universal.
+
+The family of gates they describe and utilize are a generalization of the controlled $X$ and controlled $Z$ gates, in a $d$-dimensional quantum computer, the following:
+\[\Gamma X(\ket{\phi}) = C_{p_1 = d-1}(\ket{d-1}\bra{\phi} + \dots)\]
+\[\Gamma Z(\theta) = C_{p_1 = d-1}\left(e^{i\theta}\ket{d-1}\bra{d-1} + \dots\right)\]
+That is, the $\Gamma X$ family conditionally maps some state $\ket{d-1}\ket{\phi}$ to $\ket{d-1}\ket{d-1}$, and the $\Gamma Z$ family applies some relative phase factor to the state $\ket{d-1}\ket{d-1}$. When the control object is in state $\ket{d-1}$ the effect on all other states are arbitrary, so long as the resulting operation is unitary. When the control object is not in state $\ket{d-1}$ the operation has no effect.
+
+This paper is a very promising theoretical and practical foundation for working with quantum systems with multiple objects all of one arbitrary dimension, especially systems based on the linear ion trap, but due to how different its approach is to ours, we only take one thing from it, which is a way of decomposing control operations $C_c(U_j)$ using auxiliary qutrits (or higher) instead of auxiliary qubits.
+
+The process is identical to what we just described using Toffoli gates, except by introducing an auxiliary qutrit with index $k$, as opposed to the qubit with index $k$, and defining $p_k = 2$, we can use two single-controlled increments instead of one double-controlled (i.e.\ Toffoli) gate:
+\[
+C_c(U_j) = C_{r_{i_1}=p_{i_1}}(X_k)^{-1}
+C_{r_{i_2}=p_{i_2}}(X_k)^{-1}
+C_{c'}(U_j)
+C_{r_{i_2}=p_{i_2}}(X_k)
+C_{r_{i_1}=p_{i_1}}(X_k)
+\]
+Since $X_k$ is an increment operation acting on a qutrit, it will not be involutory the way that a qubit increment is, so we need to invert it explicitly. [Muthukrishnan used transpositions, and we will be using transpositions as well, so we should move the single-object transpositions up to this section or earlier, and change this to C(S) instead of C(X). Then have a note about how you could use C(X) instead if that is available more directly, since we will eventually implement C(S) in terms of C(X). maybe that note should go in chapter 3 when we make that implementation of C(S)?]
+
+In \cite{multi-valued-logic} this was done more efficiently, effectively setting $p_k = d-1$ rather than $p_k = 2$, and performing $d-1$ separate controlled operations for each auxiliary object added, but since we only consider qutrits this is equivalent.
+\section{Universality of Composite Systems}
+Earlier we outlined how 7 techniques can be used in order to decompose any unitary in $U(N)$ into an approximating series of gates from the finite generator set $\{H, T, C(X)\}$. In order to make sense of computation in mixed systems we ought to propose at least one gate set that is universal. Recall our definition of transposition matrices:
+\[S_{p_1\dots p_n, q_1\dots q_n}(\ket{r_1}\dots\ket{r_n}) = \begin{cases}
+	\ket{p_1}\dots\ket{p_n} & \text{if\ } r_i = q_i \forall i \in \mathbb{Z}, 1 \leq i \leq n \\
+	\ket{q_1}\dots\ket{q_n} & \text{if\ } r_i = p_i \forall i \in \mathbb{Z}, 1 \leq i \leq n \\
+	\ket{r_1}\dots\ket{r_n} & \text{otherwise}
+\end{cases}
+\]
+This definition works as-is for arbitrary composite systems, which will be useful for our generalization, but we also define $S_{p,q}$ [suddenly realizing I use $\ket{i}$ and $\ket{j}$ for single systems... if I switch to a consistent notation I will need to switch to $p$ and $q$ as well!] acting on single objects within a composite system:
+\[S_{p, q}\ket{r} =
+\begin{cases}
+	\ket{p} & \text{if\ } r = q \\
+	\ket{q} & \text{if\ } r = p \\
+	\ket{r} & \text{otherwise}
+\end{cases}
+\]
+[ambiguous vs $S_{p_i, q_i}$... maybe $S_{(p_i),(q_i)}$?]
+
+Then our first goal is to prove [theorem?] that any unitary matrix acting on some composite system, $U \in U(N) = U(\prod_i d_i)$, with at least one qubit, i.e.\ some $j$ such that $d_j = 2$, that the gate set $\{H, T\} \cup \{S_{p,q}\} \cup \{C(S_{p,q})\}$ is universal.
+
+We have from existing qubit literature that such a matrix can be decomposed into unitaries acting on various axis aligned planes, which can then be decomposed into multi-controlled operations $C_c(U_j)$ acting on some qubit, sandwiched by transpositions $S_{(p_i),(q_i)}$. Now we follow much the same procedure as before, but instead of only having the single transposition $S_{0, 1} = X_2$ to work with, we work with general transpositions $S_{p, q}$.
+
+First recall the algorithm for decomposing a transposition into controlled increments, which we generalize by simply decomposing into controlled transpositions. [I should probably use the term NOT, so that it is more intuitive how control increment and control transposition are both generalizations of control NOT] If $p_i = q_i$ for all $i$ except one $i = k$, then $S_{(p_i), (q_i)}$ is already a controlled operation $C_c(S_{p_k,q_k})$. If $p_i$ and $q_i$ differ by more than one value then decompose into two transpositions $S_{(p_i), (p'_i)}S_{(p'_i), (q_i)}$ and then inductively turn each one into a series of controlled transpositions.
+
+Now the way that we decompose the controlled objects depends on the dimension of our auxiliary objects. If there are auxiliary qutrits or higher then we can use the decomposition we derived from \cite{multi-valued-logic}, reducing the size of the control set via
+\[
+C_c(U_j) = C_{r_{i_1}=p_{i_1}}(S_{0,1})
+C_{r_{i_2}=p_{i_2}}(S_{1,2})
+C_{c'}(U_j)
+C_{r_{i_2}=p_{i_2}}(S_{1,2})
+C_{r_{i_1}=p_{i_1}}(S_{0,1})
+\]
+Otherwise if there are only auxiliary qubits available we can use the Toffoli decomposition, with a target qubit and two control objects that could be of any dimension. The gate would still be written $C_{r_{i_1}=p_{i_1},r_{i_2}=p_{i_2}}(X_j)$. [implementing this double-controlled gate would require some elaboration, I'll need to explain the circuit for implementing Toffoli using $C(\sqrt{X})$ and generalize that. Also implementing $C(U_j)$ in terms of $C(X)$ needs some explanation! It's just the first two and the last steps that stay the same. It would also be good to explain how in binary $S_{0,1} = X_2 = HT^4H$, and $C_{p=0}(U_j) = X_pC_{p=1}(U_j)X_p$, in fact does the basis need $S_{p,q}$? or just $C_{r_i=d_i-1}(S_{p_j,q_j})$ and $X_i$...]
+
+This is a straight forward generalization of the universality result for qubits, but requires a lot of different permutation matrices in order to be complete, so while the above argument is generic to any composite system, it is not that useful by itself. We do not stop here, however; by specifying that all objects are qubits or qutrits we can make further decompositions and get a set of 5 gates. [note somewhere that this isn't proven to be minimal, it's meant to be enough to work with]
+
+\section{Cliff Plus T basis}
+Universal computation for qubit computers is described in full detail in \cite{textbook}, based on the approach described in the papers \cite{universal-qubit}, which extends the results of \cite{cnot-decomposition} to achieve universality with only 3 gates:
+\begin{align*}
+	H_2 = \frac{1}{\sqrt{2}}\left[\begin{matrix}
+		1 & 1 \\
+		1 & -1
+	\end{matrix}\right]
+	\\
+	T_2 = \left[\begin{matrix}
+		1 & 0 \\
+		0 & \frac{1}{\sqrt{2}}\left(1+ i\right)
+	\end{matrix}\right]
+	\\
+	C_{p_0=1}(X_2) = \left[\begin{matrix}
+		1 & 0 & 0 & 0 \\
+		0 & 1 & 0 & 0 \\
+		0 & 0 & 0 & 1 \\
+		0 & 0 & 1 & 0 \\
+	\end{matrix}\right]
+\end{align*}
+If a quantum computer has these operations available as elementary gates on every qubit in the system, and has $C(X)$ implemented as an elementary gate on enough pairs of qubits, so that $C(X)$ can be implemented indirectly for all remaining pairs, then this quantum computer will satisfy universal computation. In practice a quantum computer can implement more than just these operations, and doing so will generally allow more efficient implementation of quantum algorithms, but this set of 3 gates is a theoretically interesting sufficient condition for quantum universality.
+\section{Ternary Logic}
+Although these techniques about the polynomial algebra of ternary logic are novel and powerful, they were a secondary result of \cite{arithmetics}, whereas the main goal was to provide concrete circuits that could implement addition of ternary integers, since integer addition is central to arithmetic. [``Factoring with Qutrits'' is a big deal here, and has a lot of results that are hard to parse... they are surprising (metaplectic performs better than supermetaplectic, binary performs better than ternary in width-limited systems) but might be quite specific to the metaplectic architectures being considered by this group... I don't know if I have time to account for that paper properly, but it's a good one so it would be ideal if I did!] They provide two algorithms that both perform addition, but one requiring a larger amount of physical time to compute, [should define width vs depth] where the other uses parallel computation on a larger number of qutrits in order to perform the calculation faster.
+
+These algorithms are implemented in ways that leverage coincidences of having exactly 3 dimensions, and exemplify what efficient ternary algorithms should look like, but they also raise the question of whether a mixed binary-ternary quantum computer could implement these algorithms more efficiently. In this section we give an overview of these algorithms as presented in \cite{arithmetics}, [their performance in the context of Shor's factoring algorithm as presented in ``Factoring with Qutrits'', and raise some basic questions about how all of these algorithms would look if implemented in a fault tolerant, mixed logic system. [ultimately providing motivation for the universality argument we give in chapter 3, and I think also providing motivation for fault tolerant implementation of our basis in a system that is physically ternary] [this is such a strong motivator, but I want to be careful that they haven't already talked about fault tolerance, like in the topological-anyon-thing paper, or if they have then be mindful of what they have said... post-hoc justification of things takes a lot of last minute reading!]
+
 \section{Discussion}
 We have found that having access to the 2- and 3-dimensional Fourier transforms, along with any permutation that acts dependently on a qubit-qutrit pair, seem to be enough to produce infinite order operations, and in particular we found the gates $H_2 C(X_3)$ and $H_3 C(X_2)$ are infinite order. This means that $C(X_2)$ and $C(X_3)$ are analogous to the phase gate $Z^{\frac{1}{4}}$ in that they are finite order but with a Fourier transform become infinite order. It was seen in \cite{universal-qubit} that the phase gate and the Fourier transform are therefore universal for single qubit operations, which may have an analogue for mixed-logic using these gates, meaning that the same gates we use to implement permutations are likely universal as well when combined with the Clifford operations. [Clifford+1 maybe this is obvious? not sure whether that result is dimension-specific or not general]
 

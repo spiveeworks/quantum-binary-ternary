@@ -385,12 +385,32 @@ b
 \]
 \subsection{Evolution}
 The second postulate of quantum mechanics can be stated in three equivalent ways: Given a closed quantum system with initial state vector $\ket{\phi}$ these 3 equivalent equations hold:
-\[-i\hbar\frac{d}{dt}\ket{\phi} = H\ket{\phi}\]
-\[\ket{\phi} = \exp\left(i \frac{tH}{\hbar}\right)\ket{\phi_0}\]
+\[-\frac{ih}{2\pi}\frac{d}{dt}\ket{\phi} = H\ket{\phi}\]
+\[\ket{\phi} = \exp\left(\frac{i 2\pi tH}{h}\right)\ket{\phi_0}\]
 \[\ket{\phi} = U\ket{\phi_0}\]
-Where $\hbar$ is the reduced Planck constant, which is a known scalar constant, $H$ is the Hamiltonian operator, a Hermitian operator associated with the energy present in the system, and $U$ is the unitary operator arising from fixing $t$ before exponentiating $itH/\hbar$.
+Where $\hbar$ is the reduced Planck constant, which is a known scalar constant, $H$ is the Hamiltonian operator, a Hermitian operator associated with the energy present in the system, and $U$ is the unitary operator arising from fixing $t$ before exponentiating $i2\pi tH/h$.
 
-A quantum computer, then, is simply a device that is able to manipulate the Hamiltonian $H$ of a quantum system, for specific durations of time $t$. When a quantum computer is capable of implementing a particular $H$, $t$ pair, we call the corresponding unitary matrix $U$ an elementary gate of the quantum computer. Composing these elementary gates will always give some overall unitary matrix $U = U_1U_2\dots U_k$, so the core of quantum computation then, is to understand how computationally interesting unitary matrices can be implemented using elementary gates of a quantum computer.
+A quantum computer, then, is simply a device that is able to manipulate the Hamiltonian $H$ of a quantum system, for specific durations of time $t$. For example, suppose there is a qubit system such as an electron that can be in one of two spin states, or an ion that can be in ground or excited states, and there is an external electromagnetic field that can be activated on command which affects one of these qubit states without affecting the other, giving a Hamiltonian like
+\[H = \begin{bmatrix}
+0 & 0 \\ 0 & c
+\end{bmatrix},\]
+then by setting $t = h/2c$ we get
+\begin{align*}
+U &= \exp\left(\frac{i 2\pi tH}{h}\right)
+\\&= \exp\left(\begin{bmatrix}
+0 & 0 \\
+0 & \frac{i 2\pi tc}{h}
+\end{bmatrix}\right)
+\\&= \exp\left(\begin{bmatrix}
+0 & 0 \\
+0 & i\pi
+\end{bmatrix}\right)
+\\&= \begin{bmatrix}
+1 & 0 \\
+0 & -1
+\end{bmatrix}
+\end{align*}
+When a quantum computer is capable of implementing a particular $H$, $t$ pair, we call the corresponding unitary matrix $U$ an elementary evolution of the quantum computer. Composing these elementary evolutions will always give some overall unitary matrix $U = U_1U_2\dots U_k$, so the core of quantum computation then, is to understand how computationally interesting unitary matrices can be implemented using elementary evolutions of a quantum computer. [elementary evolution is a new term, if I am happy with this then I should ctrl-f for the word elementary to see where I use the term gate, and change it to evolution. once I've described fault tolerance and magic states a little, I'd like to introduce the term elementary gate as vaguely relating to fault tolerance instead, so that the $\{T, H\}$ basis is a little better justified]
 \subsection{Measurement}
 Although the quantum systems we are discussing are represented as having a continuous state space of possible state vectors, a fundamental (and titular!) peculiarity of quantum mechanics is that when observed, a quantum object will always appear to be in states that are elements of some orthonormal basis of the corresponding Hilbert space. What is more peculiar, and more well known of quantum mechanics, is that the state that is measured becomes the new state of the system.
 
@@ -518,8 +538,86 @@ While this is straight-forward for states that are simply the Kronecker product 
 
 \section{Quantum Computation}
 
-With quantum mechanics and the associated concept of a quantum algorithm in place, we can begin to reason about the techniques of quantum computation. To this end we shall briefly discuss the computer science of probabilistic vs deterministic algorithms, as well as the group theory of different sets of unitary matrices, important concepts that lay the foundation of technical discussions in the field of quantum computation. With this in place we shall be prepared to discuss the state of the field when it comes to quantum computation on objects with more than two basis states.
+With quantum mechanics and the associated concept of a quantum algorithm in place, we can begin to reason about the techniques of quantum computation. To this end we shall briefly discuss the computer science of probabilistic vs deterministic algorithms, as well as the group theory of different sets of unitary matrices, important concepts that lay the foundation of technical discussions in the field of quantum computation. With this in place we shall be prepared to discuss the state of the field when it comes to quantum computation on objects with more than two basis states. [and uh... our own findings!]
 
+\subsection{Classical Computation in Quantum Algorithms}
+In classical computation we can imagine an algorithm or circuit mapping some $M$ discrete states to some $N$ discrete states, according to some function $f: \{0\dots M-1\} \to \{0\dots N-1\}$. (say $M = 2^m,\ N = 2^n$ where $m$ and $n$ are the number of physical wires leading in and out of the circuit) For example we could define the logical conjunction or AND map which maps pairs of bits $\{00, 01, 10, 11\}$ to single bits $\{0, 1\}$: 
+\begin{align*}
+	\text{AND}(x) = \begin{cases}
+		1 & \text{if\ } x = 11\\
+		0 & \text{otherwise}
+	\end{cases}
+\end{align*}
+
+Given such a map $f$ we can define a linear operator by extending linearly on the computational basis: $A_f\ket{i} = \ket{f(i)}$, giving a matrix whose columns are all computational basis vectors. For example our logical conjunction becomes:
+
+\[
+A_\text{AND} = \left[\begin{matrix}
+	1&1&1&0\\
+	0&0&0&1
+\end{matrix}\right]
+\]
+
+In quantum computation we require that all operations be reversible, unitary operations. This means that a matrix $A_f$ representing a classical computation $f$ will be available as a unitary operator if and only if $M=N$ and $f$ is invertible, i.e.\ if $f$ is a permutation. When $M = N = 2$ we only have two such permutation matrices:
+\begin{align*}
+	I = \left[\begin{matrix}
+		1&0\\
+		0&1
+	\end{matrix}\right]
+	&&&
+	X = \left[\begin{matrix}
+		0&1\\
+		1&0
+	\end{matrix}\right]
+\end{align*}
+
+Maps that don't satisfy $M = N$ or $f$ invertible can still be represented as a permutation matrix, acting on $\mathbb{C}^{M\times N}$ as follows:
+\[B_f(\ket{i}\otimes\ket{j}) = \ket{i}\otimes\ket{j+f(i) \mod N}\]
+
+The inverse of this matrix is simply $\ket{i}\ket{j} \mapsto \ket{i}\ket{j-f(i) \mod N}$.
+
+In the case of the binary AND map, $B_{\text{AND}}$ will be a $8\times8$ permutation matrix known as the Toffoli gate. It can be shown that compositions of Toffoli gates acting on some number of bits can be used to implement any $n$-qubit permutation matrix as an algorithm on some larger number of qubits $n+m$, so long as the extra $m$ qubits are initialized to known values.
+
+Permutation matrices by themselves might not seem interesting, since they exclusively represent calculations that can be done in classical contexts, but in fact are crucial for many quantum algorithms, since they will act linearly on superposition states. For example if we consider the map $f(x) = x^2\mod 16$, then the constructed matrix $B_f$ acting on 8 qubits will of course distribute linearly over any linear combination of basis states including the following:
+\begin{align*}
+	B_f(\ket{2}\ket{0}+\ket{5}\ket{0}) 
+	= B_f\ket{2}\ket{0} +& B_f\ket{5}\ket{0}
+	\\= \ket{2}\ket{4} +& \ket{5}\ket{9}
+\end{align*}
+
+Further manipulations or measurement of the result of such a transformation can enable many powerful quantum algorithms including Shor's period finding algorithm. This means that permutation matrices are an important topic in quantum computation, and a good deal of research has been and continues to be done to better understand how permutation matrices can be decomposed into efficient quantum algorithms.
+
+\subsection{Quantum Circuits}
+We have described quantum algorithms as a sequence of unitary transformations and measurements on quantum states represented using Kronecker products, but as the number of quantum objects gets large the relevant vectors and matrices grow exponentially, which is a problem because these exponentially large operations are precisely the ones that we can't calculate on a classical computer, so they are of the most interest. In order to notate these operations which could become quite large, we introduce the quantum circuit diagram. [I don't have a citation for this! This one is legitimately common knowledge]
+
+The diagram resembles a musical staff, with multiple horizontal lines representing distinct quantum objects, and with squares on these gates representing operations that should be performed on these objects over time:
+
+\begin{quantikz}
+\lstick{$\ket{\phi}$} & \gate{U_1} & \gate{U_3} & \qw \rstick{$\ket{\phi'}$} \\
+\lstick{$\ket{0}$} & \gate{U_2} & \qw & \qw \rstick{$\ket{\psi}$}
+\end{quantikz}
+
+This would represent two quantum objects, initially in states $\ket{\phi}$ and $\ket{0}$, i.e.\ the whole system was in state $\ket{\phi}\otimes\ket{0}$. Then $U_1\otimes U_2$ is applied to this state, giving
+\[(U_1 \otimes U_2)(\ket{\phi} \otimes \ket{0}) = (U_1\ket{\phi})\otimes (U_2\ket{\phi})\]
+and then $U_3 \otimes I$, giving overall
+\[(U_3 \otimes I)((U_1\ket{\phi})\otimes (U_2\ket{\phi})) = (U_3U_1\ket{\phi})\otimes (U_2\ket{0})\]
+We also label these final states $\ket{\phi'} = U_3U_1\ket{\phi}$, and $\ket{\psi} = U_2\ket{0}$.
+
+These diagrams are inspired by classical circuit diagrams, and as such the horizontal lines are typically referred to as `wires', but unlike classical circuits there is no such wire in practice. The horizontal axis of a quantum circuit is strictly chronological, as a single object evolves over time, usually while sitting still in space. Additionally wires can't split or merge, reflecting the fact that all quantum circuits are reversible between measurements. Measurements can still be included in a quantum circuit, however. For example measuring the $\ket{+}$ state can be written:
+
+\begin{quantikz}
+\lstick{$\ket{+}$} & \meter{} & \qw \rstick{$\ket{0}$ or $\ket{1}$}
+\end{quantikz}
+
+In general measurement can be quite flexible, with different bases of measurement, and with conditional execution of gates depending on the result of measurement, but we only need this simplest case of measurement in the computational basis.
+
+Finally when something other than a Kronecker product of single-object matrices is applied, we can have boxes spanning multiple wires:
+
+\begin{quantikz}
+	\lstick{$\ket{i}$} & \gate[2]{B_f} & \qw \rstick{$\ket{i}$}\\
+	\lstick{$\ket{j}$} & & \qw \rstick{$\ket{j + f(i) \mod 2}$}
+\end{quantikz}
+[almost like we should have used this example earlier]
 \subsection{Probabilistic Algorithms}
 In computer science there is a distinction between deterministic algorithms, and randomized/probabilistic/non-deterministic algorithms. In summary a deterministic algorithm is a sequence of exact steps that can be executed in order to compute a result, whereas a probabilistic algorithm is permitted to rely on some source of random information to determine its control flow, meaning that the same input could result in many different outputs.
 
@@ -535,53 +633,18 @@ In quantum contexts however, algorithms are generally assumed to be Monte Carlo 
 
 When constructing unitary matrices out of some elementary gate set, it becomes possible to use approximate constructions, since all quantum algorithms are Monte Carlo by default, and small changes in a state's coordinates tend not to significantly affect the overall probability distribution of the algorithm's outputs. Often quantum algorithms and their associated unitary matrices are implemented asymptotically, where the desired accuracy of the algorithm is taken as a parameter, and as this parameter gets smaller a longer sequence of elementary gates is constructed to achieve this level of accuracy.
 
-\subsection{Classical Computation in Quantum Algorithms}
+\subsection{Error Correction}
+We have described how by controlling the external forces acting on a quantum system, we can implement some set of elementary evolutions on that system. In practice however, no matter how much engineering work we do to control an environment, the forces we deliberately impose are not the only forces present. This means there is always some (hopefully small) quantity of noise affecting the system, and so the longer that a quantum computer is left running, the more deviation there will be between what state the quantum computer is in, and what theoretical state our model would predict it to be in. This is a major source of error in quantum computation, and since these errors persist across time, and even propagate between different quantum objects as those objects interact with each other, this imposes strict limits on how long a naive algorithm can be before the whole process is drowned in error.
 
-In classical computation we can imagine an algorithm or circuit mapping some $M$ discrete states to some $N$ discrete states, according to some function $f: \{0\dots M-1\} \to \{0\dots N-1\}$. (say $M = 2^m,\ N = 2^n$ where $m$ and $n$ are the number of physical wires leading in and out of the circuit) For example we could define the logical conjunction or AND map which maps pairs of bits $\{00, 01, 10, 11\}$ to single bits $\{0, 1\}$: 
-\begin{align*}
-\text{AND}(x) = \begin{cases}
-1 & \text{if\ } x = 11\\
-0 & \text{otherwise}
-\end{cases}
-\end{align*}
+The paper \cite{algos} describes many algorithms and demonstrates their implementation on the 5-qubit \verb`ibmqx4`/\verb`ibmqx5` quantum computers, all of which were implemented at scales that would be trivial to implement classically instead, such as finding the smallest $p$ so that $15^p-1$ is divisible by 11. These implementations did not use any error correction, and so results that should have had a 0.5 chance of being measured in simulation, (among eight possible outcomes) were measured with a frequency of 0.25 in practice. This goes to show that if the algorithms had to compute on larger numbers, and thus got any longer than the ten to thirty operations demonstrated in \cite{algos}, then measurement at the end would have started to become entirely random, making computation impossible. [should I mention the microsecond scales described in that paper? it's interesting but it hasn't really come up]
 
-Given such a map $f$ we can define a linear operator by extending linearly on the computational basis: $A_f\ket{i} = \ket{f(i)}$, giving a matrix whose columns are all computational basis vectors. For example our logical conjunction becomes:
+What makes quantum computation scalable beyond this limit is error correction, where redundant qubits are added, so that if the state of only one qubit changes then it can be reset to the state of the others. The theory of error correction is very sophisticated but it is enough for now to know only that it exists, taking as the only example a partial version of Shor's coding scheme \cite[shor-encoding], if we represent the logical state $\ket{0}$ with a physical state $\ket{0}\ket{0}\ket{0}$ in three qubits, and a `bit flip' error occurs, turning this into $\ket{0}\ket{1}\ket{0}$, then we can write a quantum algorithm that detects and corrects this error. Algorithms capable of detecting and correcting errors are of a smaller scale than the algorithms demonstrated in \cite{algos}, so by alternating between calculation and error detection one can reasonably expect to perform calculations at a greater scale than naive implementation of algorithms would allow.
 
-\[
-A_\text{AND} = \left[\begin{matrix}
-1&1&1&0\\
-0&0&0&1
-\end{matrix}\right]
-\]
+When using these redundant coding schemes, a distinction is made between operations that are called fault tolerant, versus those that are not. Taking the example of a three qubit coding scheme capable of detecting bit flip errors, whose physical state is in $\ket{0}\ket{0}\ket{0}$, before undergoing an error is introduced that transforms the physical state into the invalid state $\ket{0}\ket{1}\ket{0}$. As is the design, this error is possible to detect and correct, but what if this error occurs right before a computation is performed? If we want to map the logical state $\ket{0}$ to $\ket{1}$, then we could imagine this erroneous physical state mapping to $\ket{1}\ket{0}\ket{1}$, which after error correction will in fact represent $\ket{1}$. If we had gotten $\ket{1}\ket{0}\ket{0}$ instead, i.e.\ if the error had propagated between physical qubits, then after error correction we would have mapped $\ket{0}$ to $\ket{0}$. An algorithm that always exhibits the former behaviour is called fault tolerant, and in the same way that we have elementary evolutions that are possible on physical qubits, we will also have an analogy for these acting on logical qubits:
 
-In quantum computation we require that all operations be reversible, unitary operations. This means that a matrix $A_f$ representing a classical computation $f$ will be available as a unitary operator if and only if $M=N$ and $f$ is invertible, i.e.\ if $f$ is a permutation. When $M = N = 2$ we only have two such permutation matrices:
-\begin{align*}
-I = \left[\begin{matrix}
-1&0\\
-0&1
-\end{matrix}\right]
-&&&
-X = \left[\begin{matrix}
-0&1\\
-1&0
-\end{matrix}\right]
-\end{align*}
+[Definition] An \emph{elementary gate} is a unitary transformation that can be implemented fault tolerantly on some logical states, as a sequence of elementary evolutions acting on the corresponding physical gates.
 
-Maps that don't satisfy $M = N$ or $f$ invertible can still be represented as a permutation matrix, acting on $\mathbb{C}^{M\times N}$ as follows:
-\[B_f(\ket{i}\otimes\ket{j}) = \ket{i}\otimes\ket{j+f(i) \mod N}\]
-
-The inverse of this matrix is simply $\ket{i}\ket{j} \mapsto \ket{i}\ket{j-f(i) \mod N}$.
-
-In the case of the binary AND map, $B_{\text{AND}}$ will be a $8\times8$ permutation matrix known as the Toffoli gate. It can be shown that compositions of Toffoli gates acting on some number of bits can be used to implement any $n$-qubit permutation matrix as an algorithm on some larger number of qubits $n+m$, so long as the extra $m$ qubits are initialized to known values.
-
-Permutation matrices by themselves might not seem interesting, since they exclusively represent calculations that can be done in classical contexts, but in fact are crucial for many quantum algorithms, since they will act linearly on superposition states. For example if we consider the map $f(x) = x^2\mod 16$, then the constructed matrix $B_f$ acting on 8 qubits will of course distribute linearly over any linear combination of basis states including the following:
-\begin{align*}
-B_f(\ket{2}\ket{0}+\ket{5}\ket{0}) 
-= B_f\ket{2}\ket{0} +& B_f\ket{5}\ket{0}
-\\= \ket{2}\ket{4} +& \ket{5}\ket{9}
-\end{align*}
-
-Further manipulations or measurement of the result of such a transformation can enable many powerful quantum algorithms including Shor's period finding algorithm. This means that permutation matrices are an important topic in quantum computation, and a good deal of research has been and continues to be done to better understand how permutation matrices can be decomposed into efficient quantum algorithms.
+Once the technology of fault tolerant computation is set up, we can effectively pretend it doesn't exist, and draw quantum circuits that act on logical bits directly. These logical circuits can then be automatically fleshed out into a physical circuit acting on perhaps seven times as many physical objects, with error correction occupying much of what may have once been a simple algorithm. Typically algorithms are first described in a theoretical, ideal context, with no errors, possible only in classical simulations of these algorithms, and are later run as a naive physical implementation, as in \cite{algos}, and then finally as a scalable, fault tolerant algorithm, supposing that there is a quantum computer with enough qubits to run it. In this way all of the algorithms and techniques described in this thesis are intuitively understood to run at the physical level, in terms of elementary evolutions, but paying deliberate mind to the eventual need for fault tolerant implementation, using a much more restricted set of elementary gates acting on logical quantum objects.
 
 \subsection{Phase and Amplitude}
 Since we assume a very specific space $\mathbb{C}^n$ with a canonical/computational basis available, we can and often do talk directly about the coordinates of vectors in this space. We call each complex coordinate an \emph{amplitude}, and importantly in a composite space the amplitudes of a Kronecker product are the coordinates \emph{after} expanding the product not before. For example the Kronecker product $\ket{+} \otimes \ket{-}$ as a vector looks like the following:
@@ -619,7 +682,7 @@ While there is a lot of potential in the topic of non-binary quantum computation
 [last paragraph from when this subsection was the intro to chapter 2 literature review and discussion]
 To these ends we shall review some of the literature that makes up the current understanding of quantum computation in ternary and higher forms of logic, as well as what little is currently known about mixed systems with a combination of qubits, qutrits, and higher objects. Of note also are the textbook ``Quantum Computation and Quantum Information''\cite{textbook} and the general audience paper ``Quantum Algorithm Implementations for Beginners''\cite{algos} [not cited anywhere else, remove? though it might come up in ternary arithmetic discussion, or as a supplementary reference for Shor's algorithm] which provide extensive discussion of the foundational aspects of qubit computation. Much of non-binary and mixed logic research is a direct generalization of the techniques collected in these two texts. [maybe stop framing it as a multi-valued logic review now, it's just the background content of our own results... a lot of this is good material for an abstract though]
 
-\subsection{Pauli Matrices}
+\subsection{Pauli and Clifford Matrices}
 A useful family of matrices are the Pauli matrices, which in the $2\times2$ qubit case are the $X$ and $Z$ matrices discussed in previous examples:
 \begin{align*}
 X = \left[\begin{matrix}
@@ -653,49 +716,191 @@ Observe that these matrices do not commute, but that $Z_nX_n = \omega_nX_nZ_n$:
 
 From this it can be seen that all elements of the Pauli group will be of the form $\omega_n^iX_n^jZ_n^k$, giving the Pauli group an order of $n^3$.
 
-This group is an interesting finite group in quantum computation, first brought to attention since $X_2$ and $Z_2$ along with $Y  = iX_2Z_2$ have physical meaning in quantum mechanical description of electron spin. Further, these 3 matrices each transform the state space of a qubit in a very geometrically convenient way, each along a different pair of axes in the Bloch sphere. [either describe the Bloch sphere specifically for this statement, or make this statement more vague] The Pauli group of generalized Pauli matrices provide similar algebraic power, being generated by 2 gates that might also have physical meaning, while still providing some level of transformation of quantum states along all axes.
-[this is a huge part of my intuition for why we start with the Pauli group, but this explanation is a mess. I don't want to get into the full details of how unitary operators form a sphere in Mat(n, C), although I could, if I brought back the ``displacement operators as basis for general operators'', I think $U(n)$ is literally the unit sphere in this basis? It's a big aside for an intuition that isn't directly used here, since what we tend to talk about instead is the power of $H_2$ and $H_3$.]
+This group is an interesting finite group in quantum computation, first brought to attention since $X_2$ and $Z_2$ along with $Y  = iX_2Z_2$ have physical meaning in quantum mechanical description of electron spin. Further, these 3 matrices each transform the state space of a qubit in a very geometrically convenient way, each along a different pair of axes in the Bloch sphere. [either describe the Bloch sphere specifically for this statement, or make this statement more vague] The Pauli group of generalized Pauli matrices provide similar algebraic power, being generated by two gates that represent very simple geometric angles in their corresponding state spaces, simple enough to be the first two gates one implements fault tolerantly, but with different combinations of $X_N$ and $Z_N$ providing complete generality in the combinations of axes one rotates about.
 
-The convenience of the $Y_2$ matrix along with the identity $D_{x, z}^k = D_{kx,kz}$ motivate the definition of the displacement operators as seen in \cite{pi-over-eight}:
-\[D_{x, z} = \omega^{xz}_{2n}X^xZ^z\]
-These displacement operators are equivalent to the generalized Pauli matrices up to global phase, but generate a group of twice the size called the Weyl-Heisenberg group:
-\[H(n) = \{\omega_{2n}^iX^jZ^k\}\]
-
+In order to capture the $Y_2$ matrix as well we need to introduce additional scale factors $\omega_{2N}$, which in the $N=2$ case gives $\omega_4 = i$, and $Y_2 = \omega_{4}X_2Z_2$. This gives a group of twice the size called the Weyl-Heisenberg group, denoted
+\[H(n) = \{\omega_{2n}^iX^jZ^k\}.\]
 The normaliser of the Weyl-Heisenberg group is called the Clifford group, and must be at least as powerful as the Pauli group, while also providing, among others, the discrete Fourier transform:
 \[H_n = \frac{1}{\sqrt{n}}\sum_{i,j} \omega_n^{ij}\ket{i}\bra{j}\]
 The Clifford group contains arbitrary scale factors, making it uncountably infinite, but when removing these scale factors it turns out to be another powerful finite group, making its generator a very useful place to start when considering possible elementary gate sets for a quantum computer.
 
-[describe the SWAP operation, which is always Clifford]
+Pauli, Weyl-Heisenberg, and Clifford groups also exist in composite systems. In the Pauli case this group contains arbitrary combinations of $X_{d_i}$ and $Z_{d_i}$ on each object $i$ of the system, so in a system with two objects of dimension $d_1$ and $d_2$ the Pauli group would be
+\[\{\omega_{d_1}^a\omega_{d_2}^b(X_{d_1}^cZ_{d_1}^d\otimes X_{d_2}^eZ_{d_2}^f)\ |\ a, b, c, d, e, f \in \mathbb{Z}\}.\]
+The scale factors $\omega_{d_i}$ are shared, and can be combined into a single term $\omega_{d'}$ where $d'$ is the greatest common divisor of $d_1$ and $d_2$, but the operations $X_{d_1}Z_{d_1}$ and $X_{d_2}Z_{d_2}$ will not combine. The Clifford group of a composite system is simply the normaliser of the corresponding Weyl-Heisenberg group, out of all of the unitaries in $U(N)$. This means that while the Weyl-Heisenberg group only contains Kronecker products, the Clifford group can contain operations acting on dependently multiple objects. In a composite system with two $d$ level objects the operations SUM and SWAP will always be Clifford:
+\begin{align*}
+	SUM(\ket{i}\ket{j}) = \ket{i}\ket{i+j \mod d} &&& SWAP(\ket{i}\ket{j}) = \ket{j}\ket{i}
+\end{align*}
+(extended linearly)
 
+To prove that SWAP is Clifford, observe $SWAP^{-1} = SWAP$, and let $D_1, D_2 \in H_d$, then
+\begin{align*}
+SWAP (D_1 \otimes D_2) SWAP (\ket{i}\ket{j})
+&= SWAP (D_1 \otimes D_2)(\ket{j}\ket{i})
+\\&=SWAP (D_1\ket{j} \otimes D_2\ket{i})
+\\&=D_2\ket{i} \otimes D_1\ket{j}
+\end{align*}
+Extended linearly this means $SWAP (D_1 \otimes D_2) SWAP$ is the same linear operation as $D_2 \otimes D_1$, which is in the Weyl-Heisenberg group. For SUM one must manipulate $X$ and $Z$ separately. In the following take all sums to be mod $d$:
+\begin{align*}
+&SUM^{-1} (X^aZ^b \otimes X^eZ^f) SUM (\ket{i}\ket{j})
+\\&=SUM^{-1} (X^aZ^b \otimes X^eZ^f) (\ket{i}\ket{i+j})
+\\&=\omega_d^{bi+fi+fj}SUM^{-1}(X^a \otimes X^e) (\ket{i}\ket{i+j})
+\\&=\omega_d^{bi+fi+fj}SUM^{-1} (\ket{i+a}\ket{i+j+e})
+\\&=\omega_d^{bi+fi+fj}\ket{i+a}\ket{j+e-a}
+\\&=\omega_d^{bi+fi+fj}(X^a \otimes X^{e-a})\ket{i}\ket{j}
+\\&=(X^aZ^{b+f} \otimes X^{e-a}Z^f)\ket{i}\ket{j}
+\end{align*}
+Extended linearly this is once again a Weyl-Heisenberg matrix, $X^aZ^{b+f} \otimes X^{e-a}Z^f$.
 
-\section{Notation for Mixed Systems}
+\subsection{Notation for Mixed Systems}
 [make sure that I am actually using this notation, also maybe throw some references in even though this is mostly standard]
 
-A very ergonomic notation for gates in quantum algorithms is to subscript the gate with relevant information about that gate such as the dimension of the object or system on which it acts, the index of the individual object or part of the composite system on which it acts, or the computational basis states that it affects.
+We have been notating $N \times N$ objects with the $N$ subscript, which distinguishes between objects that perform similar roles in different Hilbert spaces, but in composite systems it is more important to distinguish between operations acting on distinct objects within that system, i.e. to distinguish between $X \otimes I$ and $I \otimes X$. Further, since we will be describing algorithms acting in mixed systems we would like to distinguish between both of these at the same time! In order to prevent ambiguity we adopt strict conventions on which letter is used for different pronumerals, so that for example $X_{d_i}$ is always an operation in the non-composite system, i.e. in $U(d_i)$, whereas $X_i$ is an operation in the composite system, i.e. in $U(d_1d_2\dots d_n)$.
 
-Many discussions of quantum algorithms vary only one property of a given quantum gate at a time, making this notation unambiguous. Unfortunately we must have gates acting on distinct objects of a composite system, each with a dimension that could be different, which requires us to take extra care. Lest we lose the ergonomics of putting all the necessary information in small and descriptive subscripts, we continue to place variables in these subscripts, but avoid numerals unless the meaning is clear. We will now enumerate in advance the exact index sets that could be used for a variable in a subscript, a preferred letter in the alphabet for representing such a variable, and what that subscript means when this variable is used.
+In any quantum system we define $N$ to be the number of computational basis states, and either $n$ or $m+n$ to be the number of individual objects in the composite system, where the first $m$ objects will be somehow distinct from the last $n$. This means the most general operation we could describe in such a system would be an operation in $U(N)$, and such an operation would be denoted $U_N$ to indicate its dimension.
 
-In composite quantum systems we define $N$ to be the number of computational basis states, and either $n$ to be the number of individual objects in the composite system, or $n$ to be the number of qubits and $m$ to be the number of qutrits.[we don't use this $n$ vs $m$ discussion, all qubit qutrit discussions are in 2 or 3 objects] For example we could use these variables to index the Quantum Fourier Transform $\text{QFT}_N$ or a general unitary matrix $U_N$ acting on $N$ computational basis states, or $H^{\otimes n}$ for the Kronecker product of the $H$ matrix with itself $n$ times.
+When we want to talk about an individual object within a composite system, we index each object $1$ through to $n$, (or $1$ through to $n+m$) and use variables such as $i$, $j$, and $k$ to represent such an index. We then define $d_i$ to be the dimension of the object indexed by $i$. When the system is a single object we will have $n = 1$, and $N = d_1$, combining the $N$ notation of \cite{tolar-clifford} with the $d$ notation of \cite{multi-valued-logic}.
 
-In quantum systems of a single finite-dimensional object we instead call the dimension of this object $n$, and index each of the computational basis states $0$ through to $n-1$, represented by variables such as $i$, $j$, and $k$. For example we will frequently distinguish between $X_2$, $X_3$, and generally $X_n$ in the context of a single quantum object. This is the one case where we will use both numerals and variables for subscripts, since we very often want to say specific things about the $n=2$ and $n=3$ cases.
+Now, when indexing computational basis states in a quantum system, we use the integers $0$ through to $N-1$, and variables such as $p$, $q$, and $r$ to represent such indeces. This is particularly useful for the special class of permutation matrices that represent a transposition, where we can write $S_{p,q}$ to represent the matrix that exchanges the computational basis states $\ket{p}$ and $\ket{q}$, while leaving all others unchanged. Usually we will introduce $p$ indirectly, by naming a computational basis state $\ket{p_n}\dots\ket{p_1}$, implicitly defining $p$ to be the integer corresponding to this computational basis state, where of course $\ket{p_i}$ will be a computational basis state in the individual system $\mathbb{C}^{d_i}$. Among other things, this allows us to talk about transpositions acting on a single object by writing $S_{p_i,q_i} \in U(d_i)$. Note that we have reversed the order of $p_1 \dots p_n$, so that $p_n$ is the most significant digit, and $p_1$ is the least significant digit.
 
-Note that we change the meaning of $n$ based on context, for the sole purpose of reminding ourselves of the cyclic group formed by the set $\mathbb{Z}_n = \mathbb{Z}/n\mathbb{Z}$ equipped with addition, a very familiar object which appears repeatedly in finite groups of quantum gates acting on single quantum objects.
-[do we actually talk about single objects outside of the preliminary discussion of Pauli matrices? If the previous subsection counts then we should move this even earlier!]
+Next, if we have a unitary matrix $G_{d} \in U(d)$, and some object $i$ with dimension $d_i = d$, then we can define $G_i$ to be this operation $G_d$ applied to the $i$th object, i.e. 
+\[G_i = I_{d_n}\otimes \dots \otimes I_{d_{i-1}} \otimes G_d \otimes I_{d_{i+1}} \otimes \dots \otimes I_{d_n}\]
+When indexing an operation other than $S_{p,q}$ with a bare numeral, such as $X_2$ or $Z_3$, we exclusively interpret this as $X_d$ with $d = 2$, or $Z_d$ with $d = 3$ respectively. We will not use $X_2$ to mean $X_{d_2} \otimes I$, for example. If we talk about an operation such as  $X_2 \in U(N)$ or $X_d \in U(N)$, in a composite system, we mean $X_i$, where $i$ is an \emph{arbitrary} index satisfying $d_i = d$. For example we could suppose that a quantum computer has $X_2$ available as an elementary gate, and what we would mean is that the system has $X_i$ available as an elementary gate for every $i$ satisfying $d_i = 2$.
 
-When we want to talk about an individual object in a composite system, we index each object $1$ through to $n$, (or $1$ through to $n+m$) and use variables such as $p$, $q$, and $r$ to represent such an index. We then define $d_p$ to be the dimension of the object indexed by $p$. This allows us to extend some unitary matrix $G_d$ acting on a single quantum object of dimension $d$ to a unitary matrix $G_p$ acting on some composite system satisfying $d_p = d$. Written as a Kronecker product, $G_p$ looks like the following:
-\[G_p = I_{d_1}\otimes \dots \otimes I_{d_{p-1}} \otimes G_d \otimes I_{d_{p+1}} \otimes \dots \otimes I_{d_n}\]
+Take as an example the smallest possible mixed system, with $n = 2$, $d_1 = 3$, $d_2 = 2$, and hence $N = d_1d_2 = 6$. Set $i = 2$, then
+\[X_i = X_2 \otimes I_3 = \begin{bmatrix}
+0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 \\
+1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0
+\end{bmatrix}\]
+On the other hand if $i = 3$ then
+\[X_i = I_2 \otimes X_3 = \begin{bmatrix}
+	0 & 0 & 1 & 0 & 0 & 0 \\
+	1 & 0 & 0 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 1 \\
+	0 & 0 & 0 & 1 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 1 & 0
+\end{bmatrix}\]
+Here $d_i = 2$ and $d_i = 3$ are unique, so in fact the notation we have described already identifies $X_2$ with $X_2 \otimes I_3$, and $X_3$ with $I_2 \otimes X_3$. We have 6 computational basis states:
+\begin{align*}
+	p = 0 &&& \implies \ket{p_2}\ket{p_1} = \ket{0}\ket{0} \\
+	p = 1 &&& \implies \ket{p_2}\ket{p_1} = \ket{0}\ket{1} \\
+	p = 2 &&& \implies \ket{p_2}\ket{p_1} = \ket{0}\ket{2} \\
+	p = 3 &&& \implies \ket{p_2}\ket{p_1} = \ket{1}\ket{0} \\
+	p = 4 &&& \implies \ket{p_2}\ket{p_1} = \ket{1}\ket{1} \\
+	p = 5 &&& \implies \ket{p_2}\ket{p_1} = \ket{1}\ket{2} \\
+\end{align*}
 
-When indexing computational basis states in a composite system, we use the integers $0$ through to $N-1$ much like in single systems, [unless I removed that paragraph/notation] and variables such as $i$, $j$, and $k$ to represent such indeces. This is particularly useful for the special class of permutation matrices that represent a transposition, where we can write $S_{i,j}$ to represent the matrix that exchanges the computational basis states $\ket{i}$ and $\ket{j}$, while leaving all others unchanged.
+[I could talk about $U(2) \subseteq U(6)$ and $U(3) \subseteq U(6)$, giving $U(2)U(3) \subseteq U(6)$, the subgroup of independent operations. Could make chapter 4 a lot easier to talk about?]
 
-When we introduce a variable such as $i$, satisfying $0 \leq i \leq N-1$, we assume implicitly that the sequence of digits $i_1i_2\dots i_p \dots i_n$ exists and that each variable $i_p$ is understood to refer to the corresponding digit in this sequence. We also identify all such integers $0\dots N-1$ with their corresponding sequences of digits whenever we discuss the computational basis states.
-
-When we have a unitary matrix $U$ acting on a composite system with $N$ computational basis states, and a set $c \subseteq \{0\dots N-1\}$, our final subscript notation will be to define the controlled operation $C_c(U)$ which has the following action on the computational basis:
-\[C_c(U)\ket{i} = \begin{cases}
-	U\ket{i} & \text{if\ }i \in c \\
-	\ket{i} & \text{if\ }i \notin c
+\subsection{Conditional Operations}
+[most of these belong in an appendix, ``Appendix B, Quantum Circuits'']
+A very expressive family of operations in composite systems are the controlled operations. If $U_j \in U(d_j)$ is an operation acting on object $j$ of a composite system, then for each $i \neq j$ we would like to define $C_{r_i=q_i}(U_j)$ to be the linear extension of
+\[\ket{r_n}\dots\ket{r_1} \mapsto \begin{cases}
+	\ket{r_n}\dots \ket{r_{j+1}} (U_j\ket{r_j})\ket{r_{j-1}}\dots\ket{r_1}, & \text{if\ } r_i = q_i, \\
+	\ket{r_n}\dots\ket{r_1}, & \text{otherwise.}
 \end{cases}\]
-Note that in order for $C_c(U)$ to be unitary, it is sufficient that the image $U\ket{i}$ of any computational basis vector $\ket{i}$ satisfying $i \in c$ be a linear combination of basis vectors $\ket{j}$ themselves satisfying $j \in c$. For example if we have a gate $G_p$ acting only on object $p$ of the system, then $C_c(G_p)$ will be unitary whenever $c$ is a set whose defining predicate $i_1\dots i_n \in c$ does not depend on the digit $i_p$.
+For example a central gate in qubit computation is
+\[C_{r_2=1}(X_2) = \begin{bmatrix}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0
+\end{bmatrix},\]
+often called CNOT or XOR due to its interpretation as conditionally negating, or calculating the exclusive OR of two Boolean values. In an operation $C_{r_i = q_i}(U_j)$ we call object $i$ the control object, or the control digit, and object $j$ the target object, or the target digit. In systems where the base is known these can also be called the control qubit and target qubit respectively, or control qutrit and target qutrit. We also call the value $q_i$ the control value. Just as we can say $X_2$ to mean $X_i$ for an arbitrary qubit $i$, we can say $C(U_j)$ to represent $C_{r_i = d_i-1}(X_2)$ an arbitrary control object $i$, with $q_i = d_i - 1$ chosen as a conventional default control value.
 
-When we have a condition 
+Control operations can be quite complicated to write in this form, but become quite simple in circuit form. We write the qubit CNOT operation as:
 
-Finally when $G_d$ is a unitary matrix acting on a $d$-dimensional object, and $G_p$ is the corresponding matrix acting on object $p$ of a composite system, it is sometimes useful for the set $c$ to impose a constraint on all but $d$ of the computational basis states of the composite system, in which case we can write $C_c(G_d)$ instead of $C_c(G_p)$.
+\begin{quantikz}
+	\lstick{$\ket{1}$} & \phase{1} \vqw{1} & \qw \rstick{$\ket{1}$} \\
+	\lstick{$\ket{r_1}$} & \gate{X_2} & \qw \rstick{$\ket{r_1+1\mod 2}$}
+\end{quantikz}
+
+Generalized to an arbitrary $C_{r_2 = q_2}(U_{d_1})$ operation, i.e. an arbitrary controlled $U_{d_1}$ operation with control object $i=2$ and target object $j=1$ is notated as
+
+\begin{quantikz}
+\lstick{$\ket{q_2}$} & \phase{q_2} \vqw{1} & \qw \rstick{$\ket{q_2}$} \\
+\lstick{$\ket{r_1}$} & \gate{U_{d_1}} & \qw \rstick{$U_{d_1}\ket{r_1}$}
+\end{quantikz}
+
+The controlled $X$ operation is so common that we call it the controlled increment, interpreting $X$ as incrementing the index of the computational basis states by 1. Further rather than write the gate $X_{d_1}$ in a box we can simply write
+
+\begin{quantikz}
+	\lstick{$\ket{q_2}$} & \phase{q_2} \vqw{1} & \qw \rstick{$\ket{q_2}$} \\
+	\lstick{$\ket{r_1}$} & \targ{} & \qw \rstick{$\ket{r_1+1\mod d_1}$}
+\end{quantikz}
+
+In all of the above examples if $\ket{r_2}$ were not $\ket{q_2}$ then we would have simply written $\ket{r_1}$ and $\ket{r_2}$ unchanged at the end of the circuit. One should remember that these operations distribute linearly on computational basis states however. As an example consider the controlled NOT gate acting on $\ket{+}\ket{0}$ to create an entangled state:
+
+\begin{quantikz}
+	\lstick{$\ket{+}$} & \phase{1} \vqw{1} & \qw \rstick[wires=2]{$\frac{1}{\sqrt{2}}\ket{0}\ket{0} + \frac{1}{\sqrt{2}}\ket{1}\ket{1}$} \\
+	\lstick{$\ket{0}$} & \targ{} & \qw
+\end{quantikz}
+
+(This works by expanding the Kronecker $\ket{+}\ket{0}$ to $\frac{1}{\sqrt{2}}\ket{0}\ket{0} + \frac{1}{\sqrt{2}}\ket{1}\ket{0}$, and then applying $C(X)$ to each term.)
+
+When dealing with qubit computers it has been conventional to omit the control value from circuit diagrams, and indicate the control value with either a filled in or hollow dot, for control values 1 and 0 respectively:
+
+\begin{quantikz}
+	\lstick{$\ket{r_2}$} & \ctrl{1} & \octrl{1} & \qw \rstick{$\ket{r_2}$} \\
+	\lstick{$\ket{r_1}$} & \targ{} & \targ{} & \qw \rstick{$\ket{r_1+1\mod d_1}$}
+\end{quantikz}
+
+We cannot use this convention since we have more than two computational basis states to represent, so we represent this more explicitly as
+
+\begin{quantikz}
+	\lstick{$\ket{r_2}$} & \phase{1} \vqw{1} & \phase{0} \vqw{1} & \qw \rstick{$\ket{r_2}$} \\
+	\lstick{$\ket{r_1}$} & \targ{} & \targ{} & \qw \rstick{$\ket{r_1+1\mod d_1}$}
+\end{quantikz}
+
+This makes the open dot notation available for re-appropriation, so we follow \cite{arithmetics} in using this to represent the Clifford SUM operation:
+
+\begin{quantikz}
+	\lstick{$\ket{r_2}$} & \octrl{1} & \qw \rstick{$\ket{r_2}$} \\
+	\lstick{$\ket{r_1}$} & \targ{} & \qw \rstick{$\ket{r_1+r_2}$}
+\end{quantikz}
+
+A qubit convention that we can generalize is to represent the SWAP operation as:
+
+\begin{quantikz}
+	\lstick{$\ket{r_2}$} & \swap{1} & \qw \rstick{$\ket{r_1}$} \\
+	\lstick{$\ket{r_1}$} & \targX{} & \qw \rstick{$\ket{r_2}$}
+\end{quantikz}
+
+[might not use this however...]
+
+\subsection{Multi-control Operations}
+
+One can generalize control operations to control an operation that acts on multiple target bits, and hence define operations of the form $C_{r_3=q_3}(C_{r_2=q_2}(U_{d_1}))$, which has uses, especially when generalizing SUM to `soft-control' operations the way that \cite{arithmetics} does, but we do not use this formulation, and instead directly define $C_{r_3=q_3,r_2=q_2}(U_{d_1})$ to have the same effect, applying $U_{d_1}$ when \emph{all} conditions are satisfied, and doing nothing otherwise. The circuit representation of such a gate is, unsurprisingly:
+
+\begin{quantikz}
+	\lstick{$\ket{r_3}$} & \phase{q_3} \vqw{1} & \qw \rstick{$\ket{r_3}$} \\
+	\lstick{$\ket{r_2}$} & \phase{q_2} \vqw{1} & \qw \rstick{$\ket{r_2}$} \\
+	\lstick{$\ket{r_1}$} & \gate{U_{d_1}} & \qw \rstick{$U_{d_1}\ket{r_1}$}
+\end{quantikz}
+
+For the sake of formality we will often work with an index set $I \subset \{1 \dots n\}$ containing the indices of all of the control objects, and write the control operation more succinctly as $C_c(U_j)$, where $c$ is the set of computational basis vectors that $C_c(U_j)$ will apply $U_j$ to, i.e.\ the set \[\{\ket{r_n}\dots\ket{r_1}\ |\ r_i = q_i \forall i \in I\}\]
+
+An operation that is commonly used in qubit contexts is the Toffoli gate, which is simply a controlled $X_2$ operation with two control qubits, $C_{r_{i_1} = 1, r_{i_2} = 1}(X_2)$.
+
+\begin{quantikz}
+	\lstick{$\ket{1}$} & \phase{1} \vqw{1} & \qw \rstick{$\ket{1}$} \\
+	\lstick{$\ket{1}$} & \phase{1} \vqw{1} & \qw \rstick{$\ket{1}$} \\
+	\lstick{$\ket{r_1}$} & \targ{} & \qw \rstick{$\ket{r_1+1\mod 2}$}
+\end{quantikz}
+
+In the above examples the target object has always been $i = 1$. This is not necessary, but when it is possible it makes for a much simpler block representation of the resulting $C_c(U_{d_1}) \in U(N)$. If \emph{every} object except for $i = 1$ is a control object, then this will be the following block matrix:
+\[\begin{bmatrix}
+I & 0 & \cdots & 0 & 0 & 0 & \cdots & 0\\
+0 & I & \cdots & 0 & 0 & 0 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \cdots & \vdots \\
+0 & 0 & \cdots & I & 0 & 0 & \cdots & 0 \\
+0 & 0 & \cdots & 0 & U_j & 0 & \cdots & 0\\
+0 & 0 & \cdots & 0  & 0 & I & \cdots & 0\\
+\vdots & \vdots & \cdots & \vdots & \vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & 0 & 0 & 0 & \cdots & I
+\end{bmatrix}\]
+where the point along the diagonal at which $U_j$ appears is determined by interpreting the control values as an integer $0 \leq q_n\dots q_2 \leq N/{d_1}$.

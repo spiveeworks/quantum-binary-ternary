@@ -4,149 +4,207 @@
 A foundational result in quantum computation is that of universal computation, that certain combinations of quantum gate can be used to implement any quantum algorithm to some accuracy, given sufficient circuit depth. The resulting circuits are generally too long to use in practice, compared to compilation techniques that rely on specific properties of the algorithm in question, but the result is still useful since it proves that it's not impossible, i.e.\ its necessary and sufficient conditions provide a starting point for designing and using quantum computers in practice.
 
 \section{Universal Computation in Qubit Contexts}
-Universal computation for qubit computers is described in full detail in \cite{textbook}, based on the approach described in the paper \cite{universal-qubit}, [and the one it references, for permutation things] which requires only 3 gates to achieve universality:
-\begin{align*}
-	H_2 = \frac{1}{\sqrt{2}}\left[\begin{matrix}
-		1 & 1 \\
-		1 & -1
-	\end{matrix}\right]
-	\\
-	T_2 = \left[\begin{matrix}
-		1 & 0 \\
-		0 & \frac{1}{\sqrt{2}}\left(1+ i\right)
-	\end{matrix}\right]
-	\\
-	C_{p_0=1}(X_2) = \left[\begin{matrix}
-		1 & 0 & 0 & 0 \\
-		0 & 1 & 0 & 0 \\
-		0 & 0 & 0 & 1 \\
-		0 & 0 & 1 & 0 \\
-	\end{matrix}\right]
-\end{align*}
-If a quantum computer has these operations available as elementary gates on every qubit in the system, and has $C(X)$ implemented as an elementary gate on enough pairs of qubits, so that $C(X)$ can be implemented indirectly for all remaining pairs, then this quantum computer will satisfy universal computation. In practice a quantum computer can implement more than just these operations, and doing so will generally allow more efficient implementation of quantum algorithms, but this set of 3 gates is a theoretically interesting sufficient condition for quantum universality.
+The two most widely useful results about universality of qubit computers are the result of \cite{cnot-decomposition}, that a quantum computer with arbitrary operations from $U(2)$ on each individual qubit, and the controlled not $C(X)$ operation, one can exactly implement any unitary $U \in U(N)$, and the result of \cite{universal-qubit}, which ports this result to fault tolerant computation by showing that with only two fault tolerant elementary gates one can approximate any single-qubit operation in $U(2)$, and hence with the addition of $C(X)$, which is also fault tolerant, one can fault tolerantly approximate any operation in $U(N)$. We shall describe the former of these results, and in doing so generalize it to the following:
 
-Although quantum universality is ultimately a way of arranging these gates into algorithms that approximately implement some unitary operation, the algorithm itself is easier to describe in the reverse direction, decomposing a given unitary operation into sequences of increasingly basic operations.
+[Theorem] In any mixed quantum computer with at least one qubit, one can achieve universal computation with either:
+\begin{itemize}
+	\item Arbitrary qubit operations and arbitrary controlled increments $C_{r_i=q_i}(X_{d_j})$
+	\item Arbitrary qubit operations and arbitrary controlled transpositions $C_{r_i=q_i}(S_{p_i,p'_i})$
+\end{itemize}
+[I define $S_{p,q}$ after this point so... should move those definitions up to the notation section]
 
-In full detail the process has 7 steps:
-\begin{enumerate}
-	\item Unitary into unitaries on axis aligned planes
-	\item axis aligned plane unitary into multi-controlled operation on any qubit + 2 copies of a transposition
-	\item transposition into controlled operations by Gray codes
-	\item controlled operations into Toffoli + single control operation
-	\item Toffoli gate into $C(V)$ where $V^2 = X$
-	\item single control operation into $AC(X)BC(X)C$
-	\item single qubit operation into sequence of $H$, $T$ operations
-\end{enumerate}
-We will later extend this process to work for systems with at least one qubit, and any number of qutrits, so long as controlled increment operations $C_{p_i=1}(X)$ are also available between qutrit-qutrit pairs, and qubit-qutrit pairs. Since we assume to have a qubit available, we can leverage the same structure as described above, and in doing so avoid thinking about the geometry of the qutrit state space altogether. As a result the only steps that require our modification are steps 3 and 4, so we shall describe how they work in the qubit case here, for the rest of the steps the sources \cite{textbook} and \cite{universal-qubit} explain in plenty of detail.
-\subsection{Decomposing Transpositions}
-A transposition is a permutation that swaps two elements of a set, but leaves all other elements unchanged, and so when we say transposition in the context of quantum computation we mean a linear operation that swaps two computational basis states, and leaves the others unchanged, i.e. the linear extension of
-\[S_{p_1\dots p_n, q_1\dots q_n}(\ket{r_1}\dots\ket{r_n}) = \begin{cases}
-	\ket{p_1}\dots\ket{p_n} & \text{if\ } r_i = q_i \forall i \in \mathbb{Z}, 1 \leq i \leq n \\
-	\ket{q_1}\dots\ket{q_n} & \text{if\ } r_i = p_i \forall i \in \mathbb{Z}, 1 \leq i \leq n \\
-	\ket{r_1}\dots\ket{r_n} & \text{otherwise}
-\end{cases}
+In the case of a computer with only qubits, this theorem is equivalent to the result of \cite{cnot-decomposition}. We shall now outline the series of techniques presented in the textbook \cite{textbook}, which collect the relevant techniques from \cite{cnot-decomposition} and its predecessors into a continuous sequence of increasingly powerful proofs of universal computation. We will treat this as a single proof, with each step of the proof decomposing an arbitrary unitary $U \in U(N)$ into a smaller set of basic operations. The first decomposition is of $U$ into
+\[U = \prod_{p=0}^{N-2}\prod_{q=p+1}^{N-1}U_{p,q},\]
+giving $(N-1)(N-2)/2$ unitary matrices $U_{p,q}$, one for each distinct pair $p = p_n\dots p_1$, $q = q_n\dots q_1$, $p < q$. [need to define these digital expansions instead of the $\ket{p_n}\dots\ket{p_1}$ thing I thought I would use] Specifically $U_{p,q}$ will be `two level' unitaries, in that they only act on the two computational basis vectors $\ket{p}$ and $\ket{q}$, meaning there are some complex $a, b, c, d$ so that
+\[U_{p,q} = I + (a-1)\ket{p}\bra{p} + b\ket{p}\bra{q}+ c\ket{q}\bra{p}+ (c-1)\ket{q}\bra{q}.\]
+For example in a system of two qubits, with $p = 1$ and $q = 2$:
+\[U_{1,2} = \begin{bmatrix}
+1 & 0 & 0 & 0 \\
+0 & a & b & 0 \\
+0 & c & d & 0 \\
+0 & 0 & 0 & 1
+\end{bmatrix}\]
+This operation will have no effect on computational basis states $\ket{0}\ket{0}$ or $\ket{1}\ket{1}$, but will act on $\ket{p_2}\ket{p_1}$ and $\ket{q_2}\ket{q_1}$ in a similar manner to
+\[U_2 = \begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix}\]
+
+The proof that any unitary can be represented as a product of such two-level unitaries amounts to a kind of row reduction on the lower left triangle of the unitary, choosing the $c$ value of each $U_{p,q}$ in order to eliminate each element one at a time. We won't present the exact details here, since this part requires no change in the case of a mixed quantum computer. The full procedure can of course be found in \cite{textbook}.
+
+These two-level unitaries can then be implemented as a series of controlled operations $\{C_c(U_2)\}$, which can in turn be decomposed into `basic' operations, $C(X)$ along with arbitrary $U_2 \in U(2)$. This decomposition is done using a variety of techniques presented in \cite{cnot-decomposition}. This set of techniques provide an excellent starting point for reasoning about quantum computation at the level of physical qubits, but in order to work with logical qubits one can go a step further and approximately implement all of $U(2)$ using only two basic gates with known fault tolerant implementations. This result was shown in \cite{universal-qubit}, and shall inform our later discussion in \ref{} of minimal gate sets in quantum computers consisting only of qubits and qutrits.
+
+\section{Representing Two-Level Unitaries With Control Operations}
+Once we have decomposed a unitary into two-level unitaries $U_{p,q}$, acting on computational basis states $\ket{p}$ and $\ket{q}$, our next goal will be to represent this two-level unitary as a concrete quantum circuit consisting of various controlled operations. First, we must choose any qubit in the system, which will be indexed by an integer $j$ satisfying $d_j = 2$. Now define $C_c(U_j)$ to be the control operation applying 
+\[U_2 = \begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix}\]
+to qubit $j$, so long as every other object in the quantum system is in state $q_i$. In our notation this means
+\[c = \{\ket{r_n}\dots\ket{r_1}\ |\ r_i = q_i \text{\ whenever\ } i \neq j\}\]
+
+Now $C_c(U_j)$ will also be a two-level unitary, acting on
+\[p' = q_n \dots q_{j+1} 0 q_{j-1} \dots q_1,\]
+\[q' = q_n \dots q_{j+1} 1 q_{j-1} \dots q_1.\]
+Formally,
+\[C_c(U_j) = I + (a-1)\ket{p'}\bra{p'} + b\ket{p'}\bra{q'}+ c\ket{q'}\bra{p'}+ (c-1)\ket{q'}\bra{q'}.\]
+
+Consider our $U_{1,2}$ example. We could choose $j = 1$. Then $p'_2 = q'_2 = q_2 = 1$, so $p'$ and $q'$ would have binary expansion $10$ and $11$, the integers 2 and 3 respectively. This gives
+\[C_c(U_j) = C_{r_2=1}(U_j) = \begin{bmatrix}
+	1 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & a & b \\
+	0 & 0 & c & d
+\end{bmatrix}.
 \]
-For example in a system with 2 qubits the transposition $S_{10,11}$ is simply the controlled not operation $C_{p_1 = 1}(X)$.
 
-We also write $S_{p_i, q_i}$ rather than the full $S_{p_1\dots p_n, q_1\dots q_n}$ when possible.
+At this point we can fairly easily see how to implement $U_{1,2}$ as a concrete quantum circuit, so long as we can map $\ket{p}=\ket{1}$ to $\ket{p'} = \ket{2}$ and $\ket{q}=\ket{2}$ to $\ket{q'}=\ket{3}$. There are two permutation matrices that will do this:
+\[P = \begin{bmatrix}
+	1 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 1 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 0
+\end{bmatrix}, \begin{bmatrix}
+	0 & 0 & 0 & 1 \\
+	1 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 0
+\end{bmatrix}\]
 
-[later, for ternary and mixed systems: We also take $S_{0,1}$, $S_{1,2}$, and $S_{0,2}$ to be defined operations acting on a single qutrit, and further define $S_{0,1} = X_2$ acting on single qubits, even in composite systems where other operations exist.]
+We choose the latter of these, which happens to map any $\ket{r}$ to $\ket{r+1 \mod 4}$, and can be represented by the following circuit:
 
-In step 2 of the process described earlier, we needed transpositions in order to transform one of the axes of an axis aligned plane into an axis whose indices match the other axis, except for one qubit index, which we shall take to be the first object in the system. (though this may be less efficient than other choices) In other words we have some pair of computational basis states $\ket{1-p_1}\ket{p_2}\dots\ket{p_n}$ and $\ket{q_1}\dots\ket{q_2}$ upon which the original unitary was acting, and as such we would like to generate a transposition that swaps $\ket{p_1}\dots \ket{p_n}$ with $\ket{q_1}\dots\ket{q_n}$ so that the plane unitary now acts only on $\ket{1-p_1}\ket{p_2}\dots \ket{p_n}$ and $\ket{p_1}\ket{p_2}\dots \ket{p_n}$.
+\begin{quantikz}
+\lstick{$\ket{r_2}$} & \qw & \targ{} & \qw \rstick[wires=2]{$\ket{r+1 \mod 4}$} \\
+\lstick{$\ket{r_1}$} & \gate{X_2} & \phase{0} \vqw{-1} & \qw  \\
+\end{quantikz}
 
-In order to implement these transpositions, the first step is to decompose them using what are called Gray codes, sequences of bit strings where each bit string differs from its neighbours by only by a single digit. Put more formally, we implement $S_{p_i,q_i}$ by induction on the number of indeces $i$ where $p_i \neq q_i$. If there are no states where they differ then $S_{p_i,q_i} = I$ so there is nothing to be done. If they differ by only one state, i.e. $p_j = 1 - q_j$, then the transposition is exactly the controlled-increment operation $C_c(X_j)$ where $c$ is the following set of condition vectors:
-\begin{align*}
-	c &= \{\ket{r_1}\dots\ket{r_n}\ |\ r_i = p_i = q_i \text{\ whenever\ } i \neq j\}
-	\\&= \{\ket{p_1}\dots\ket{p_n}, \ket{q_1}\dots\ket{q_n}\}
-\end{align*}
+As a matrix expression this is $P = (I \otimes X_2)C_{r_1=0}(X_2 \otimes I)$. Since each term in this circuit is self-inverse, we can reverse the circuit to implement $P^{-1}$ as well. Then in order to apply $U_{p,q}$ to $\ket{r}$, we first apply $P$, then $C_c(U_j)$, then $P^{-1}$, which is the following similarity transformation:
+\[\begin{bmatrix}
+	1 & 0 & 0 & 0 \\
+	0 & a & b & 0 \\
+	0 & c & d & 0 \\
+	0 & 0 & 0 & 1
+\end{bmatrix} = \begin{bmatrix}
+0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 \\
+1 & 0 & 0 & 0
+\end{bmatrix}
+\begin{bmatrix}
+	1 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & a & b \\
+	0 & 0 & c & d
+\end{bmatrix}
+\begin{bmatrix}
+0 & 0 & 0 & 1 \\
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0
+\end{bmatrix}.\]
+As a quantum circuit this is:
 
-In the inductive case where there is more than one value $i$ for which $p_i$ and $q_i$ differ, we can pick just one, call it $j$, and decompose $S_{p_i, q_i}$ into two transpositions $S_{p_i, p'_i}S_{p'_i, q_i}$ defining
-\[p'_i = \begin{cases}
-	q_i = 1 - p_j & \text{if\ } i = j \\
-	p_i & \text{otherwise}
-\end{cases}\]
-Then we have $S_{p_i, p'_i} = C_c(X_j)$ similar to above, and $S_{p'_i, q_i}$ as some product of such controlled operations by the inductive hypothesis.
+\begin{quantikz}
+\lstick[wires=2]{$\ket{\phi}$} & \qw & \targ{} & \phase{1} \vqw{1} & \targ{} & \qw & \qw \rstick[wires=2]{$U_{p,q}\ket{\phi}$} \\
+ & \gate{X_2} & \phase{0} \vqw{-1} & \gate{U_2} & \phase{0} \vqw{-1} & \gate{X_2} & \qw
+\end{quantikz}
 
-[would be clearer to have a lemma: $S_{(p_i), (p'_i)}S_{(p'_i), (q_i)}=S_{(p_i), (q_i)}$]
+To generalize this we must describe a process for generating and implementing $P$ in any qubit computer. The process given in \cite{textbook} is to implement the transposition $S_{p,p'}$ mapping $\ket{p}$ to $\ket{p'}$. For them this will do as a permutation $P$ since they assume $q'_j = q_j$ as opposed to our assumption that $q'_j = 1$. Consider as an extreme example where $n=3$, and $j=1$, where all three bits need to be inverted, i.e.\ $p_3 \neq q_3$, $p_2 \neq q_2$, $p_1 = q_1$:
 
-At this point we will have decomposed some unitary acting on a plane, into as many as $2n$ multi-controlled increment operations, sandwiching a single multi-controlled unitary acting on some qubit. Our next step will be to decompose all of these multi-controlled unitaries into Toffoli gates sandwiching a single-controlled unitary.
+\begin{quantikz}
+	\lstick{$\ket{r_3}$} & \targ{} & \phase{q_3}\vqw{1} & \phase{q_3}\vqw{1} & \phase{q_3}\vqw{1} & \targ{} & \qw \\
+	\lstick{$\ket{r_2}$} & \phase{p_2}\vqw{-1} & \targ{} & \phase{q_2}\vqw{1} & \targ{} & \phase{p_2}\vqw{-1} & \qw \\
+	\lstick{$\ket{r_1}$} & \phase{p_1}\vqw{-1} & \phase{p_1}\vqw{-1} & \targ{} & \phase{p_1}\vqw{-1} & \phase{p_1}\vqw{-1} & \qw
+\end{quantikz}
 
-\subsection{Multi-control Gates}
-We would like to implement a controlled operation $C_c(U_j)$ with a very strict control condition, specifying the value of every single qubit in the system except for the target qubit with index $j$. In general it is hard enough to implement elementary gates that act on 2 or 3 qubits, and even then it is rare that a quantum computer will be able to implement these for arbitrary combinations of qubits, so we definitely need to decompose these multi-controlled operations in order to work with any realistic elementary gate set.
+In the circuit for $PC_c(U_j)P^{-1}$ the latter half of the above sequence of operations would have no effect, since it would be transforming the action of $C_c(U_2)$ on basis vectors that it doesn't do anything to, so in fact the full circuit simplifies to a circuit that looks much like the above:
 
-The approach is to introduce $n-2$ auxiliary qubits to the system, indexed $n+1$ through $2n-2$, which begin and end this process in the computational basis state $\ket{0}$. We then use these auxiliary qubits to check an increasing number of our condition qubits, the first auxiliary qubit state $r_{n+1}$ will indicate whether $r_1$ and $r_2$ are both in the desired states $p_1$ and $p_2$ respectively. The second will indicate the first 3, up until the final auxiliary state $r_{2n-2}$ which indicates whether all $n-1$ qubits apart from $r_j$ are in the correct state. At this point we can implement the desired gate as $C_{r_{2n-2}=1}(U_j)$, and then undo the process of setting $r_{n+1} \dots r_{2n-2}$ so that they may be used again.
+\begin{quantikz}
+	\lstick{$\ket{r_3}$} & \targ{} & \phase{q_3}\vqw{1} & \phase{q_3}\vqw{1} & \phase{q_3}\vqw{1} & \phase{q_3}\vqw{1} & \phase{q_3}\vqw{1} & \targ{} & \qw \\
+	\lstick{$\ket{r_2}$} & \phase{p_2}\vqw{-1} & \targ{} & \phase{q_2}\vqw{1} & \phase{q_2}\vqw{1} & \phase{q_2}\vqw{1} & \targ{} & \phase{p_2}\vqw{-1} & \qw \\
+	\lstick{$\ket{r_1}$} & \phase{p_1}\vqw{-1} & \phase{p_1}\vqw{-1} & \targ{} & \gate{U_2} & \targ{} & \phase{p_1}\vqw{-1} & \phase{p_1}\vqw{-1} & \qw
+\end{quantikz}
 
-The key to this process is the Toffoli gate, which is simply a controlled $X$ operation with two control bits, $C_{r_{i_1}=p_{i_1},r_{i_2}=p_{i_2}}(X_j)$
+The first half of this is essentially the $P$ we originally wanted, mapping $\ket{p}$ to $\ket{p'}$ and $\ket{q}$ to $\ket{q'}$. This process is fine for showing universal computation in the abstract, but is hard to generalize to mixed contexts, and is generally very wasteful. Instead we shall do something much simpler, using only $C(X)$. The first step shall be to choose a smaller permutation $P_1$ so that $p_j$ maps to 0 and $q_j$ maps to 1. There are four cases to consider:
+\begin{itemize}
+	\item $p_j = 0$, $q_j = 1$ already,
+	\item $p_j = 1$, $q_j = 0$
+	\item $p_j = q_j = 0$
+	\item $p_j = q_j = 1$
+\end{itemize}
+In the first case we can set $P_1 = I$, and do nothing, and in the second case we can set $P = X_j$, but in the last two cases we must pick some $k$ so that $p_k \neq q_k$. Then if we are in the third case we set $P = C_{r_k = q_k}(X_j)$, and in the fourth case $P = C_{r_k = p_k}(X_j)$. Now $P_1\ket{q} = \ket{q'}$, so all that remains is to map each remaining $p_i$ to $q_i$ without changing $\ket{q}$. This is simple to do with $C_{r_j=0}(X_i)$, repeated once for each $i\neq j$ with $p_i \neq q_i$. Applied to $\ket{p}$ this will change $p_j$ to $0$, setting the control value, so that the remaining bits can be set to $\ket{q_i}$, and of course applied to $\ket{q}$ this will change $q_j$ to $1$, making no other changes since the control bit has been set incorrectly.
 
-Once again our formal description will be inductive. Take $I$ to be the set of indeces $i$ for which our control operation $C_c(U_j)$ has a constraint $r_i = p_i$, so that
-\[c = \{\ket{r_1}\dots\ket{r_n}\ |\ r_i = p_i \text{\ whenever} i \in I\}\]
-Then we shall perform induction on the size of $I$, implementing any control operation as $2\ord{I}-2$ Toffoli gates, sandwiching a single control operation $C_{r_k=p_k}(U_j)$. When $I$ is a singleton set $\{k\}$, then we introduce no auxiliary bits, and simply yield the operation $C_{r_k=p_k}(U_j)$ as is. Otherwise, we choose two indeces $i_1$ and $i_2$ from $I$, introduce an auxiliary qubit $r_k$ which starts and ends in the state $\ket{0}$, and reduce $I$ to
-\[I' = (I \backslash \{i_1, i_2\})\cup \{k\}\]
-Correspondingly, define $p_k = 1$ and reduce the condition set $c$ to
-\[c' = \{\ket{r_1}\dots\ket{r_n}\ |\ r_i = p_i \text{\ whenever} i \in I'\}\]
-Now we simply put all of these constructions together, reducing as
-\[C_c(U_j) = C_{r_{i_1}=p_{i_1},r_{i_2}=p_{i_2}}(X_k)
-C_{c'}(U_j)
-C_{r_{i_1}=p_{i_1},r_{i_2}=p_{i_2}}(X_k)\]
-Since the middle of these is a controlled operation with a smaller index set $I'$, we can invoke the inductive hypothesis, decomposing $C_c(U_j)$ as required.
+Applied to our extremal three-qutrit example this will look like the following:
 
-As a small optimization, if $U_j$ is the increment operation $X_j$ then we can implement $C_c(X_j)$ directly as $2\ord{I} - 3$ Toffoli gates, by taking as a base case $\ord{I} = 2$ where $C_c(X_j)$ is already a Toffoli gate, saving one controlled operation and one Toffoli gate.
-\subsection{Multi-Valued Logic}
-When the final operation $U_j$ in the above decomposition acts on a qutrit or higher, rather than a qubit, the remaining steps become much more difficult, simply because the geometry of $U(n)/U(1)$ is more complicated than that of $U(2)/U(1)$. In order to overcome this the paper \cite{multi-valued-logic} uses a different approach, by outlining a way of implementing a family of gates with arbitrarily many elements, depending on the required accuracy of implementation, and presents a separate proof that this family of gates is universal.
+\begin{quantikz}
+	\lstick{$\ket{r_3}$} & \qw & \qw & \targ{} & \phase{q_2}\vqw{1} & \targ{} & \qw & \qw & \qw \\
+	\lstick{$\ket{r_2}$} & \phase{p_2}\vqw{1} & \targ{} & \qw & \phase{q_2}\vqw{1} & \qw & \targ{} & \phase{p_2}\vqw{1} & \qw \\
+	\lstick{$\ket{r_1}$} & \targ{} & \phase{0}\vqw{-1} & \phase{0}\vqw{-2} & \gate{U_2} & \phase{0}\vqw{-2} & \phase{0}\vqw{-1} & \targ{} & \qw
+\end{quantikz}
 
-The family of gates they describe and utilize are a generalization of the controlled $X$ and controlled $Z$ gates, in a $d$-dimensional quantum computer, the following:
-\[\Gamma X(\ket{\phi}) = C_{p_1 = d-1}(\ket{d-1}\bra{\phi} + \dots)\]
-\[\Gamma Z(\theta) = C_{p_1 = d-1}\left(e^{i\theta}\ket{d-1}\bra{d-1} + \dots\right)\]
-That is, the $\Gamma X$ family conditionally maps some state $\ket{d-1}\ket{\phi}$ to $\ket{d-1}\ket{d-1}$, and the $\Gamma Z$ family applies some relative phase factor to the state $\ket{d-1}\ket{d-1}$. When the control object is in state $\ket{d-1}$ the effect on all other states are arbitrary, so long as the resulting operation is unitary. When the control object is not in state $\ket{d-1}$ the operation has no effect.
+In this case our circuit is the same length, or even longer if more optimization had been applied, but the simplification from three Toffoli gates to three $C(X)$ gates is dramatic once we start representing Toffoli gates in terms of $C(X)$, and as the number of bits increases this difference will increase quadratically, so it is a significant improvement. Of course arguments about universal computation are not intended to be efficient anyway, and the real purpose of this approach is to generalize to mixed systems. The way that we do this is straight forward. We still choose $j$ to be some qubit, meaning $d_j = 2$ still. $P_1$ is chosen by the same process as before as well, but if $k$ needs to be chosen it can be an arbitrary control digit whether binary or otherwise. Now to change the remaining digits $p_i$ to $q_i$, we still use controlled operations, but can choose whether we use $C_{r_j=0}(S_{p_i,q_i})$ to change $p_i$, or $C_{r_j=0}(X_{d_i})^{q_i-p_i}$, depending on which basis of \ref{} we are aiming to use.
 
-This paper is a very promising theoretical and practical foundation for working with quantum systems with multiple objects all of one arbitrary dimension, especially systems based on the linear ion trap, but due to how different its approach is to ours, we only take one thing from it, which is a way of decomposing control operations $C_c(U_j)$ using auxiliary qutrits (or higher) instead of auxiliary qubits.
+We have now written $U_{p,q}$ as a combination of control operations, and so next is to use the techniques described in \cite{cnot-decomposition} to decompose these into operations with only a single control object. Of course with the above technique most of our operations are already in this form, but this doesn't eliminate any potential cases, since we still have an arbitrary $C_c(U_j)$ in the middle of the circuit.
 
-The process is identical to what we just described using Toffoli gates, except by introducing an auxiliary qutrit with index $k$, as opposed to the qubit with index $k$, and defining $p_k = 2$, we can use two single-controlled increments instead of one double-controlled (i.e.\ Toffoli) gate:
-\[
-C_c(U_j) = C_{r_{i_1}=p_{i_1}}(X_k)^{-1}
-C_{r_{i_2}=p_{i_2}}(X_k)^{-1}
-C_{c'}(U_j)
-C_{r_{i_2}=p_{i_2}}(X_k)
-C_{r_{i_1}=p_{i_1}}(X_k)
-\]
-Since $X_k$ is an increment operation acting on a qutrit, it will not be involutory the way that a qubit increment is, so we need to invert it explicitly. [Muthukrishnan used transpositions, and we will be using transpositions as well, so we should move the single-object transpositions up to this section or earlier, and change this to C(S) instead of C(X). Then have a note about how you could use C(X) instead if that is available more directly, since we will eventually implement C(S) in terms of C(X). maybe that note should go in chapter 3 when we make that implementation of C(S)?]
+\subsection{Decomposing Control Operations}
+We would like to decompose $C_c(U_j)$ into elements of $U(2)$ and operations of the form $C(X_{d_i})$ or $C(S_{p_i,p'_i})$. In a binary computer this is done in three steps. The first is to introduce/require an additional $n-3$ auxiliary qubits to the quantum computer that are not intended to be affected by the original unitary in $U(N)$ or the control operation in question, and to inductively reduce the operation $C_c(U_j)$ into a series of gates with two control qubits. We index the new qubits $n+1$ through $2n-2$, which begin and end this process in the computational basis state $\ket{0}$. The key to this process is the Toffoli gate, which [we recall? I've already been talking about them...] is simply a controlled $X$ operation with two control bits, $C_{r_k=q_k,r_l=q_l}(X_j)$.
 
-In \cite{multi-valued-logic} this was done more efficiently, effectively setting $p_k = d-1$ rather than $p_k = 2$, and performing $d-1$ separate controlled operations for each auxiliary object added, but since we only consider qutrits this is equivalent.
-\section{Universality of Composite Systems}
-Earlier we outlined how 7 techniques can be used in order to decompose any unitary in $U(N)$ into an approximating series of gates from the finite generator set $\{H, T, C(X)\}$. In order to make sense of computation in mixed systems we ought to propose at least one gate set that is universal. Recall our definition of transposition matrices:
-\[S_{p_1\dots p_n, q_1\dots q_n}(\ket{r_1}\dots\ket{r_n}) = \begin{cases}
-	\ket{p_1}\dots\ket{p_n} & \text{if\ } r_i = q_i \forall i \in \mathbb{Z}, 1 \leq i \leq n \\
-	\ket{q_1}\dots\ket{q_n} & \text{if\ } r_i = p_i \forall i \in \mathbb{Z}, 1 \leq i \leq n \\
-	\ket{r_1}\dots\ket{r_n} & \text{otherwise}
-\end{cases}
-\]
-This definition works as-is for arbitrary composite systems, which will be useful for our generalization, but we also define $S_{p,q}$ [suddenly realizing I use $\ket{i}$ and $\ket{j}$ for single systems... if I switch to a consistent notation I will need to switch to $p$ and $q$ as well!] acting on single objects within a composite system:
-\[S_{p, q}\ket{r} =
-\begin{cases}
-	\ket{p} & \text{if\ } r = q \\
-	\ket{q} & \text{if\ } r = p \\
-	\ket{r} & \text{otherwise}
-\end{cases}
-\]
-[ambiguous vs $S_{p_i, q_i}$... maybe $S_{(p_i),(q_i)}$?]
+Take $I$ to be the set of indices $i$ for which our control operation $C_c(U_j)$ has a constraint $r_i = q_i$, so that
+\[c = \{\ket{r_1}\dots\ket{r_n}\ |\ r_i = q_i \text{\ whenever} i \in I\}\]
+Then we shall perform induction on the size of $I$, implementing any control operation as $2\ord{I}-4$ Toffoli gates, sandwiching a final single- or double-controlled operation $C_{r_k=q_k, r_l=q_l}(U_j)$. Informally this looks like the following:
 
-Then our first goal is to prove [theorem?] that any unitary matrix acting on some composite system, $U \in U(N) = U(\prod_i d_i)$, with at least one qubit, i.e.\ some $j$ such that $d_j = 2$, that the gate set $\{H, T\} \cup \{S_{p,q}\} \cup \{C(S_{p,q})\}$ is universal.
+\begin{quantikz}
+\lstick{$\ket{0}$}  & \qw & \qw \midstick[6,brackets=none]{=}& \targ{} & \phase{1}\vqw{4} & \targ{} & \qw \rstick{$\ket{0}$}\\
+\lstick{$\ket{r_k}$}& \phase{q_k}\vqw{1} & \qw& \phase{q_k}\vqw{-1} & \qw & \phase{q_k}\vqw{-1} & \qw \rstick{$\ket{r_k}$} \\
+\lstick{$\ket{r_l}$}& \phase{q_l}\vqw{2} & \qw& \phase{q_l}\vqw{-1} & \qw & \phase{q_l}\vqw{-1} & \qw \rstick{$\ket{r_l}$} \\
+\lstick{$\vdots$}& & & & & & \rstick{$\vdots$} \\
+                 & \ctrl{1} & \qw& \qw & \ctrl{1} & \qw & \qw  \\
+\lstick{$\ket{r_j}$}& \gate{U_j} & \qw& \qw & \gate{U_j} & \qw & \qw
+\end{quantikz}
 
-We have from existing qubit literature that such a matrix can be decomposed into unitaries acting on various axis aligned planes, which can then be decomposed into multi-controlled operations $C_c(U_j)$ acting on some qubit, sandwiched by transpositions $S_{(p_i),(q_i)}$. Now we follow much the same procedure as before, but instead of only having the single transposition $S_{0, 1} = X_2$ to work with, we work with general transpositions $S_{p, q}$.
+In total this implements an operation with $\ord{I}$ control bits in terms of one with $\ord{I}-1$ control bits. Formally we have introduced an auxiliary qubit $r_i$, and reduced $I$ to
+\[I' = (I \backslash \{k, l\})\cup \{i\}\]
+Correspondingly, set $q_i = 1$ and reduce the condition set $c$ to
+\[c' = \{\ket{r_1}\dots\ket{r_n}\ |\ r_i = q_i \text{\ whenever} i \in I'\}\]
+This returns us to the form we started in, with an operation $C_{c'}(U_j)$, but with one less control qubit. Eventually we will reach a base case where $\ord{I} = 2$, in which case $C_c(U_j)$ is already a double-controlled gate sandwiched by $2\ord{i}-4 = 0$ Toffoli gates. This means that inductively we end up with the result that we wanted.
 
-First recall the algorithm for decomposing a transposition into controlled increments, which we generalize by simply decomposing into controlled transpositions. [I should probably use the term NOT, so that it is more intuitive how control increment and control transposition are both generalizations of control NOT] If $p_i = q_i$ for all $i$ except one $i = k$, then $S_{(p_i), (q_i)}$ is already a controlled operation $C_c(S_{p_k,q_k})$. If $p_i$ and $q_i$ differ by more than one value then decompose into two transpositions $S_{(p_i), (p'_i)}S_{(p'_i), (q_i)}$ and then inductively turn each one into a series of controlled transpositions.
+This decomposition into Toffoli gates acting on auxiliary qubits generalizes to mixed logic without any modification, so long as auxiliary qubits are available. Alternatively one can copy \cite{multi-valued-logic} which introduces auxiliary objects of dimension $d>2$, and uses singly-controlled permutations gates, though controlled increments will do as well. We will assume $d=3$ but it is easy to optimize the number of auxiliary objects when $d$ is larger. The transformation instead looks like this:
 
-Now the way that we decompose the controlled objects depends on the dimension of our auxiliary objects. If there are auxiliary qutrits or higher then we can use the decomposition we derived from \cite{multi-valued-logic}, reducing the size of the control set via
-\[
-C_c(U_j) = C_{r_{i_1}=p_{i_1}}(S_{0,1})
-C_{r_{i_2}=p_{i_2}}(S_{1,2})
-C_{c'}(U_j)
-C_{r_{i_2}=p_{i_2}}(S_{1,2})
-C_{r_{i_1}=p_{i_1}}(S_{0,1})
-\]
-Otherwise if there are only auxiliary qubits available we can use the Toffoli decomposition, with a target qubit and two control objects that could be of any dimension. The gate would still be written $C_{r_{i_1}=p_{i_1},r_{i_2}=p_{i_2}}(X_j)$. [implementing this double-controlled gate would require some elaboration, I'll need to explain the circuit for implementing Toffoli using $C(\sqrt{X})$ and generalize that. Also implementing $C(U_j)$ in terms of $C(X)$ needs some explanation! It's just the first two and the last steps that stay the same. It would also be good to explain how in binary $S_{0,1} = X_2 = HT^4H$, and $C_{p=0}(U_j) = X_pC_{p=1}(U_j)X_p$, in fact does the basis need $S_{p,q}$? or just $C_{r_i=d_i-1}(S_{p_j,q_j})$ and $X_i$...]
+\begin{quantikz}
+	\lstick{$\ket{0}$}  & \qw & \qw \midstick[6,brackets=none]{=}& \gate{S_{0,1}} & \gate{S_{1,2}} & \phase{2}\vqw{4} & \gate{S_{2,1}} & \gate{S_{1,0}} & \qw \rstick{$\ket{0}$}\\
+	\lstick{$\ket{r_k}$}& \phase{q_k}\vqw{1} & \qw& \phase{q_k}\vqw{-1} & \qw & \qw & \qw & \phase{q_k}\vqw{-1} & \qw \rstick{$\ket{r_k}$} \\
+	\lstick{$\ket{r_l}$}& \phase{q_l}\vqw{2} & \qw& \qw & \phase{q_l}\vqw{-2} & \qw & \phase{q_l}\vqw{-2} & \qw & \qw \rstick{$\ket{r_l}$} \\
+	\lstick{$\vdots$}& & & & & & & & \rstick{$\vdots$} \\
+	& \ctrl{1} & \qw& \qw & \qw & \ctrl{1} & \qw & \qw & \qw  \\
+	\lstick{$\ket{r_j}$}& \gate{U_j} & \qw& \qw & \qw & \gate{U_j} & \qw & \qw & \qw
+\end{quantikz}
 
-This is a straight forward generalization of the universality result for qubits, but requires a lot of different permutation matrices in order to be complete, so while the above argument is generic to any composite system, it is not that useful by itself. We do not stop here, however; by specifying that all objects are qubits or qutrits we can make further decompositions and get a set of 5 gates. [note somewhere that this isn't proven to be minimal, it's meant to be enough to work with]
+$S_{0,1}$ in the above diagram can be replaced with $X_3$ and $S_{1,0}$ with $X^{-1}$ to achieve the same effect, depending on the desired basis. If we have arbitrarily many qutrits or higher available, then we can ignore the Toffoli gates altogether, and only use the $C(X)$ or $C(S_{p_i,p'_i})$ gates available to us to reduce $C_c(U_k)$ to a singly-controlled $C_{r_i=2}(U_j)$, but for generality we shall continue as if Toffoli gates need to be used as well. Given $V_j^2 = U_j$, \cite{cnot-decomposition} presents the following circuit for any $C_{r_k=q_k, r_l=q_l}(U_j)$:
+
+\begin{quantikz}
+	\lstick{$\ket{r_k}$}& \phase{q_k}\vqw{1} & \qw\midstick[3,brackets=none]{=}& \qw & \phase{q_k}\vqw{1} & \qw & \phase{q_k}\vqw{1} & \phase{q_k}\vqw{2} & \qw \rstick{$\ket{r_k}$} \\
+	\lstick{$\ket{r_l}$}& \phase{q_l}\vqw{1} & \qw& \phase{q_l}\vqw{1} & \targ{} & \phase{q_l}\vqw{1} & \targ{} & \qw & \qw \rstick{$\ket{r_l}$} \\
+	\lstick{$\ket{r_j}$}& \gate{U_j} & \qw& \gate{V_j} & \qw & \gate{V_j^{-1}} & \qw & \gate{V_j} & \qw
+\end{quantikz}
+
+This decomposes our many doubly-controlled gates into singly-controlled gates, but interestingly all of the Toffoli gates acting on auxiliary qubits will become $C(\sqrt{X_2})$\footnote{If one wants a square root of $X$, then $(H^{-1}\sqrt{Z}H)^2 = H^{-1}ZH = X$ is a simple example, with $\sqrt{Z}\ket{i} = \omega_4^i\ket{i}$.} rather than $C(X)$. So long as object $j$ is still a qubit, this proof will generalise to a mixed quantum computer as follows:
+
+\begin{quantikz}
+	\lstick{$\ket{r_k}$}& \phase{q_k}\vqw{1} & \qw\midstick[3,brackets=none]{=}& \qw & \phase{q_k}\vqw{1} & \qw & \phase{q_k}\vqw{1} & \phase{q_k}\vqw{2} & \qw \rstick{$\ket{r_k}$} \\
+	\lstick{$\ket{r_l}$}& \phase{q_l}\vqw{1} & \qw& \phase{q_l}\vqw{1} & \gate{S_{q_l,q_l+1}} & \phase{q_l}\vqw{1} & \gate{S_{q_l+1,q_l}} & \qw & \qw \rstick{$\ket{r_l}$} \\
+	\lstick{$\ket{r_j}$}& \gate{U_j} & \qw& \gate{V_j} & \qw & \gate{V_j^{-1}} & \qw & \gate{V_j} & \qw
+\end{quantikz}
+
+Once again $S_{q_l,q_l+1}$ and $S_{q_l+1,q_l}$ can be replaced with $X_{d_l}$ and $X_{d_l}^{-1}$ depending on the desired basis.
+
+In fact \cite{cnot-decomposition} generalizes this implemention of doubly-controlled gates directly to arbitrary $C_c(U_j)$, so this approach could be directly generalized to a mixed context by replacing all $X_2$ operations with increment/decrement respectively, avoiding the discussion of auxiliary qubits or qutrits altogether, but requiring greater circuit depth in place of the shorter circuit length. This gives a total of three distinct ways of implementing $C_c(U_j)$ in terms of singly-controlled operations $C_{r_k=q_k}(U_j)$, acting on qubits. In all three cases we now need only demonstrate how to implement these in terms of single-qubit unitaries and $C_{r_k=q_k}(X_2)$, which in this case is the same as $C_{r_k=q_k}(S_{0,1})$. The qubit construction referenced in \cite{cnot-decomposition} works for this purpose without modification:
+
+\begin{quantikz}
+\lstick{$\ket{r_k}$} & \phase{q_k} & \qw\midstick[2,brackets=none]{=}& \qw & \phase{q_k}\vqw{1} & \qw & \phase{q_k}\vqw{1} & \qw & \qw \rstick{$\ket{r_k}$}\\
+\lstick{$\ket{r_j}$} & \gate{U_j} & \qw & \gate{A} & \targ{} & \gate{B} & \targ{} & \gate{C} & \qw
+\end{quantikz}
+
+where $A,B,C \in U(2)$ are chosen so that $ABC=I$ and $AXBXC = U_j$. This can be done in general, via the spherical geometry of $U(2)/U(1) \cong SO(3)$[define!], as shown in \cite{cnot-decomposition}. Combining all of the steps just described we have proven \ref{}, generalizing the universality result of \cite{cnot-decomposition} and \cite{textbook} to mixed quantum computers with at least one qubit, and with significantly fewer operations than \cite{textbook} seems to have used, even in the case of a computer with only qubits available. $\square$
 \section{Analysing Small Permutations}
 We have reduced $U(N)$ to a finite number of generator elements we would like to target. By setting $d_i \in \{2, 3\}$ we have a generator of 12 operations, 4 single object operations
 \[H_2, T, X_2, X_3\]

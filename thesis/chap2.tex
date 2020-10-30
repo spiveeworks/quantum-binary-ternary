@@ -1,54 +1,114 @@
 % chap2.tex (Chapter 2 of the thesis)
 \chapter[TERNARY ARITHMETIC]{Ternary Arithmetic}
-\section{Ternary Logic}
-Although these techniques about the polynomial algebra of ternary logic are novel and powerful, they were a secondary result of \cite{arithmetics}, whereas the main goal was to provide concrete circuits that could implement addition of ternary integers, since integer addition is central to arithmetic. [``Factoring with Qutrits'' is a big deal here, and has a lot of results that are hard to parse... they are surprising (metaplectic performs better than supermetaplectic, binary performs better than ternary in width-limited systems) but might be quite specific to the metaplectic architectures being considered by this group... I don't know if I have time to account for that paper properly, but it's a good one so it would be ideal if I did!] They provide two algorithms that both perform addition, but one requiring a larger amount of physical time to compute, [should define width vs depth] where the other uses parallel computation on a larger number of qutrits in order to perform the calculation faster.
+The QArC Group at Microsoft have written a number of papers describing logic in ternary quantum computers, including a full description of integer addition and Shor's factoring algorithm in ternary quantum computers \cite{arithmetics, shor-qutrit}, paying particular mind to a fault tolerant/elementary gate set called the metaplectic basis, described in \cite{universal-anyon, topological-anyon-thing}. While the algorithms for addition are deliberately designed to be generic to any ternary quantum computer, the specific analysis of elementary gates required is specific to the class of quantum computer being considered, so it is unclear whether these analyses pose any relevance to our discussion of mixed logic. We shall describe the algorithms given for addition, and demonstrate how they can be ported to a mixed qubit-qutrit quantum computer without any modification. This will inform our exploration of theoretical quantum gates that might be powerful to have available in such mixed contexts. We also discuss algebraic techniques used in \cite{arithmetics} that fail to generalize to mixed contexts, suggesting some novel complexity present in mixed contexts that does not exist in a purely binary or purely ternary context.
 
-These algorithms are implemented in ways that leverage coincidences of having exactly 3 dimensions, and exemplify what efficient ternary algorithms should look like, but they also raise the question of whether a mixed binary-ternary quantum computer could implement these algorithms more efficiently. In this section we give an overview of these algorithms as presented in \cite{arithmetics}, [their performance in the context of Shor's factoring algorithm as presented in ``Factoring with Qutrits'', and raise some basic questions about how all of these algorithms would look if implemented in a fault tolerant, mixed logic system. [ultimately providing motivation for the universality argument we give in chapter 3, and I think also providing motivation for fault tolerant implementation of our basis in a system that is physically ternary] [this is such a strong motivator, but I want to be careful that they haven't already talked about fault tolerance, like in the topological-anyon-thing paper, or if they have then be mindful of what they have said... post-hoc justification of things takes a lot of last minute reading!]
-
+\section{Ternary Addition With Minimal Width}
 \ [also what part of it was `improved'? I think leveraging the binary nature of some of the variables was actually the main advantage!]
-\subsection{Improved Ternary Arithmetics}
-The classical implementation of binary addition is first to define a ``half adder'' which calculates the sum of two bits $a_0 + b_0$ as a number between 0 and 2, in binary either $00$, $01$, or $10$. We can observe that the least significant digit is simply $s_0 = a_0 + b_0 \mod 2$, and in the binary case the most significant digit is $a_0b_0$. This low digit is output directly, but the high digit is now named $c_1$ and `carried'. This leads to the ``full adder'' which calculates the sum of 3 bits $a_1 + b_1 + c_1$ as a number between 0 and 3. Both of these are classical operations which could be implemented as permutations in the usual way. In the ternary case the same logic applies, a ternary full adder would add 3 trits $a_1 + b_1 + c_1$ to get a number between 0 and 6, represented as two trits $c_2, s_1$, returning $s_1$ as a result, and carrying $c_2$ forward.
 
-The first algorithm presented by \cite{arithmetics} leverages the fact that the only way $c_{i+1}$ can be 2 is if $a_i = b_i = c_i = 2$, but since $c_1$ comes from a half adder, or from $c_0$ which was initialized to 0, we know that $c_i$ will never be 0. This means that the carry operation implemented only needs to calculate $c_{i+1}$ in situations where $c_i$ is 0 or 1, the other 9 inputs can essentially produce garbage. Additionally they allow the circuit they implement $U_c$ to transform the registers containing $a_i$ and $b_i$, allowing all calculations to be made in place. The carry `trits' are calculated up to the highest trit $c_{l+1}$, which is yielded as is as $s_{l+1}$, then this calculation is reversed to recover $a_l$, $b_l$, and $c_l$, setting $s_l = a_l + b_l + c_l \mod 3$, and so on, overwriting $b_l$ with this value since it is no longer needed, down to $s_0 = a_0 + b_0 + c_0 \mod 3$. This algorithm acts on $2l+2$ qutrits, the digits $a_i$ and $b_i$, along with $c_0$ which is generally going to be 0, and $s_{l+1}$ which is initially also 0. This is only one or two qutrits more than the logical input of the algorithm, which is hard to beat, and uses $2n$ non-Clifford operations. (the ones implemented either asymptotically [or fault tolerantly using magic states])
+The first algorithm laid out in \cite{arithmetics} was a reversible algorithm for adding the ternary expansion of two integers, a simple generalization of an operation fundamental to computation in integers. In order to implement addition in some base $d$ one must implement the sum of three digits $a_i + b_i + c_i$ to get a number between $0$ and $3d-3$, a number which is itself represented as two separate digits,
+\[c_{i+1} = \left\lfloor \frac{a_i + b_i + c_i}{d} \right\rfloor, \text{\ and\ }
+\]\[s_i = a_i + b_i + c_i \mod d.\]
+$s_i$ is easily implemented as a pair of SUM operations, which is significantly simpler than $c_{i+1}$ which is an almost arbitrary map $\{0,\dots,d-1\}^3 \to \{0,\dots,d-1\}$. A significant simplification made in \cite{arithmetics} is to note that when $d=3$, the only way $c_{i+1}$ can be 2 is if all $a_i$, $b_i$, and $c_i$ before it are also 2. Since $c_0$ is assumed to be 0 this means $c_i$ is always either 0 or 1, meaning we only need to implement a map from $\{0,1,2\}^2\times\{0,1\} \to \{0, 1\}$. Then with careful analysis of the required map they presented the following circuit:
 
-The second algorithm aims to parallelise the calculation of the carry trits by observing three cases of $a_i + b_i + c_i$:
+\begin{quantikz}
+	\lstick{$c_i$} & \qw & \qw & \octrl{2} & \octrl{2} & \gate{S_{0,1}} & \swap{1} & \qw & \qw \rstick ? \\
+	\lstick{$a_i$} & \gate[wires=2]{S_{00,22}} & \octrl{1} & \qw & \qw & \qw & \targX{} & \swap{1} & \qw \rstick ?\\
+	\lstick{$b_i$} & \qw & \targ{} & \targ{} & \targ{} & \phase{0} \vqw{-2} & \qw & \targX{} & \qw \rstick{$c_{i+1}$}\\
+\end{quantikz}
+
+This carry circuit is then used to add two $m$-qutrit integers by composing it $m$ times, calculating $c_m$, which is written into a separate output register $s_m$. Then since these carry operations are reversible, they are reversed one by one, overwriting $b_i$ with each $s_i$ in the process. Note that $c_{i+1}$ is swapped with the $b_i$ register once it is calculated, making presentation cleaner later on, and also simulating the fact that qutrits in a physical quantum computer may not be able to interact with each other arbitrarily, they might only be able to interact with adjacent qutrits in some physical layout. They do all of this while only requiring two SWAP operations, which considered significantly cheaper in fault tolerant contexts since they are Clifford operations, unlike the $S_{00,22}$ or $C(S_{0,1})$ operations.
+
+We note that the core of this improvement was to treat $c_i$ like a qubit! This suggests that the whole algorithm for ternary arithmetic will map very cleanly into a mixed quantum computer. If we modify the carry circuit so that $c_i$ actually is a qubit, we get the following circuit:
+
+\begin{quantikz}
+	\lstick{$c_i$} & \qw & \qw & \phase{1} \vqw{2} & \targ{} & \qw \rstick{$c_{i+1}$} \\
+	\lstick{$a_i$} & \gate[wires=2]{S_{00,22}} & \octrl{1} & \qw & \qw & \qw \rstick ?\\
+	\lstick{$b_i$} & \qw & \targ{} & \gate{X_3^{-1}} & \phase{0} \vqw{-2} & \qw \rstick ?\\
+\end{quantikz}
+
+The pair of Clifford SUM operations become a single non-Clifford\footnote{One can compute $C(X)X^jZ^kC(X^{-1})$ as we have shown in \ref{}, but we will see in \ref{} that \emph{no} operation that acts dependently on a qubit-qutrit pair can be Clifford.} controlled decrement, the inverse of a controlled increment. Further the controlled transposition simply becomes a controlled increment mod 2. Finally we cannot swap $c_{i+1}$ with $b_i$ since one is a qubit and the other is a qutrit. We see very clearly that this algorithm would be very sensitive to connectivity between qubits and qutrits if implemented in a mixed system. We have turned a carry operation with two non-Clifford operations into one with three non-Clifford operations. In addition to this, the calculation $s_i = a_i + b_i + c_i \mod 3$ becomes
+
+\begin{quantikz}
+	\lstick{$c_i$} & \qw & \phase{1} \vqw{2} & \qw \rstick{$c_{i}$} \\
+	\lstick{$a_i$} & \octrl{1} & \qw & \qw \rstick{$a_i$}\\
+	\lstick{$b_i$} & \targ{} & \targ{} & \qw \rstick{$s_i$}\\
+\end{quantikz}
+
+This means that in total to add two $m$-qutrit integers we have gone from $2m$ non-Clifford operations to $4m$ non-Clifford operations, which may be a significant loss, but also isn't strictly meaningful at this point in time, since this metric is specific to the class of quantum computer described in \cite{topological-anyon-thing}, whereas we do not have a proposed fault tolerant model of mixed quantum computation with which to judge this outcome. We have used two qubit-qutrit gates, $C_2(X_3)$ [didn't end up defining $C_d(U)$... do that!] and $C_3(X_2)$, gates that we will end up investigating directly in \ref{finitely-generated}.
+
+\section{Ternary Addition With Minimal Depth}
+The second algorithm presented by \cite{arithmetics} aims to parallelise the calculation of the carry trits by observing three cases of $a_i + b_i + c_i$:
 \begin{itemize}
 	\item $a_i = b_i = 0 \implies c_{i+1} = 0$, denoted $C[i, i+1] = 0$
 	\item $a_i + b_i = 1 \implies c_{i+1} = c_i$, denoted $C[i, i+1] = 2$
 	\item $a_i + b_i \geq 2 \implies c_{i+1} = 1$, denoted $C[i, i+1] = 1$
 \end{itemize}
-These three cases can be calculated up front and stored in trit registers, without knowing any carry digits. This allows the calculations to be done in parallel, requiring $l$ Clifford gates, but taking the same amount of time that would be needed if $l = 1$.
+These three cases can be calculated up front and stored in trit registers, without knowing any carry digits. This allows the calculations to be done in parallel requiring $m$ Clifford gates, but only taking the amount of time required to compute one or two of these calculations in sequence.
 
-Next a merge algorithm is defined, if $C[i, j] = C[j, k] = 2$ then $c_i = c_j = c_k$, so $C[i, k] = 2$ also. In fact whenever $C[j, k] = 2$ we will have $C[i, k] = C[i, j]$. On the other if $C[j, k] \neq 2$ then $c_k$ will be $C[j, k]$, 0 or 1 respectively, so $C[i, k]$ is simply $C[j, k]$. This is another classical operation, which can be implemented as a permutation. This allows for what is called a `divide and conquer' algorithm, where different $C[i, k]$ values are merged one layer at a time, taking $l - \omega(l) - \left\lfloor \log l \right\rfloor$ additional trits on top of the $2l$ needed for the input of the algorithm, where $\omega(l)$ is the number of 1s in the binary expansion of $l$. The `layers' add up to a circuit depth of $\left\lfloor \log l \right\rfloor + \left\lfloor \log \frac{n}{3} \right\rceil + 2$, despite the algorithm using $3l - 2\omega(l) - 2\left\lfloor \log l \right\rfloor - 1$ non-Clifford operations in total.
+Next a merge algorithm is defined, if $C[i, j] = C[j, k] = 2$ then $c_i = c_j = c_k$, so $C[i, k] = 2$ also. In fact whenever $C[j, k] = 2$ we will have $C[i, k] = C[i, j]$. On the other hand, if $C[j, k] \neq 2$ then $c_k$ will be equal to $C[j, k]$ itself, either 0 or 1, and in either case $C[i, k]$ is simply $C[j, k]$. This calculation of $C[i,k]$ in terms of $C[i, j]$ and $C[j, k]$ is another classical operation, which can be implemented as a permutation. Now different combinations of $C[i, k]$ are merged in $\left\lfloor \log l \right\rfloor + \left\lfloor \log \frac{n}{3} \right\rceil + 2$ parallel `layers', requiring $3l - 2\omega(l) - 2\left\lfloor \log l \right\rfloor - 1$ non-Clifford operations across all of these layers, where $\omega(l)$ is the number of 1s in the binary expansion of $l$. The algorithm far from minimizes width however, taking $l - \omega(l) - \left\lfloor \log l \right\rfloor$ additional qutrits on top of the $2l$ needed for the input of the algorithm.
 
-In addition to describing both of these algorithms in full, in a manner generic to any ternary quantum computer, the paper goes on to describe the standard ways of extending addition to implement addition mod $3^n$, as well as subtraction and comparison, and the efficiency gains that can be made by not calculating the data these calculations would only discard. Then of course the paper moves on to discuss the supermetaplectic basis as described previously.
-
-While the algorithms it described are presented as ternary algorithms, it is interesting that the main optimization of the first algorithm was to recognize that the carry digit is actually a binary piece of data, making this algorithm a piece of mixed binary-ternary logic, simply embedded inside a ternary computer! Additionally the second algorithm has carry information $C[i, k]$ which is ternary, but this algorithm could be implemented for addition of binary integers as well! This means both of these algorithms could be interpreted as being intrinsically mixed, but as being embedded in a ternary quantum computer, even though they were intended to be intrinsically ternary algorithms. This makes the specific implementation of these algorithms in a mixed context an excellent starting point for thinking about real applications of mixed logic[, and also makes the efficiency discussions of ``Factoring with Qutrits'' a very interesting place to look for the tradeoffs between the binary and ternary roles of mixed quantum data].
-
-\subsection{Fault Tolerance and Mixed Logic}
-[outline fault tolerant computing in more detail, and outline how the ternary arithmetics algorithms act on physical qutrits, whereas a realistic algorithm would act on logical qutrits, and hence could be mixed.... I assume the topological quantum systems still need fault tolerant computing?]
-
-
-\section{Porting ``Improved Ternary Arithmetics''}
-[this stuff has been floating around for a while, will write the ideas here properly and integrate into the above]
-We have discussed how the algorithms for arithmetic described in \cite{arithmetics} could naturally be ported to a mixed logic system, by using qubits for binary carry bits, or by using 
+Here a key feature of the algorithm is to observe that $C[i, j]$ is intrinsically ternary, but interestingly the addition of two binary integers would have the same three carry cases, so if we can implement the base case $C[i, i+1]$ as yielding a qutrit based on two qubits, then we would have turned another ternary arithmetic algorithm into a mixed algorithm, but this time using qutrit carry information to add a series of qubits! Let $a_i, b_i \in \{0, 1\}$, then $c_{i+1}$ will be 1 if $a_i = b_i = 1$, 0 if $a_i = b_i = 0$, and $c_{i}$ if $a_i \neq b_i$. This can be implemented as follows
 
 \begin{quantikz}
-	\lstick{$c_i$} & \qw & \qw & \phase{1} \vqw{2} & \gate{S_{0,1}} & \qw \rstick{$c_{i+1}$} \\
-	\lstick{$a_i$} & \gate[wires=2]{S_{00,22}} & \octrl{1} & \qw & \qw & \qw \\
-	\lstick{$b_i$} & \qw & \targ{} & \gate{X_3^{-1}} & \phase{0} \vqw{-2} & \qw \\
+\lstick{0} & \targ{} & \targ{} & \gate{S_{1,2}} & \qw \rstick{$C[i,i+1]$} \\
+\lstick{$a_i$} & \phase{1} \vqw{-1} & \qw & \qw & \qw \rstick{$a_i$}\\
+\lstick{$b_i$} & \qw & \phase{1} \vqw{-2} & \qw & \qw \rstick{$s_i$}\\
 \end{quantikz}
 
-[don't know how to do $\oplus^\dagger$ so ugly box for now.]
+Here $S_{1,2}$ is a potentially cheap Clifford operation that allows us to calculate $C[i, i+1]$ in terms of $a_i + b_i$. This is much like the $S_{0,1}$ used in the original $C[i, i+1]$ circuit in \cite{arithmetics}. Much like the SWAP operations in their previous carry gates, Clifford operations are being used liberally to turn quantities that are easy to calculate into quantities that are more convenient to design algorithms for. The next step of the algorithm is to merge the different qutrit quantities $C[i, k]$, which is unchanged since there are no qubits involved.
 
-have found a useful set of basic gates for mechanized compilation
-\\let's look at specific algorithms that have been designed rather than compiled
-\\\cite{arithmetics} implements ternary addition as a permutation on computational basis states
-\\the ripple carry is designed so that the carry digit is always binary, which could be implemented in a mixed context
-\\(possibly draw up a circuit implementing the carry operations)
-\\the look ahead carry has ternary carry registers, but could be used for binary arithmetic, again giving a mixed algorithm
-\\(possibly draw up circuit for this as well)
-\\either of these would have less entropy than the pure ternary case, but many practical tradeoffs may render pure ternary to be superior, such as connectivity requirements, performance costs of mixed logic in general
-\\we have access to any method, lot of flexibility! add bits or trits with bit carry or trit carry
-\\(possibly mention mixed-string representations, here or in final discussion)
+Now in order to calculate the resulting qubits we must obviously diverge from \cite{arithmetics} once more. A key component of their algorithm was to calculate $C[0, 1]$ separately, since $c_0 = 0$ we can replace the $C[0, 1] = 2$ case with $C[0, 1] = 0$, which is another binary quantity. $C[0, 1]$ is 1 if both $a_0$ and $b_0$ are 1, which is implemented with a single Toffoli gate $C_{a_0 = 1, b_0 = 1}(X_{C[0, 1]})$. Now since we have eliminated the $C[0, 1] = 2$ case, what we are really calculating is $c_1$. Next $\cite{arithmetics}$ would have used the merging formula to calculate each $c_k$ implicitly by merging $C[0, j] = c_j$ with $C[j, k]$. Since we want $c_k$ to be a qubit we will replace these specific merges with our own circuit:
 
+\begin{quantikz}
+\lstick{$c_j$} & \qw & \phase{1} \vqw{1} & \qw \rstick{$c_j$} \\
+\lstick{$C[j, k]$} & \phase{1} \vqw{1} & \phase{2} \vqw{1} & \qw \rstick{$C[j, k]$} \\
+\lstick{$0$} & \targ{} & \targ{} & \qw \rstick{$c_k$} \\
+\end{quantikz}
+
+Now with all $c_k$ calculated we can of course calculate $s_k = a_i + b_i + c_i \mod 2$ with two SUM operations, i.e.\ two $C(X_2)$ operations. The circuits for calculating $c_k$ used gates with two control objects, so the performance of this part of the algorithm would depend primarily on how these operations are implemented in the given mixed quantum computer. We have now generalized both algorithms from being purely qutrit based to using a mixture of qubits and qutrits, and in doing so have repeatedly encountered the controlled increment operations $C_2(X_3)$ and $C_3(X_2)$.
+
+\section{Speculation on Mixed Coding Schemes}
+At this point we make the small aside that while it makes sense to use physical qubits to encode logical qubits, the primary advantage of doing this is that it allows one to avoid thinking about qutrits altogether. As soon as we start considering a mixture of qubits and qutrits we could develop a coding scheme that encodes these objects into a system that is itself mixed, but we should plausibly be able to encode them into a system that is itself a pure ternary system as well, or even a pure binary system. For example both of the algorithms given in \cite{arithmetics} used many binary registers as is, by simply not using the $\ket{2}$ state of the relevant qutrits. Taking the simplified $\{\ket{0}\ket{0}\ket{0}, \ket{1}\ket{1}\ket{1}\}$ example from \ref{}, and generalising it to $\{\ket{0}\ket{0}\ket{0}, \ket{1}\ket{1}\ket{1}, \ket{2}\ket{2}\ket{2}\}$ in order to implement a logical qutrit, we could then implement a logical qubit on the same computer by simply treating all $\ket{2}$ states in that block as errors that need to be corrected.
+
+In actual fact coding schemes can do quite a bit better than detecting bit flip errors with $3\times$ redundancy, but simultaneously detect bit flip and sign flip errors with $7\times$ redundancy with an encoding scheme called the Steane code \cite{steane-code}, which raises the question of what a qubit-in-qutrit Steane code might look like. Further, if a logical qubit and a logical qutrit are both implemented in such a manner on the same ternary system, then another natural question would be what a fault tolerant implementation of $C_2(X_3)$ and $C_3(X_2)$ would look like. All of these arguments apply equally to encoding qutrits in a qubit system, which might be the more compelling option, since the major quantum computers to date have been based on physical qubits. [do I need to cite this? it's kind of the premise of this thesis that we currently mainly understand qubits... It shouldn't be hard to cite though, I'll see what I can find.]
+
+A standard milestone for any proposed quantum computer is to show that a set of fault tolerant/elementary gates [do I need the term elementary if I keep saying fault tolerant?] can be used to approximate any unitary operation $U \in U(N)$. In \ref{universal-computation} we will generalize the approach laid out in \cite{universal-qubit} to show that two different sets of seven [check that it is still seven!] gates can be used to make such an approximation. Both of these sets contain $C_3(X_2)$, $C_2(X_3)$, and one of them also contains $C_2(X_3)$, providing further theoretical motivation for fault tolerant implementation of these gates, in addition to their use in out generalisation of the algorithms in \cite{arithmetics}.
+
+\subsection{Supermetaplectic Basis}
+[do I leave this here right after our big discussion of the same paper? I think it really belongs after discussion of \cite{pi-over-eight}, but maybe we could move that here?]
+
+In the above discussion and related papers the QArC group have paid particular attention to a ``Metaplectic'' system of computation which is fault tolerant, and implements an elementary gate set called the ``metaplectic basis'' that can generate all Clifford operations, along with the more expensive implementation of a single non-Clifford operation
+\[Y = \begin{bmatrix}
+1 & 0 & 0 & \\
+0 & 1 & 0 & \\
+0 & 0 & -1 & \\
+\end{bmatrix}.\]
+
+In \cite{arithmetics} an alternative fault tolerant gate set was proposed, using $P_9$ in place of $Y$, the principal gate satisfying $P_9^3 = Z_3$:
+\[P_9 = \begin{pmatrix}
+1 & 0 & 0 \\
+0 & \omega_9 & 0 \\
+0 & 0 & \omega_9^2 \\
+\end{pmatrix}\]
+Both gate sets can be used to approximate any unitary $U \in U(3^n)$, but \cite{arithmetics} showed that this latter gate set can exactly implement any permutation matrix. They refer to this latter gate set as the ``supermetaplectic basis'', which seems to refer to this increase in power when dealing with permutation matrices.
+
+In order to show that this generator set exactly implements the permutation matrices in $U\left(3^n\right)$, i.e. all of $\mathcal{S}_{N}$, they decompose these matrices in 3 steps.
+\begin{enumerate}
+	\item It seems to have been taken implicitly that with an implementation of $C_{i_1 = 2}(X)$, other permutations acting on more than 2 qutrits can be decomposed in a manner similar to the qubit process described previously.
+	\item Various permutations acting on 2 or 3 qutrits that are not in $\mathcal{C}_2$ were shown to be pairwise equivalent, including arbitrary transpositions of pairs of states.
+	\item Two different diagonal matrices were constructed using $P_9$, whose Fourier transforms were qutrit permutations including $C_{i_1=2}(X)$ itself, meaning the permutations themselves are in this basis.
+\end{enumerate}
+
+Both of these explicit steps were derived through analysis of the permutation and diagonal matrices as polynomial expressions, first interpreting permutation matrices as acting on the computational basis, e.g.
+\[C_{i_1=0}(X)(\ket{i}\ket{j}) = \ket{i}\ket{j+1-i^2 \mod 3}\]
+[using $i,j$ instead of $p,q$... but I like $i,j$ here] then interpreting diagonal matrices as acting on the phase factors of the computational basis, e.g.
+\[C_{i_1=0}(Z)(\ket{i}\ket{j}) = \omega_{3}^{j(1-i^2)}\ket{i}\ket{j}\]
+This allows us to compose permutation matrices and diagonal matrices respectively, and simplify the resulting polynomials mod 3. This technique is clearly powerful, given its success in proving the above claims in \cite{arithmetics}, but unfortunately when we try to do this in a mixed system, we get terms evaluated mod 3, nested inside terms evaluated mod 2, and vice versa. For example in a system with a qubit and a qutrit we could write
+\[X_3\ket{i}\ket{j} = \ket{i}\ket{j+1\mod 3}.\]
+Further, by using a control value of 1 we can leverage that $2 \mod 2 = 0$ and write
+\[C_{j=1}(X_2)\ket{i}\ket{j} = \ket{i+j \mod 2}\ket{j}.\]
+Composing these we get
+\[C_{j=1}(X_2)X_3\ket{i}\ket{j} = \ket{i+(j+1 \mod 3)\mod 2}\ket{j + 1 \mod 3},\]
+which does not simplify, defeating the purpose of this analysis. 
+
+Another approach might be to inject our bits and trits into $\mathbb{Z}_6$, and represent $X_d$ as adding some constant that divides 6. [I have managed to justify using mod 6, but I still can't work out what the problem is. Is the problem that all reversible polynomials are affine linear anyway? Or that composition of polynomials still isn't well defined? I'll think about it some more. I forgot about it because it wasn't going to get any results, not realising that "there's nothing here worth writing a paper about" is still decent thesis content. In fact maybe there's a publishable negative result that I missed by dismissing it!]
