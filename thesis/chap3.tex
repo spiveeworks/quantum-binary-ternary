@@ -146,7 +146,7 @@ In this case our circuit is the same length, or even longer if more optimization
 
 We have now written $U_{p,q}$ as a combination of control operations, and so next is to use the techniques described in \cite{cnot-decomposition} to decompose these into operations with only a single control object. Of course with the above technique most of our operations are already in this form, but this doesn't eliminate any potential cases, since we still have an arbitrary $C_c(U_j)$ in the middle of the circuit.
 
-\subsection{Decomposing Control Operations}
+\section{Decomposing Control Operations}
 We would like to decompose $C_c(U_j)$ into elements of $U(2)$ and operations of the form $C(X_{d_i})$ or $C(S_{p_i,p'_i})$. In a binary computer this is done in three steps. The first is to introduce/require an additional $n-3$ auxiliary qubits to the quantum computer that are not intended to be affected by the original unitary in $U(N)$ or the control operation in question, and to inductively reduce the operation $C_c(U_j)$ into a series of gates with two control qubits. We index the new qubits $n+1$ through $2n-2$, which begin and end this process in the computational basis state $\ket{0}$. The key to this process is the Toffoli gate, which [we recall? I've already been talking about them...] is simply a controlled $X$ operation with two control bits, $C_{r_k=q_k,r_l=q_l}(X_j)$.
 
 Take $I$ to be the set of indices $i$ for which our control operation $C_c(U_j)$ has a constraint $r_i = q_i$, so that
@@ -200,42 +200,90 @@ Once again $S_{q_l,q_l+1}$ and $S_{q_l+1,q_l}$ can be replaced with $X_{d_l}$ an
 In fact \cite{cnot-decomposition} generalizes this implemention of doubly-controlled gates directly to arbitrary $C_c(U_j)$, so this approach could be directly generalized to a mixed context by replacing all $X_2$ operations with increment/decrement respectively, avoiding the discussion of auxiliary qubits or qutrits altogether, but requiring greater circuit depth in place of the shorter circuit length. This gives a total of three distinct ways of implementing $C_c(U_j)$ in terms of singly-controlled operations $C_{r_k=q_k}(U_j)$, acting on qubits. In all three cases we now need only demonstrate how to implement these in terms of single-qubit unitaries and $C_{r_k=q_k}(X_2)$, which in this case is the same as $C_{r_k=q_k}(S_{0,1})$. The qubit construction referenced in \cite{cnot-decomposition} works for this purpose without modification:
 
 \begin{quantikz}
-\lstick{$\ket{r_k}$} & \phase{q_k} & \qw\midstick[2,brackets=none]{=}& \qw & \phase{q_k}\vqw{1} & \qw & \phase{q_k}\vqw{1} & \qw & \qw \rstick{$\ket{r_k}$}\\
-\lstick{$\ket{r_j}$} & \gate{U_j} & \qw & \gate{A} & \targ{} & \gate{B} & \targ{} & \gate{C} & \qw
+\lstick{$\ket{r_k}$} & \phase{q_k}\vqw{1} & \qw\midstick[2,brackets=none]{=}& \qw & \phase{q_k}\vqw{1} & \qw & \phase{q_k}\vqw{1} & \qw & \qw \rstick{$\ket{r_k}$}\\
+\lstick{$\ket{r_j}$} & \gate{U_j} & \qw & \gate{A} & \targ{} & \gate{B} & \targ{} & \gate{C} & \qw\rstick{$C(U_j)\ket{r_j}$}
 \end{quantikz}
 
 where $A,B,C \in U(2)$ are chosen so that $ABC=I$ and $AXBXC = U_j$. This can be done in general, via the spherical geometry of $U(2)/U(1) \cong SO(3)$[define!], as shown in \cite{cnot-decomposition}. Combining all of the steps just described we have proven \ref{}, generalizing the universality result of \cite{cnot-decomposition} and \cite{textbook} to mixed quantum computers with at least one qubit, and with significantly fewer operations than \cite{textbook} seems to have used, even in the case of a computer with only qubits available. $\square$
 \section{Analysing Small Permutations}
-We have reduced $U(N)$ to a finite number of generator elements we would like to target. By setting $d_i \in \{2, 3\}$ we have a generator of 12 operations, 4 single object operations
-\[H_2, T, X_2, X_3\]
-and 8 permutation matrices acting on pairs of objects
-\[C_2(X_2), C_2(S_{0,1}), C_2(S_{0, 2}), C_2(S_{1, 2}), C_3(X_2), C_3(S_{0, 1}), C_3(S_{0, 2}), C_3(S_{1, 2})\}\]
-where $C_2(\dots)$ is taken to constrain some qubit to the value 1, and $C_3(\dots)$ some qutrit to the value 3. [could define this explicitly in notation section, $C_2$ and $C_d$ also]
+We have generated $U(N)$ with a finite set of two-object operations along with arbitrary qubit operations from $U(2)$. We can then apply the result of \cite{universal-qubit}, that any element of $U(2)$ can be approximated using the following operations $H_2$ and $T$:
 
-We can construct $X_2$ in the usual way, as $H_2T^4H_2$, so we can remove this from the generator set. Further when a matrix $A_j$ acts on the target digit, and hence has no effect on the control digit of a control operation $C_c(B_j)$ we can make many reductions using the relation
-\[A_jC_c(B_j)A_j^{-1} = C_c(A_jB_jA_j^{-1})\]
-Since when the condition is not satisfied the left hand side will have the effect of $A_jIA_j^{-1}$ i.e.\ no effect, just like the right hand side, and when the condition is satisfied both sides will have the effect $A_jB_jA_j^{-1}$.
-
-[why not just explicitly take all these gates to act on hypothetical 2-object systems from now on, either $\mathbb{C}^4$, $\mathbb{C}^6$, or $\mathbb{C}^9$]
-
-This lets us remove most of the control objects targeting qutrits:
 \begin{align*}
-	C_d(S_{0, 2}) = C_d(X_3^{-1}S_{0,1}X_3) = X_3^{-1}C_d(S_{0,1})X_3
-	\\
-	C_d(S_{1, 2}) = C_d(X_3S_{0,1}X_3^{-1}) = X_3C_d(S_{0,1})X_3^{-1}
+	H_2 = \frac{1}{\sqrt{2}}\left[\begin{matrix}
+	1 & 1 \\
+	1 & -1
+\end{matrix}\right]
+&&&
+T = \left[\begin{matrix}
+	1 & 0 \\
+	0 & \frac{1}{\sqrt{2}}\left(1+ i\right)
+\end{matrix}\right]
 \end{align*}
-We have now reduced our generator set to 7:
-\[H_2, T, X_3, C_2(X_2), C_2(S_{0, 1}), C_3(X_2), C_3(S_{0, 1})\]
 
-It is hard to speculate on what a good generator would be without properly considering the physical constraints and trade-offs of a specific computer, but it would not be surprising if $C_2(X_3)$ was more favourable to implement than $C_2(S_{0, 1})$, [suddenly realizing that when turning 2-level unitary into controlled operation we could have used any permutation! which means I could have targeted $C(X)$ from the start! I should consider drawing out the entire discussion of universality into parallel discussions of transposition vs incrementation, since they seem equivalent at every level, not just this one.] and while it is easy to implement $C_d(X_3)$ as $C_d(S_{0,1})C_d(S_{1,2})$, [this is another neat control identity to generalise] it isn't obvious how the reverse might be done. We will later find by brute force that
-\[C_2(S_{0,1}) = C_3(X_2) C_2(X_3)^{-1} C_3(X_2) C_2(X_3) C_3(X_2)\]
+We will come back in \ref{} to talk briefly about how this is done, since it involves an aspect of algebraic number theory that will be useful to us. The result was then used to argue that by the decompositions described in \cite{cnot-decomposition}, the gate set $H_2$, $T$, and $C_2(X_2)$ is universal, a significant result since this gate set can also be implemented fault tolerantly. We can directly map this result to mixed quantum computers via \ref{}, to get two alternative finite gate sets, $\{H_2, T, C_{r_k=q_k}(X_j)\}$, and $\{H_2, T, C_{r_k=q_k}(S_{p_j,p'_j})\}$. We will now discuss ways that this operator set can be reduced further, with particular mind to the simplest case of quantum computers that only have qubits and qutrits. First we can fix $q_k=d_k-1$, and generate other control values via the circuit equivalence
 
-A decomposition that is likely much less useful than the above is that we can implement $X_3$ as $X_2C_2(X_3)X_2C_2(X_3)$, which increments a qutrit on the condition that a qubit is $\ket{1}$, and then flips that qubit before repeating, ultimately incrementing the qutrit regardless of the state of the qubit. We are going to assume that $X_3$ is significantly easier to implement than $C_2(X_3)$, since $X_3$ only acts on one object, and is not only Clifford, but Pauli, and hence will almost always be implemented before any other operations in the target quantum computer.
+\begin{quantikz}
+	& \phase{q_k}\vqw{1} & \qw\midstick[2,brackets=none]{=}& \gate{X_k^{q'_k-q_k}} & \phase{q'_k}\vqw{1} & \gate{X_k^{q_k-q'_k}} & \qw\\
+	& \gate{U_j} & \qw & \qw & \gate{U_j} & \qw
+\end{quantikz}
 
-This means we have one of two generator sets, either the transposition based set
-\[\{H_2, T, X_3, C_2(X_2), C_2(S_{0, 1}), C_3(X_2), C_3(S_{0, 1})\}\]
-or the increment based set
-\[\{H_2, T, X_3, C_2(X_2), C_2(X_3), C_3(X_2), C_3(X_3)\}\]
-[we haven't given an argument for $C_3(S_{0,1})$ in terms of $C_3(X_3)$, hopefully I'll start using increments the whole way through the universality argument, but otherwise you can use an auxiliary qubit and do $C_3(X_2)C_2(S_{0,1})C_3(X_2)$]
+This introduces each $X_d$ to our generator set, but removes each $C_{r_k=q_k}(\dots)$ apart from $q_k=d_k-1$. Further we already have $X_2 = H^{-1}T^4H$, so we only need $X_d$ for $d > 2$. Additionally, we can fix $p_j$ to 0 by a similar equivalence
 
-Either way we would have 7 gates to implement and then work with. All of the examples we have seen of universal computation for qubits or qutrits has involved some number of Clifford gates, and a single non-Clifford gate, but in order to generalize the standard binary model of quantum computation we find we require 3 additional control gates, none of which are Clifford. [I should probably show that $C_3(X_3)$ is not Clifford..........] As we saw in \cite{tolar-clifford}, there are no Clifford operations that act dependently between a qubit and a qutrit, so it is not clear how easy or valuable it would be to minimize the number of non-Clifford gates used in a mixed logic systems. This prompts a search for other finite groups that act on mixed qubit-qutrit systems.
+\begin{quantikz}
+	& \phase{q_k}\vqw{1} & \qw\midstick[2,brackets=none]{=}& \qw & \phase{q_k}\vqw{1} & \qw & \qw\\
+	& \gate{S_{p_j,p'_j}} & \qw & \gate{X_k^{-p_j}} & \gate{S_{0,p'_j-p_j}} & \gate{X_k^{p_j}} & \qw
+\end{quantikz}
+
+where the difference $p'_j-p_j$ is evaluated mod $d_j$. Finally, we can optionally exchange $p_j$ and $p'_j$ to sure that the difference $p'_j - p_j$ is always at most $d_j/2$. For example $S_{2,1}$ acting on a qutrit is equivalent to $S_{1,2}$, which by the above can be reduced to $X_3S_{1,2}X_3^{-1}$. This means ultimately our generator sets are $\{H_2, T, X_{d_i}, C_{r_k=d_k-1}(X_k)\}$ and $\{H_2, T, X_{d_i}, C_{r_k=d_k-1}(S_{0,p'_k})\}$, with $d_i > 2$, $p'_k \leq d_k/2$. In the qubit-qutrit case these will both have seven elements, the increment basis
+\[\{H_2, T, X_3, C_2(X_2), C_2(X_3), C_3(X_2), C_3(X_3)\},\]
+and the transposition basis
+\[\{H_2, T, X_3, C_2(X_2), C_2(S_{0, 1}), C_3(X_2), C_3(S_{0, 1})\}.\]
+
+We will now show how these two bases are directly equivalent to each other, though generating the increment basis from the transposition basis will be much less expensive than the other way around. Five of the operations are common between the two bases, so the only difference is that one contains $C_2(X_3)$ and $C_3(X_3)$, where the other contains $C_2(S_{0,1})$ and $C_3(S_{0,1})$. In general $C_d(A)C_d(B) = C_d(AB)$, so setting $A = S_{0,1}$ and $B = S_{1,2}$ we get $C_d(X_3)$. As an explicit quantum circuit in the transposition basis:
+
+\begin{quantikz}
+	& \phase{d_k-1}\vqw{1} & \qw\midstick[2,brackets=none]{=}& \qw & \phase{d_k-1}\vqw{1} & \qw & \phase{d_k-1}\vqw{1} & \qw\\
+	& \targ{} & \qw & \gate{X_3^{-1}} & \gate{S_{0,1}} & \gate{X_k} & \gate{S_{0,1}} & \qw
+\end{quantikz}
+
+Since $d_k$ is arbitrary in this construction, we have implemented both of the controlled increment operations $C_2(X_3)$ and $C_3(X_3)$. The reverse is more contrived; we will later find by brute force that $X_2$, $X_3$, $C_2(X_3)$, and $C_3(X_2)$ generate all permutations on an $N=6$ composite system, and in particular $C_2(S_{0,1})$ becomes the following:
+
+\begin{quantikz}
+	& \phase{1}\vqw{1} & \qw\midstick[2,brackets=none]{=}& \targ{} & \phase{1}\vqw{1} & \targ{} & \phase{1}\vqw{1} & \phase{1}\vqw{1} & \targ{} & \qw\\
+& \gate{S_{0,1}} & \qw & \phase{2}\vqw{-1} & \targ{} & \phase{2}\vqw{-1} & \targ{} & \targ{} & \phase{2}\vqw{-1} & \qw
+\end{quantikz}
+
+We cannot directly generate $C_3(S_{0,1})$ using $C_3(X_3)$ due to parity, since $C_3(S_{0,1})$ is an odd number of transpositions and $C_3(X_3)$ is an even number of transpositions. One thing we can do is introduce an auxiliary qubit, and use $C_2(S_{0,1})$ as above:
+
+\begin{quantikz}
+	\lstick{$\ket{0}$} & \qw & \qw\midstick[3,brackets=none]{=}& \targ{} & \phase{1}\vqw{2} & \targ{} & \qw \rstick{$\ket{0}$} \\
+	& \phase{2}\vqw{1} & \qw& \phase{2}\vqw{-1} & \qw & \phase{2}\vqw{-1} & \qw\\
+	& \gate{S_{0,1}} & \qw & \qw & \gate{S_{0,1}} & \qw & \qw
+\end{quantikz}
+
+Another option we have is to introduce the Clifford SWAP and SUM operations, and appeal to the equivalences shown in \cite{arithmetics}. $S_{01,10}$ in a two qutrit system was shown to be implementable by five $C_3(X_3)$ gates and a SWAP:
+
+\begin{quantikz}
+& \gate[2]{S_{01,10}} & \qw\midstick[2,brackets=none]{=} & \phase{2}\vqw{1} & \targ{} & \phase{2}\vqw{1} & \targ{} & \phase{2}\vqw{1} & \gate[2]{\text{SWAP}} \\
+& \qw & \qw & \targ{} & \phase{2}\vqw{-1} & \targ{} & \phase{2}\vqw{-1} & \targ{} & \\
+\end{quantikz}
+
+Then $C_{r_2=0}(S_{0,1})$ is identical to $S_{00,01}$, which is a reflection in $\mathbb{C}^9$ just like $S_{01,10}$, and in fact \cite{arithmetics} transform these operations to each other using Clifford operations $X_3$ and SUM:
+
+\begin{quantikz}
+	& \phase{0}\vqw{1} & \qw\midstick[2,brackets=none]{=} & \octrl{1} & \gate{X} & \gate[2]{S_{01,10}} & \gate{X^{-1}} & \octrl{1} & \octrl{1} & \qw\\
+	& \gate{S_{0,1}} & \qw & \targ{} & \gate{X} & \qw & \gate{X^{-1}} & \targ{} & \targ{} & \qw\\
+\end{quantikz}
+
+These equivalences are theoretically interesting, but at this algebraic level, the transposition basis appears to be significantly more efficient than the increment basis. Despite this, it is hard to speculate on what a good basis would be without properly considering the physical constraints and trade-offs of a specific quantum computer. For example, it would not be surprising if $C_2(X_3)$ were more favourable to implement fault tolerantly than $C_2(S_{0, 1})$, due to its resemblance to the SUM operation between two qutrits, but it is also possible that neither end up being implemented exactly, and that a different basis is used which approximately implements both of the bases we have presented.
+
+Another decomposition that we have not discussed until now is the implementation of $X_3$ in terms of $C_2(X_3)$ and $X_2$:
+
+\begin{quantikz}
+	\lstick{$\ket{0}$} & \qw & \qw\midstick[2,brackets=none]{=}& \gate{X_2} & \phase{1}\vqw{1} & \gate{X_2} & \phase{1}\vqw{1} & \qw\\
+	& \gate{X_3} & \qw& \qw & \gate{X_3} & \qw & \gate{X_3} & \qw
+\end{quantikz}
+
+We do not use the abbreviated $\oplus$ notation in this case to make it clear what is happening in this circuit -- we are applying $X_3$ conditionally, once for every possible condition, which has the same effect as unconditionally applying $X_3$. In theory this reduces both of our generator sets to only need six gates, but in practice this is absurd, since $X_3$ is a Pauli operation which will be one of the first and simplest operations to implement on a fault tolerant quantum computer, and we have implemented it in terms of a controlled operation with no known fault tolerant implementation.
+
+In any case we have a set of seven gates that appear useful to implement and work with. All of the examples we have seen of universal computation for non-mixed systems of qubits or qutrits have involved some number of Clifford gates, and a single non-Clifford gate, but in order to generalize the standard binary model of quantum computation we find we require four control gates, only one of which is Clifford, together with the non-Clifford $T$, for a total of four non-Clifford gates. [I should probably show that $C_3(X_3)$ is not Clifford..........] An interesting avenue of future research would be the question of what the minimum number of non-Clifford gates is for achieving universal computation in mixed systems like this.
