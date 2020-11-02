@@ -10,46 +10,41 @@
 
 %\section{Quantum Mechanics}
 
-\chapter[PRELIMINARIES]{Preliminaries}
+\chapter*{Introduction}
+
+Quantum computation is a contemporary paradigm of computation based on manipulating the quantum behaviour of particles, which leverages phenomena such as superposition and entanglement of `qubits', quantum analogues to the classical bit, and could theoretically compute useful results that would, for example, take millenia for a classical computer to calculate. Increasingly powerful quantum computers are being realized in practice, and the theory of quantum algorithms and quantum information is growing as well; both of these things are necessary for real life quantum computation to achieve results not already available in classical contexts.
+
+One emerging topic within the field of quantum computation is the exploration of devices and algorithms that utilise logic systems other than the binary system familiar to classical computer science, since these alternative number systems present themselves readily within the quantum mechanics of certain physical systems. A related topic that is newer still is the question of what devices and algorithms might utilise logic systems that \emph{mix} binary, ternary, and higher quantum data, the simplest of which is the mixed binary-ternary quantum system. Mixing binary and ternary is of particular interest since we might be able to combine the strengths of both systems, using binary data and the relatively simple binary algorithms when convenient, but utilising the increased novelty and complexity of ternary logic whenever there is an obvious way of capitalising on this novelty.
+
+In \autoref{preliminaries} we go to great lengths to establish the foundational linear algebra, quantum mechanics, and quantum computation that are already understood and used to construct basic algorithms in qubit contexts, primarily restating the ideas described in the textbook \cite{textbook}. We then describe the basic notation and behaviour of ternary and higher analogues to these operations, all things which are in common usage in the literature. This discussion is long, and in \autoref{formalities} one can find further details and definitions for the basic concepts upon which linear algebra is itself defined. The reader may not need to follow all of this discussion, in which case they can skip familiar content, until as late as \autoref{notation}, where we describe the specific ways that we need to notate quantum operations and quantum circuits in order to keep track of the many indeces that can vary independently in a mixed quantum computer.
+
+With this in place we continue in \autoref{ternary} to describe known results of ternary quantum logic, and `qutrit' computers, centering on the paper \cite{arithmetics} which presents two algorithms for implementing integer addition of trits in a quantum computer. We describe the algorithms, and then present original circuits which perform the same calculations, but using qubits instead of qutrits where possible. We do this without having a particular physical implementation in mind, which blinds us to the performance characteristics that the original algorithms were better able to optimise and discuss. We do find, however, that the resulting circuits are simpler than the original qutrit circuits, suggesting that mixed logic is in fact capable of combining the strengths of individual logic systems. We also discuss analytical techniques presented in \cite{arithmetics} for representing ternary gates as polynomials mod 3, which do not easily generalise to mixed systems, suggesting that there is hidden structure exclusive to mixed logic that does not exist in ternary logic, which may either be beneficial or detrimental.
+
+Then, in \autoref{universality}, we discuss the topic of universal computation, which explores sufficient conditions for a quantum computer to be capable of executing arbitrary quantum algorithms. We follow the results of \cite{textbook} and its sources \cite{cnot-decomposition, universal-qubit} for achieving universal computation in a qubit computer with standard gate sets, and provide original but straight-forward generalisations of these results to mixed computers, finding that tightly analogous sets of elementary operations are sufficient in mixed contexts as long as at least one qubit is available.
+
+After this, in \autoref{finite-gen} we describe how an important set of operations called the Clifford operations do not provide any way of transmitting data between a qubit and a qutrit, dramatically changing what can be done with such Clifford operations. We discuss how one property of the Clifford operations -- that they form a finite group -- might apply to other sets of operations as well, including sets that can transmit data between qubits and qutrits, and describe the way that \cite{universal-qubit} applied algebraic number theory to prove results about operations that we can use to show they form infinite groups.
+
+We then perform a programmatic search for groups of matrices to see which are finite and which are infinite. The search is implemented in the C programming language, without any external dependencies, using integer/rational arithmetic to keep track of the algebraic roots of unity that occur in the binary and ternary Clifford groups. We describe the algorithms used, including a summary of the open addressed hash map that we implement, before stating the results of the search, including novel operations that appear in groups which we either prove or conjecture to be infinite.
+
+At the end of all of this in \autoref{conclusion} we summarise the key points that we found in our original research, and point to the vast possibilities for future research in mixed quantum systems directly following from the discoveries and literature reviewed in this thesis.
+
+\chapter[PRELIMINARIES]{Preliminaries}\label{preliminaries}
 \section{Algebra of Unitary Matrices}
-In quantum mechanics it will turn out crucial to have a strong theory of unitary operations acting linearly on complex-valued objects, so to that end we shall define these concepts and their notation here. [And sketch some theorems?]
+In quantum mechanics it will turn out crucial to have a strong theory of unitary operations acting linearly on complex-valued objects, so to that end we shall define these concepts and their notation here.
 \subsection{Hilbert Spaces}
 Cartesian coordinates provide a powerful abstract way of reasoning about physical space as the combination of 3 variables, or conversely a way of visualizing combinations of variables as planes or volumes within a physical space. Hilbert spaces are a description which abstracts the Cartesian coordinate system even further, describing a much larger class of mathematical objects with similar geometric properties, including the space of possible states that a quantum object can take.
 
-The abstract definition of a Hilbert space describes the following mathematical objects:
-\begin{itemize}
-	\item A set of `scalars', either $\mathbb{R}$ or $\mathbb{C}$
-	\item A (nonempty) set of `vectors' $\mathbb{H}$
-	\item A binary operation of vector addition: $\mathbb{H} \times \mathbb{H} \to \mathbb{H}$, written $u + v$ where $u$, $v$ are the vectors being added.
-	\item An operation that `scales' vectors by a scalar: $\mathbb{K} \times \mathbb{H} \to \mathbb{H}$, simply written $av$ where $a$ is the scalar and $v$ is the vector
-	\item An operation called the inner product, yielding a scalar for each pair of vectors: $\mathbb{H} \times \mathbb{H} \to \mathbb{K}$, written for now as $(u, v)$ where $u$, $v$ are the vectors involved.
-	\item Well defined limits of any Cauchy sequence in $\mathbb{H}$, written $\lim_{n \to \infty} v_n$ where $(v_n)_{n=1}^\infty$ is the Cauchy sequence
-\end{itemize}
-Note that since $\mathbb{H}$ is non-empty, it must contain a `zero vector' acquired by scaling any element of $\mathbb{H}$ by 0. This vector is itself written as 0. When these objects are available, we say that $\mathbb{H}$ is a Hilbert space if it further satisfies the following algebraic properties, for any $a, b\in \mathbb{K}$, $u,v,w \in \mathbb{H}$:
-\begin{itemize}
-	\item vector associativity: $u + (v + w) = (u + v) + w$
-	\item vector commutativity: $u + v = v + u$
-	\item scalar identity: $1v = v$
-	\item scalar associativity: $a(bv) = (ab)v$
-	\item vector distribution: $a(u + v) = au + av$
-	\item scalar distribution: $(a+b)v = av + bv$
-	\item conjugate symmetry of inner products: $(u, v) = (v, u)^*$ (where $a^*$ is the complex conjugate of $a$)
-	\item right linearity: $(u, v+w) = (u, v) + (u, w)$
-	\item positive definite: $(v, v)$ real, and strictly positive whenever $v \neq 0$
-\end{itemize}
-Additionally Cauchy sequences must actually converge to their limits, a property whose formal definition and applications are beyond the scope of this thesis.
-
-The primary Hilbert spaces discussed in this thesis are the sets of complex valued column vectors:
-\[\mathbb{C}^n = \left\{\left[\begin{matrix} a_0\\a_1\\\vdots\\a_n\end{matrix}\right]\ |\ a_0, a_1, \dots a_n \in \mathbb{C}\right\}\]
-Adding and scaling of vectors of course take the usual definitions:
+Hilbert spaces are defined explicitly in \autoref{inner-products}, they are a class of vector space with an inner product, that is closed under limits. Naturally the field defining the coordinates of a complete vector space ought to be either $\mathbb{R}$ or $\mathbb{C}$, and in this thesis we will always use $\mathbb{C}$. In \autoref{qm} we will see that quantum computation most commonly acts on finite dimensional Hilbert spaces, which are structurally equivalent to $\mathbb{C}^n$, as outlined in \autoref{coords-inner-product}. $\mathbb{C}^n$ is the set of $n$-dimensional column vectors
+\[\left\{\left[\begin{matrix} a_0\\a_1\\\vdots\\a_n\end{matrix}\right]\ \middle|\ a_0, a_1, \dots a_n \in \mathbb{C}\right\},\]
+equipped with the usual definitions of addition and scaling,
 \[
 c_0\left[\begin{matrix} a_0\\a_1\\\vdots\\a_n\end{matrix}\right]
 +
 c_1\left[\begin{matrix} b_0\\b_1\\\vdots\\b_n\end{matrix}\right]
 =
-\left[\begin{matrix} c_0a_0+c_1b_0\\c_0a_1+c_1b_1\\\vdots\\c_0a_n+c_1b_n\end{matrix}\right]
+\left[\begin{matrix} c_0a_0+c_1b_0\\c_0a_1+c_1b_1\\\vdots\\c_0a_n+c_1b_n\end{matrix}\right],
 \]
-Inner products take a fairly natural definition:
+along with the simplest possible inner product,
 \[
 \left(
 \left[\begin{matrix} a_0\\a_1\\\vdots\\a_n\end{matrix}\right]
@@ -59,58 +54,15 @@ Inner products take a fairly natural definition:
 =
 \left[\begin{matrix} a_0^*&a_1^*&\cdots&a_n^*\end{matrix}\right]
 \left[\begin{matrix} b_0\\b_1\\\vdots\\b_n\end{matrix}\right]
-= \sum_{i=0}^{n-1} a_i^*b_i
+= \sum_{i=0}^{n-1} a_i^*b_i.
 \]
-Inner products introduce a concept of orthogonality to a space of vectors, we say two vectors $u, v$ are orthogonal when $(u, v) = 0$.
-\[
-\left(\left[\begin{matrix}1\\0\end{matrix}\right],\left[\begin{matrix}0\\1\end{matrix}\right]\right) = 0
-\]
-In general if two column vectors $v_i$ and $v_j$ have coordinates 0 except for their $i$th and $j$th coordinate respectively, then $(v_i, v_j) = \delta_{ij}$, 1 when $i = j$ and 0 otherwise. This condition is what it means for the set $\{v_0 \dots v_{n-1}\}$ to be an orthonormal basis of the vector space $\mathbb{C}^n$. It is a fundamental result of Hilbert spaces that if a countable set of vectors $v_i \in \mathbb{H}$ span the whole space, that is if every vector $w \in \mathbb{H}$ is an infinite linear combination of the vectors $v_i$, then $\mathbb{H}$ has an orthonormal basis. If this orthonormal basis is finite then we say that $\mathbb{H}$ is finite dimensional, and can observe any vector $v \in \mathbb{H}$ as analogous to the following column vector in $\mathbb{C}^n$:
-\[\left[\begin{matrix}
-	(v_0, v)\\
-	(v_1, v)\\
-	\cdots\\
-	(v_n, v)
-\end{matrix}\right]\]
-Notice that the column vectors corresponding to the basis vectors $v_i$ have coordinate 0 everywhere except for their $i$th co-ordinate which is 1. Further the co-ordinates of these column vectors are exactly the co-ordinates of $v$ in $\mathbb{H}$:
-\[\left(v_i, \sum_{j=0}^{n-1} a_jv_j\right) = \sum_{j=0}^{n-1} a_j\left(v_i, v_j\right) = a_i\]
-Finally the inner products of vectors $u, v \in \mathbb{H}$ are exactly the inner products of the corresponding column vectors:
-\begin{align*}
-	(u, v) &= \left(\sum_{i=0}a_iv_i, \sum_{j=0} b_jv_j\right)
-	\\&= \sum_{j=0}b_j \left(\sum_{i=0}a_iv_i, v_j\right)
-	\\&= \sum_{j=0}b_j \left(v_j, \sum_{i=0}a_iv_i\right)^*
-	\\&= \sum_{i,j=0}a_i^*b_j \left(v_j, v_i\right)^*
-	\\&= \sum_{i,j=0}a_i^*b_j \delta_{ij}
-	\\&= \sum_{i=0}a_i^*b_i
-	\\&= \sum_{i=0}(v_i, u)^*(v_i, v)
-	\\&= \left(
-	\left[\begin{matrix}
-		(v_0, u)\\
-		(v_1, u)\\
-		\cdots\\
-		(v_n, u)
-	\end{matrix}\right]
-	,
-	\left[\begin{matrix}
-		(v_0, v)\\
-		(v_1, v)\\
-		\cdots\\
-		(v_n, v)
-	\end{matrix}\right]
-	\right)
-\end{align*}
-[could prove conjugate linearity earlier, or stop proving linear algebra results altogether!!]
-
-In this sense any finite dimensional Hilbert space is geometrically equivalent to the complex vector space $\mathbb{C}^n$ where $n$ is the size of any orthonormal basis of $\mathbb{H}$.
-
-As we shall describe in Chapter 1, quantum computation most commonly acts on Hilbert spaces that are finite dimensional, and while the specific space being considered can be important in practical contexts, this thesis is concerned with the theoretical and therefore only needs to understand the complex vector space $\mathbb{C}^n$.
 
 One caveat to this equivalence is the concept of basis-independence, that many concepts in linear algebra are made useful by the fact that they give the same result regardless of which basis is used for the space in question. To show that something is basis independent, it is sufficient and often convenient to define it directly in terms of the inner product and vector operations, rather than the coordinate system induced by a given basis. As an example the $\ell^2$ norm in $\mathbb{C}^n$ does not depend on the basis used:
 \[\norm{v}_2 = \sqrt{(v, v)} = \sqrt{\sum_{i=0}^{n-1}\ord{v_i}^2}\]
 This cannot be done for any other $\ell^p$ norm.
 
-\subsection{Dirac Notation}
-There are a number of notations available for reasoning about linear algebra and vector spaces, but we shall see [do we?] that in order to reason about quantum algorithms we will rely heavily on the following techniques:
+\subsection{Dirac Notation}\label{dirac}
+There are a number of notations available for reasoning about linear algebra and vector spaces, but we shall see that in order to reason about quantum algorithms we will rely heavily on the following techniques:
 \begin{itemize}
 	\item linear operators defined in terms of inner products
 	\item change of basis via unitary operators
@@ -120,7 +72,7 @@ For this collection of techniques the Dirac notation for vectors and linear oper
 
 The main feature of Dirac notation is the ket, where a bar and angle bracket are used to distinguish a symbol as representing a vector: $\ket{v}$, $\ket{*}$, $\ket{0}$, $\ket{i}$, etc.
 
-The most common vectors used are the basis vectors, and in Dirac notation it is natural to use the index of each basis vector as the symbol \textit{for the vector itself}:
+The most common vectors used are the canonical basis vectors, and in Dirac notation it is natural to use the index of each basis vector as the symbol \textit{for the vector itself}:
 \begin{align*}
 	\ket{0} = \left[\begin{matrix}
 		1\\
@@ -201,8 +153,8 @@ For example any linear operator $A: \mathbb{C}^2 \to \mathbb{C}^2$ can be writte
 \end{align*}
 
 When defining a linear operator $L: \mathbb{C}^n \to \mathbb{C}^n$ we can define it as the `linear extension' of a more succinct map $\phi: \{\ket{i}\ |\ 0 \leq i < n\} \to \mathbb{C}^n$, by first defining $\ket{v_j} = \phi(\ket{j})$ and then setting $L = \sum_{j} \ket{v_j}\bra{j}$. This is simply a matrix whose columns are the vectors $\ket{v_j}$.
-\subsection{The Hermitian Adjoint and Diagonalizable Matrices}
-An aspect of linear algebra essential to quantum computation is diagonalization. We shall describe a number of properties that a square matrix can have, in terms of both its Hermitian Adjoint, and its eigenvalues, but first we define these concepts.
+\subsection{The Hermitian Adjoint and Diagonalisable Matrices}\label{diagonalisable}
+An aspect of linear algebra essential to quantum computation is diagonalisation. We shall describe a number of properties that a square matrix can have, in terms of both its Hermitian Adjoint, and its eigenvalues, but first we define these concepts.
 
 The Hermitian Adjoint of a linear operator $A$ (square or otherwise) is the unique linear operator $A^\dagger$ that satisfies $\braket{u}{v'} = \braket{u'}{v}$ whenever $\ket{v'} = A\ket{v}$, and $\ket{u'} = A^\dagger \ket{u}$. It turns out that the matrix representation of $A^\dagger$ is exactly the complex conjugate of the transpose of $A$, so this is taken as the definition of the Hermitian Adjoint of a matrix. As an example observe the following matrix $A$ and its Hermitian adjoint:
 \begin{align*}
@@ -247,7 +199,7 @@ $(\ket{u}\bra{v})^\dagger = \ket{v}\bra{u}$
 
 Now we move on to the eigenvector problem, which is the problem of finding a scalar $\lambda$ and non-zero vector $\ket{v}$ so that $A\ket{v}=\lambda\ket{v}$. Such a $\lambda$ is called an eigenvalue of $A$, and such a $\ket{v}$ is called the corresponding eigenvector of $A$. For example if A has a non-trivial null-space, then $\lambda=0$ will be an eigenvalue of $A$, and any vector in the null-space of $A$ will be a corresponding eigenvector of $A$: $A\ket{v} = 0\ket{v}$.
 
-If $\ket{v}$ is normalized, then the matrix $B=\lambda\ket{v}\bra{v}$ will also satisfy the eigenvalue problem $B\ket{v}=\lambda\ket{v}$, and any vector orthogonal to $\ket{v}$ will be in the null-space of $B$. This means that if all of the eigenvectors of $A$ are orthogonal to eachother, then we can write $A$ as a sum of such $B$ vectors. This structure $A = \sum_i \lambda_i \ket{v_i}\bra{v_i}$ tells us that $A$ acts like a diagonal matrix on its eigenvalues, which we call the diagonal representation of $A$, and for this reason call any such $A$ `diagonalizable'.
+If $\ket{v}$ is normalized, then the matrix $B=\lambda\ket{v}\bra{v}$ will also satisfy the eigenvalue problem $B\ket{v}=\lambda\ket{v}$, and any vector orthogonal to $\ket{v}$ will be in the null-space of $B$. This means that if all of the eigenvectors of $A$ are orthogonal to eachother, then we can write $A$ as a sum of such $B$ vectors. This structure $A = \sum_i \lambda_i \ket{v_i}\bra{v_i}$ tells us that $A$ acts like a diagonal matrix on its eigenvalues, which we call the diagonal representation of $A$, and for this reason call any such $A$ `diagonalisable'.
 
 As an example, the following matrix $Z$ is already diagonal and so has a straight-forward diagonal representation:
 \begin{align*}
@@ -257,7 +209,7 @@ As an example, the following matrix $Z$ is already diagonal and so has a straigh
 	\end{matrix}\right] = 1\ket{0}\bra{0} - 1\ket{1}\bra{1}
 \end{align*}
 
-Having orthogonal eigenvectors is closely related to the Hermitian adjoint through a class of matrices called `normal' matrices, where a matrix $A$ is normal if it satisfies $A^\dagger A = AA^\dagger$. A major result of linear algebra called the spectral theorem of normal matrices, is that a matrix is diagonalizable if and only if it is normal. What follows is a list of different classes of normal operator, each defined by a property of the matrix, and by an equivalent property of all of its eigenvalues:
+Having orthogonal eigenvectors is closely related to the Hermitian adjoint through a class of matrices called `normal' matrices, where a matrix $A$ is normal if it satisfies $A^\dagger A = AA^\dagger$. A major result of linear algebra called the spectral theorem of normal matrices, is that a matrix is diagonalisable if and only if it is normal. What follows is a list of different classes of normal operator, each defined by a property of the matrix, and by an equivalent property of all of its eigenvalues:
 \begin{align*}
 	\text{Hermitian matrix:\ }&&& A^\dagger = A & \iff& \lambda \in \mathbb{R} \\
 	\text{Unitary matrix:\ }&&& A^\dagger = A^{-1} & \iff& \ord{\lambda}=1 \\
@@ -364,7 +316,7 @@ A further subgroup of the set of unitary matrices $U(n)$ is the symmetric group 
 
 The symmetric group of any finite set is always finite, and is typically the first group considered when exploring finite subgroups of $U(n)$.
 
-\section{Quantum Mechanics}
+\section{Quantum Mechanics}\label{qm}
 
 The theory of Quantum mechanics is foundational in contemporary understanding of physical systems, and features phenomena radically different to that of the classical world when the objects under consideration are able to achieve `coherence', e.g.\ when sufficiently small or low in temperature.
 
@@ -372,7 +324,7 @@ Quantum mechanics is deliberately `incomplete' in the sense that it doesn't make
 
 Quantum computation is the study of how quantum phenomena can be used to effect computation. When designing an individual experiment or programmable quantum computer it is necessary to use a concrete, empirically verified model of physical phenomena, but the specific algorithms that can be run on a quantum computer turn out to be described sufficiently by the general theory of quantum mechanics alone. Since this thesis is concerned with algorithms, we shall summarize the description of quantum mechanics given in the ubiquitous textbook "Quantum Computation and Quantum Information" by Nielsen and Chuang \cite{textbook}. This will provide a foundation for explaining certain techniques and algorithms prominent in quantum computing, and their relationship to the questions we aim to explore.
 \subsection{State Space}
-The first postulate of quantum mechanics is that any [closed?] quantum system can be modeled by some complex Hilbert space. While many of these Hilbert spaces are of infinite dimension, we can easily create finite dimensional Hilbert spaces by either trapping or ignoring the positions and other such properties of individual particles. Once we have an $n$-dimensional Hilbert space $\mathbb{H}$ modeling a system, we can substitute this for the equivalent Hilbert space $\mathbb{C}^n$, allowing us to model the system directly with this set.
+The first postulate of quantum mechanics is that any quantum system can be modeled by some complex Hilbert space. While many of these Hilbert spaces are of infinite dimension, we can easily create finite dimensional Hilbert spaces by either trapping or ignoring the positions and other such properties of individual particles. Once we have an $n$-dimensional Hilbert space $\mathbb{H}$ modeling a system, we can substitute this for the equivalent Hilbert space $\mathbb{C}^n$, allowing us to model the system directly with this set.
 
 We call the specific elements of $\mathbb{C}^n$ state vectors whenever they represent a state that a quantum computer can take, and we shall see soon that the state vectors are exactly the vectors of unit length in $\mathbb{C}^n$. This allows us to model quantum computation itself as an operation on these unit length state vectors, and to describe the initial, final, and intermediate states of any given computation as an individual state vector.
 
@@ -410,7 +362,7 @@ U &= \exp\left(\frac{i 2\pi tH}{h}\right)
 0 & -1
 \end{bmatrix}
 \end{align*}
-When a quantum computer is capable of implementing a particular $H$, $t$ pair, we call the corresponding unitary matrix $U$ an elementary evolution of the quantum computer. Composing these elementary evolutions will always give some overall unitary matrix $U = U_1U_2\dots U_k$, so the core of quantum computation then, is to understand how computationally interesting unitary matrices can be implemented using elementary evolutions of a quantum computer. [elementary evolution is a new term, if I am happy with this then I should ctrl-f for the word elementary to see where I use the term gate, and change it to evolution. once I've described fault tolerance and magic states a little, I'd like to introduce the term elementary gate as vaguely relating to fault tolerance instead, so that the $\{T, H\}$ basis is a little better justified]
+When a quantum computer is capable of implementing a particular $H$, $t$ pair, we call the corresponding unitary matrix $U$ an elementary evolution of the quantum computer. Composing these elementary evolutions will always give some overall unitary matrix $U = U_1U_2\dots U_k$, so the core of quantum computation then, is to understand how computationally interesting unitary matrices can be implemented using elementary evolutions of a quantum computer.
 \subsection{Measurement}
 Although the quantum systems we are discussing are represented as having a continuous state space of possible state vectors, a fundamental (and titular!) peculiarity of quantum mechanics is that when observed, a quantum object will always appear to be in states that are elements of some orthonormal basis of the corresponding Hilbert space. What is more peculiar, and more well known of quantum mechanics, is that the state that is measured becomes the new state of the system.
 
@@ -466,9 +418,7 @@ As was described in our original discussion of Kronecker products, not all quant
 \end{matrix}\right]\]
 We can see this has two non-zero blocks, $1/\sqrt{2}\ket{0}$ and $1/\sqrt{2}\ket{1}$ respectively, which are not multiples of each-other.
 
-[entanglement as basis independent property?]
-
-Seeing as classical systems aren't treated as having any form of superposition, there is no classical analogy for entangled states. It is worth noting that in classical systems a composite system would be understood to have a state space that is the Cartesian product of two individual state spaces, and that the Cartesian product of an $m$-dimensional vector space with an $n$-dimensional vector space (equipped with point-wise vector addition say, giving the direct sum of two vector spaces) would have dimension $m+n$ rather than the $m\times n$ dimensional space given by composite quantum systems.
+Seeing as classical systems aren't treated as having any form of superposition, there is no classical analogy for entangled states. It is worth noting that in classical systems a composite system would be understood to have a state space that is the Cartesian product of two individual state spaces, and that the Cartesian product of an $m$-dimensional vector space with an $n$-dimensional vector space would have $m+n$ degrees of freedom rather than the $m\times n$ degrees of freedom given by the vector spaces associated with composite quantum systems.
 \subsection{Composite Evolution}
 Just as with individual systems, an isolated composite system evolves according to some unitary operator after any discrete time step. In the composite system $\mathbb{C}^{mn}$ this could be any $mn$ by $mn$ unitary matrix, and once again we call any such operation an elementary gate of a quantum computer whenever it can be reliably produced by that computer. Typically the elementary gates that can be implemented for individual systems will be implemented in the same way in composite systems, again using the Kronecker product to embed the corresponding operation into the composite model:
 \[U \otimes I = \sum_i \ket{u_i}\otimes\ket{v_i} \mapsto \sum_i (U\ket{u_i})\otimes \ket{v_i}\]
@@ -493,7 +443,7 @@ For example the operation $I \otimes H$ acting on the 2-qubit system $\mathbb{C}
 \end{matrix}\right]
 \]
 
-If all of the elementary gates available to a quantum computer can be represented as the Kronecker product of individual gates, and the initial state of the computer can be represented as the Kronecker product of individual states, then the computer will never be able to create entangled states, and will essentially be two distinct quantum computers running in parallel. This means that it is crucial for a quantum computer to have at least one operation that is not the Kronecker product of individual operations, and the most common of these elementary gates is the controlled increment gate, which acts as a permutation on the computational basis $\ket{i}\ket{j} \mapsto \ket{i}\ket{i+j \mod n}$.
+If all of the elementary gates available to a quantum computer can be represented as the Kronecker product of individual gates, and the initial state of the computer can be represented as the Kronecker product of individual states, then the computer will never be able to create entangled states, and will essentially be two distinct quantum computers running in parallel. This means that it is crucial for a quantum computer to have at least one operation that is not the Kronecker product of individual operations, and the most common of these elementary gates is the controlled increment gate, which acts as a permutation on the computational basis $\ket{i}\ket{j} \mapsto \ket{i}\ket{i+j \mod n}$. Since these operations have a different effect on each object in the system, dependent on the state of another object in the system, we call any operation that cannot be factored as a Kronecker product acting on each individual object in the quantum system \emph{dependent}, and otherwise call them \emph{independent}.
 
 The controlled increment operation in binary systems is called the controlled-not operation, which will act mod 2, and therefore simply swap the $\ket{1}\ket{0}$ state with the $\ket{1}\ket{1}$ state. In this case we would call the first qubit the `control' object, and the second qubit the `target' object. This can not be represented as a Kronecker product of two individual operations, which can be seen in the following matrix representation:
 \[
@@ -518,7 +468,7 @@ This postulate stated as is would allow us to measure all of the individual comp
 
 \[\ket{\phi} = \sum_{0 \leq i < m}\sum_{0 \leq j < n} a_{ij}\ket{i}\ket{j}\]
 
-Either the $\mathbb{C}^m$ or the $\mathbb{C}^n$ component of this system could be measured. Without loss of generality we shall describe measurement of the first state. The full statement of the measurement postulate [need to go through and make the postulates more explicit in the structure of this discussion] is that this system will be in state $\ket{i}$ with probability:
+Either the $\mathbb{C}^m$ or the $\mathbb{C}^n$ component of this system could be measured. Without loss of generality we shall describe measurement of the first state. The full statement of the measurement postulate is that this system will be in state $\ket{i}$ with probability:
 \[P(\ket{i}) = \sum_{j=0}^n\ord{a_{ij}}^2\]
 After measuring the system will be in the state that comes from applying the projection operator $(\ket{i}\bra{i})\otimes I$ and then normalizing.
 
@@ -529,16 +479,15 @@ For example observe the following 2-qubit state vector $\ket{+}\ket{+}$:
 1\\
 1
 \end{matrix}\right]\]
-
 If we measured the first qubit then we would observe $\ket{0}$ with probability $1/4+1/4 = 1/2$, and similarly $\ket{1}$ with probability $1/2$. Upon measuring $\ket{0}$ the overall state would be $\ket{0}\ket{+}$, whereas upon measuring $\ket{1}$ the overall state would be $\ket{1}\ket{+}$.
 
-While this is straight-forward for states that are simply the Kronecker product of two states, measuring entangled states can be quite interesting. For example suppose we measured the first component of the Bell state $1/\sqrt{2}(\ket{00}+\ket{11})$. As before we would find it in state $\ket{0}$ with probability $1/2$, and $\ket{1}$ with probability $1/2$, but after measurement it would be in states $\ket{00}$ and $\ket{11}$ respectively. Measuring the first component of the system changed the second one! This is the basis of a number of novel features of quantum computing, quantum information theory, and quantum cryptography. [chuck in quantum teleportation]
+While this is straight-forward for states that are simply the Kronecker product of two states, measuring entangled states can be quite interesting. For example suppose we measured the first component of the Bell state $1/\sqrt{2}(\ket{00}+\ket{11})$. As before we would find it in state $\ket{0}$ with probability $1/2$, and $\ket{1}$ with probability $1/2$, but after measurement it would be in states $\ket{00}$ and $\ket{11}$ respectively. Measuring the first component of the system changed the second one! This is the basis of a number of novel features of quantum computing, quantum information theory, and quantum cryptography.
 
-[note somewhere that more than two systems continue naturally from these subsections]
+All of the above discussion generalise naturally to systems with more than two components, so long as one component is measured at a time. In practice there is no requirement that only one object be measured at a time, or even that every object can be measured individually, but for the sake of simplicity and generality we will focus on the generic quantum computer with multiple objects each individually measurable in their computational basis.
 
 \section{Quantum Computation}
 
-With quantum mechanics and the associated concept of a quantum algorithm in place, we can begin to reason about the techniques of quantum computation. To this end we shall briefly discuss the computer science of probabilistic vs deterministic algorithms, as well as the group theory of different sets of unitary matrices, important concepts that lay the foundation of technical discussions in the field of quantum computation. With this in place we shall be prepared to discuss the state of the field when it comes to quantum computation on objects with more than two basis states. [and uh... our own findings!]
+With quantum mechanics and the associated concept of a quantum algorithm in place, we can begin to reason about the techniques of quantum computation. To this end we shall briefly discuss the computer science of probabilistic vs deterministic algorithms, as well as the group theory of different sets of unitary matrices, important concepts that lay the foundation of technical discussions in the field of quantum computation. With this in place we shall be prepared to discuss the state of the field when it comes to quantum computation on objects with more than two computational basis states, and our generalisations of these findings to quantum computers that mix objects with two and more than two basis states.
 
 \subsection{Classical Computation in Quantum Algorithms}
 In classical computation we can imagine an algorithm or circuit mapping some $M$ discrete states to some $N$ discrete states, according to some function $f: \{0\dots M-1\} \to \{0\dots N-1\}$. (say $M = 2^m,\ N = 2^n$ where $m$ and $n$ are the number of physical wires leading in and out of the circuit) For example we could define the logical conjunction or AND map which maps pairs of bits $\{00, 01, 10, 11\}$ to single bits $\{0, 1\}$: 
@@ -588,9 +537,9 @@ Permutation matrices by themselves might not seem interesting, since they exclus
 Further manipulations or measurement of the result of such a transformation can enable many powerful quantum algorithms including Shor's period finding algorithm. This means that permutation matrices are an important topic in quantum computation, and a good deal of research has been and continues to be done to better understand how permutation matrices can be decomposed into efficient quantum algorithms.
 
 \subsection{Quantum Circuits}
-We have described quantum algorithms as a sequence of unitary transformations and measurements on quantum states represented using Kronecker products, but as the number of quantum objects gets large the relevant vectors and matrices grow exponentially, which is a problem because these exponentially large operations are precisely the ones that we can't calculate on a classical computer, so they are of the most interest. In order to notate these operations which could become quite large, we introduce the quantum circuit diagram. [I don't have a citation for this! This one is legitimately common knowledge]
+We have described quantum algorithms as a sequence of unitary transformations and measurements on quantum states represented using Kronecker products, but as the number of quantum objects gets large the relevant vectors and matrices grow exponentially, which is a problem because these exponentially large operations are precisely the ones that we can't calculate on a classical computer, so they are of the most interest. In order to notate these operations which could become quite large, we introduce the quantum circuit diagram.
 
-The diagram resembles a musical staff, with multiple horizontal lines representing distinct quantum objects, and with squares on these gates representing operations that should be performed on these objects over time:
+The diagram of a quantum circuit features multiple horizontal lines representing distinct quantum objects, and with squares on these lines representing operations that should be performed on the corresponding objects over time:
 
 \begin{quantikz}
 \lstick{$\ket{\phi}$} & \gate{U_1} & \gate{U_3} & \qw \rstick{$\ket{\phi'}$} \\
@@ -617,7 +566,6 @@ Finally when something other than a Kronecker product of single-object matrices 
 	\lstick{$\ket{i}$} & \gate[2]{B_f} & \qw \rstick{$\ket{i}$}\\
 	\lstick{$\ket{j}$} & & \qw \rstick{$\ket{j + f(i) \mod 2}$}
 \end{quantikz}
-[almost like we should have used this example earlier]
 \subsection{Probabilistic Algorithms}
 In computer science there is a distinction between deterministic algorithms, and randomized/probabilistic/non-deterministic algorithms. In summary a deterministic algorithm is a sequence of exact steps that can be executed in order to compute a result, whereas a probabilistic algorithm is permitted to rely on some source of random information to determine its control flow, meaning that the same input could result in many different outputs.
 
@@ -633,56 +581,84 @@ In quantum contexts however, algorithms are generally assumed to be Monte Carlo 
 
 When constructing unitary matrices out of some elementary gate set, it becomes possible to use approximate constructions, since all quantum algorithms are Monte Carlo by default, and small changes in a state's coordinates tend not to significantly affect the overall probability distribution of the algorithm's outputs. Often quantum algorithms and their associated unitary matrices are implemented asymptotically, where the desired accuracy of the algorithm is taken as a parameter, and as this parameter gets smaller a longer sequence of elementary gates is constructed to achieve this level of accuracy.
 
-\subsection{Error Correction}
+\subsection{Error Correction}\label{error-codes}
 We have described how by controlling the external forces acting on a quantum system, we can implement some set of elementary evolutions on that system. In practice however, no matter how much engineering work we do to control an environment, the forces we deliberately impose are not the only forces present. This means there is always some (hopefully small) quantity of noise affecting the system, and so the longer that a quantum computer is left running, the more deviation there will be between what state the quantum computer is in, and what theoretical state our model would predict it to be in. This is a major source of error in quantum computation, and since these errors persist across time, and even propagate between different quantum objects as those objects interact with each other, this imposes strict limits on how long a naive algorithm can be before the whole process is drowned in error.
 
-The paper \cite{algos} describes many algorithms and demonstrates their implementation on the 5-qubit \verb`ibmqx4`/\verb`ibmqx5` quantum computers, all of which were implemented at scales that would be trivial to implement classically instead, such as finding the smallest $p$ so that $15^p-1$ is divisible by 11. These implementations did not use any error correction, and so results that should have had a 0.5 chance of being measured in simulation, (among eight possible outcomes) were measured with a frequency of 0.25 in practice. This goes to show that if the algorithms had to compute on larger numbers, and thus got any longer than the ten to thirty operations demonstrated in \cite{algos}, then measurement at the end would have started to become entirely random, making computation impossible. [should I mention the microsecond scales described in that paper? it's interesting but it hasn't really come up]
+The paper \cite{algos} describes many algorithms and demonstrates their implementation on the 5-qubit \verb`ibmqx4`/\verb`ibmqx5` quantum computers, all of which were implemented at scales that would be trivial to implement classically instead, such as finding the smallest $p$ so that $15^p-1$ is divisible by 11. These implementations did not use any error correction, and so results that should have had a 0.5 chance of being measured in simulation, (among eight possible outcomes) were measured with a frequency of 0.25 in practice. This goes to show that if the algorithms had to compute on larger numbers, and thus got any longer than the ten to thirty operations demonstrated in \cite{algos}, then measurement at the end would have started to become entirely random, making computation impossible.
 
-What makes quantum computation scalable beyond this limit is error correction, where redundant qubits are added, so that if the state of only one qubit changes then it can be reset to the state of the others. The theory of error correction is very sophisticated but it is enough for now to know only that it exists, taking as the only example a partial version of Shor's coding scheme \cite[shor-encoding], if we represent the logical state $\ket{0}$ with a physical state $\ket{0}\ket{0}\ket{0}$ in three qubits, and a `bit flip' error occurs, turning this into $\ket{0}\ket{1}\ket{0}$, then we can write a quantum algorithm that detects and corrects this error. Algorithms capable of detecting and correcting errors are of a smaller scale than the algorithms demonstrated in \cite{algos}, so by alternating between calculation and error detection one can reasonably expect to perform calculations at a greater scale than naive implementation of algorithms would allow.
+What makes quantum computation scalable beyond this limit is error correction, where redundant qubits are added, so that if the state of only one qubit changes then it can be reset to the state of the others. The theory of error correction is very sophisticated but it is enough for now to know only that it exists, taking as the only example a partial version of Shor's coding scheme\footnote{Shor's full scheme nests this process inside another process for detecting `phase flip' errors as well.} \cite{shor-encoding}, if we represent the logical state $\ket{0}$ with a physical state $\ket{0}\ket{0}\ket{0}$ in three qubits, and a `bit flip' error occurs, turning this into $\ket{0}\ket{1}\ket{0}$, then we can write a quantum algorithm that detects and corrects this error. Algorithms capable of detecting and correcting errors are of a smaller scale to the algorithms demonstrated in \cite{algos}, so by alternating between calculation and error detection one can reasonably expect to perform calculations at a greater scale than naive implementation of algorithms would allow.
 
 When using these redundant coding schemes, a distinction is made between operations that are called fault tolerant, versus those that are not. Taking the example of a three qubit coding scheme capable of detecting bit flip errors, whose physical state is in $\ket{0}\ket{0}\ket{0}$, before undergoing an error is introduced that transforms the physical state into the invalid state $\ket{0}\ket{1}\ket{0}$. As is the design, this error is possible to detect and correct, but what if this error occurs right before a computation is performed? If we want to map the logical state $\ket{0}$ to $\ket{1}$, then we could imagine this erroneous physical state mapping to $\ket{1}\ket{0}\ket{1}$, which after error correction will in fact represent $\ket{1}$. If we had gotten $\ket{1}\ket{0}\ket{0}$ instead, i.e.\ if the error had propagated between physical qubits, then after error correction we would have mapped $\ket{0}$ to $\ket{0}$. An algorithm that always exhibits the former behaviour is called fault tolerant, and in the same way that we have elementary evolutions that are possible on physical qubits, we will also have an analogy for these acting on logical qubits:
 
-[Definition] An \emph{elementary gate} is a unitary transformation that can be implemented fault tolerantly on some logical states, as a sequence of elementary evolutions acting on the corresponding physical gates.
+An \emph{elementary gate} is a unitary transformation that can be implemented fault tolerantly on some logical states, as a sequence of elementary evolutions acting on the corresponding physical gates.
 
 Once the technology of fault tolerant computation is set up, we can effectively pretend it doesn't exist, and draw quantum circuits that act on logical bits directly. These logical circuits can then be automatically fleshed out into a physical circuit acting on perhaps seven times as many physical objects, with error correction occupying much of what may have once been a simple algorithm. Typically algorithms are first described in a theoretical, ideal context, with no errors, possible only in classical simulations of these algorithms, and are later run as a naive physical implementation, as in \cite{algos}, and then finally as a scalable, fault tolerant algorithm, supposing that there is a quantum computer with enough qubits to run it. In this way all of the algorithms and techniques described in this thesis are intuitively understood to run at the physical level, in terms of elementary evolutions, but paying deliberate mind to the eventual need for fault tolerant implementation, using a much more restricted set of elementary gates acting on logical quantum objects.
 
-\subsection{Phase and Amplitude}
-Since we assume a very specific space $\mathbb{C}^n$ with a canonical/computational basis available, we can and often do talk directly about the coordinates of vectors in this space. We call each complex coordinate an \emph{amplitude}, and importantly in a composite space the amplitudes of a Kronecker product are the coordinates \emph{after} expanding the product not before. For example the Kronecker product $\ket{+} \otimes \ket{-}$ as a vector looks like the following:
-\[\ket{+} \otimes \ket{-} = \left[\begin{matrix}
+\subsection{Phase, Bloch Sphere}
+Since we assume a very specific space $\mathbb{C}^N$ with a canonical/computational basis available, we can and often do talk directly about the coordinates of vectors in this space. In a composite space we can use the coordinates in the Kronecker basis, so for example the Kronecker product $\ket{+}\otimes \ket{+}$ and $\ket{+} \otimes \ket{-}$ are vectors with the following coordinates:
+\begin{align*}
+\ket{+} \otimes \ket{+} = \left[\begin{matrix}
 \frac{1}{2} \\
--\frac{1}{2} \\
 \frac{1}{2} \\
--\frac{1}{2} \\
-\end{matrix}\right]\]
-This would have amplitudes $1/2$, $-1/2$, $1/2$, and $-1/2$ in the computational basis.
+\frac{1}{2} \\
+\frac{1}{2} \\
+\end{matrix}\right]
+&&&
+\ket{+} \otimes \ket{-} = \left[\begin{matrix}
+	\frac{1}{2} \\
+	-\frac{1}{2} \\
+	\frac{1}{2} \\
+	-\frac{1}{2} \\
+\end{matrix}\right]\end{align*}
 
-When comparing different states or coordinates within a state we often find that their coordinates are equal in magnitude, but have different complex argument. In such cases we can talk about the phase differences between the states or the coordinates of each state, to understand the state better. If two states are multiples of each other, specifically a unit complex multiple, e.g.\ $\ket{\psi} = e^{i\theta}\ket{\phi}$, then we say that they differ by a global phase factor $e^{i\theta}$, and if two amplitudes of states are unit complex multiples of each other, e.g. $\ket{\psi} = \ket{0}/\sqrt{2} + e^{i\theta}\ket{1}/\sqrt{2}$ vs. $\ket{\phi} = \ket{0}/\sqrt{2} + \ket{1}/\sqrt{2}$ then we say their $\ket{1}$ amplitudes differ by a relative phase factor $e^{i\theta}$.
+If we have two states $\ket{\psi}$ and $\ket{\phi}$ such as the above two states, whose $p$th coordinate have coordinates that have the same complex modulus, and hence are unit complex multiples of each other, then we say they differ by a relative phase factor $e^{i\theta}$ in this coordinate, such as in the above example of $\ket{+}\otimes \ket{+}$ and $\ket{+}\otimes \ket{-}$, where their $\ket{0}\ket{1}$ coordinates differ by a local phase factor of $-1$. A general example in a single qubit is be $\ket{\psi} = \ket{0}/\sqrt{2} + e^{i\theta}\ket{1}/\sqrt{2}$ vs. $\ket{\phi} = \ket{0}/\sqrt{2} + \ket{1}/\sqrt{2}$, whose $\ket{1}$ amplitude differs by a complex phase factor $e^{i\theta}$.
 
-Interestingly, global phase does not have any physical meaning, and exists only within the model, since the only predictions made by the model are the probabilities of each measurement, and global phase differences cannot affect the magnitude of any amplitude in either the state in question or any resultant states after performing computation. For example if we have two states $\ket{+}$ and $-\ket{+}$ and apply the Hadamard matrix $H$ to each we would get $\ket{0}$ and $-\ket{0}$ respectively, both before and after they have identical behaviour when measured.
+On the other hand, if two states are unit complex multiples of each other overall, i.e.\ $\ket{\psi} = e^{i\theta}\ket{\phi}$, then we say that they differ by a global phase factor $e^{i\theta}$. Interestingly, global phase differences are a peculiarity of the model we are using, and are not understood to have any effect on measurement, since global phase differences cannot affect the size of any coordinate in  a given quantum state, nor can it affect any resultant states after performing computation. For example if we have two states $\ket{+}$ and $-\ket{+}$ and apply the Hadamard matrix $H$ to each we would get $\ket{0}$ and $-\ket{0}$ respectively, both before and after they have identical behaviour when measured.
 
-Relative phase differences on the other hand, while not directly affecting measurement, can affect the course of calculation, producing states that are very different when measured. For example $\ket{+}$ and $\ket{-}$ differ only by relative phase $-1$ in the $\ket{1}$ amplitude, but after applying $H$ we get $\ket{0}$ and $\ket{1}$ respectively, different computational basis vectors, which we have assumed to be distinct when measured.
+For comparison, relative phase differences do not affect the probability of getting a certain measurement when measured in the computational basis, but can affect the course of calculation, producing states that are very different when measured. For example $\ket{+}$ and $\ket{-}$ differ only by relative phase $-1$ in the $\ket{1}$ amplitude, but after applying $H$ we get $\ket{0}$ and $\ket{1}$ respectively, different computational basis vectors, which are distinct when measured. Additionally, while global phase differences are a basis independent property of two quantum states, different bases may have different relative phase factors, or simple different coordinates altogether, so in this $\ket{+}$ and $\ket{-}$ example if we are able to directly measure in the $\ket{+}/\ket{-}$ basis then they will give distinct measurements from each other every time.
 
-Amplitude and relative phase differences can be generalized to arbitrary basis if one needs, whereas global phase differences are basis independent. Global phase differences are much more relevant to us than relative phase anyway, so we won't need any generalized notion of amplitude or relative phase. [in fact I don't think we use the basic version either!]
+By ignoring global phase differences, we can remove a degree of freedom from the state space being discussed. In a single qubit we have the state space
+\[\left\{\begin{bmatrix}a+ib \\ c+id\end{bmatrix}\ \middle|\ a, b, c, d \in \mathbb{C}, a^2+b^2+c^2+d^2 = 1\right\}.\]
+This is essentially the unit sphere in $\mathbb{R}^4$, but by presenting these coordinates in polar form, and making global phase explicit we can present the same set as
+\[\left\{e^{i\gamma}\begin{bmatrix}\cos(\theta) \\ e^{i\phi}\sin(\theta)\end{bmatrix}\ \middle|\ \gamma, \theta, \phi \in \mathbb{R}\right\}.\]
+This presentation motivates what is called the Bloch sphere, which ignores global phase factors in order to represent a single qubit as a sphere in $\mathbb{R}^3$, a space much more amenable to human intuition. The coordinates are chosen by the map
+\[e^{i\gamma}\begin{bmatrix}\cos(\theta) \\ e^{i\phi}\sin(\theta)\end{bmatrix} \mapsto
+\begin{bmatrix}\cos(\phi)\sin(2\theta) \\ \sin(\phi)\sin(2\theta) \\ \cos(2\theta)\end{bmatrix}.\]
+We directly remove the global phase factor $e^{i\gamma}$, and we also double $\theta$ which removes a global phase factor of $-1$ associated with $\pi \leq \theta < 2\pi$. This means that while in the basic $\mathbb{C}^2$ picture of a qubit, $\ket{0}$ and $\ket{1}$ are orthogonal, in the Bloch sphere they are in fact collinear:
+\begin{align*}
+\begin{bmatrix}1 \\ 0\end{bmatrix} \mapsto \begin{bmatrix}0\\0\\1\end{bmatrix}
+&&&
+\begin{bmatrix}0 \\ 1\end{bmatrix} \mapsto \begin{bmatrix}0\\0\\-1\end{bmatrix}.
+\end{align*}
+The same applies to the orthogonal states $\ket{+}$ and $\ket{-}$:
+\begin{align*}
+	\frac{1}{\sqrt{2}}\begin{bmatrix}1 \\ 1\end{bmatrix} \mapsto \begin{bmatrix}1\\0\\0\end{bmatrix}
+	&&&
+	\frac{1}{\sqrt{2}}\begin{bmatrix}1 \\ -1\end{bmatrix} \mapsto \begin{bmatrix}-1\\0\\0\end{bmatrix}.
+\end{align*}
 
-By ignoring global phase differences, we can remove a degree of freedom from the state space being discussed, but we can also remove a degree of freedom from any sets of unitary matrices being explored, since any scalar multiple of the identity will have no meaningful effect on computation, so for example $X$ and $-X$ can be considered equivalent:
+We can also remove a degree of freedom from any sets of unitary matrices being explored, since any scalar multiple of the identity will have no meaningful effect on computation, so for example $X$ and $-X$ can be considered equivalent:
 \[-X = -\left[\begin{matrix}0 & 1 \\ 1 & 0\end{matrix}\right]= \left[\begin{matrix}0 & -1 \\ -1 & 0\end{matrix}\right]\]
-Given a subgroup of the unitary matrices $G \leq U(n)$ we can make this equivalence explicit, by identifying $U(1)$ with scalar multiples of the identity in $U(n)$, and writing $G/U(1)$, which is understood to be the group quotient $G/(G \cap U(1))$, where $G \cap U(1)$ must be a normal subgroup of $G$ since it consists only of scalars. This lets us state formally that in the above example $X$ and $-X$ would belong to the same coset in $U(n)/U(1)$.
+Given a subgroup of the unitary matrices $G \leq U(n)$ we can make this equivalence explicit; the set of matrices $\{e^{i\gamma}I\}$ form a subgroup of $U(n)$ isomorphic to the group of unit complex numbers, $\{e^{i\gamma}\}$. By taking the group quotient $G / (G \cap \{e^{i\gamma}I\})$ we get a group in which for example $X$ and $-X$ would be recognized as equivalent, in the formal sense that they belong to the same coset of $(G \cap \{e^{i\gamma}I\})$. In order to make notation more succinct, we interpret $1 \times 1$ matrices as simply being scalars, giving $\{e^{i\gamma}\} = U(1)$, and based on this write $G / U(1)$ as a shorthand for $G / (G \cap \{e^{i\gamma}I\})$.
+
+In the case of the qubit we can go further and interpret cosets in $U(2)/U(1)$ as rotations of the three dimensional Bloch sphere, i.e.\ rotations in $SO(3)$. For example $X$ corresponds to the half-turn in the $y$-$z$ plane
+\[\begin{bmatrix}
+1 & 0 & 0 \\
+0 & -1 & 0 \\
+0 & 0 & -1
+\end{bmatrix}.\]
+This interpretation is very powerful, and makes quantum computation on single qubits much more intuitive, however, as soon as one moves to having multiple qubits, or even a single qutrit, we lose the capacity to meaningfully visualise the full state space of the system in three dimensional space.
 
 \section{Non-Binary Logic}
-[Is this quantum mechanics? computation? or even the abstract of the whole thesis??]
-
-In classical computation data is represented in the voltage levels of conductive materials, and logic is implemented using transistors as digital switches, whose behaviour is more responsive and more consistent to the difference between 0 voltage and high voltage, than to the difference between different levels of high voltage. [multiplication thing is more how amplifiers work than switches, so I've ended up being more vague. Not sure what is necessary here.] This means that hardware for classical computation deals almost exclusively with Boolean algebra and binary arithmetic.
+In classical computation data is represented in the voltage levels of conductive materials, and logic is implemented using transistors as digital switches, whose behaviour is more responsive and more consistent to the difference between 0 voltage and high voltage, than to the difference between different levels of high voltage. This means that hardware for classical computation deals almost exclusively with Boolean algebra and binary arithmetic.
 
 In contrast to this quantum computation inherits its number system directly from the dimension of the Hilbert space of the particles being used for computation. For example the spin of an electron forms a 2-dimensional space, the net spin of a Nitrogen-14 atom forms a 3-dimensional space, and the energy level of a trapped ion can form a multi-dimensional space depending on the number of energy levels allowed. This means that quantum computation has a much easier time implementing logical and numerical systems other than the binary system used in classical contexts, but despite this most of the quantum computation in theoretical and practical contexts is based on binary logic and arithmetic, since this is the simplest, and inherits a lot of theoretical results directly from classical computation.
 
 In practice the problem of implementing higher logic systems than binary is much more tractable in the quantum case, whereas the problem of creating and maintaining a large number of entangled quantum objects over time, a problem that doesn't exist in the classical case, becomes the primary constraint limiting practical quantum computation. By using logic systems that store more information in a smaller number of particles, we might actually have an easier time developing a quantum computer capable of performing any given scale of computation. This means that the step from binary to higher logic systems has a lot of motivation in the quantum case.
 
-While there is a lot of potential in the topic of non-binary quantum computation, and a lot of novelty already described, even this has the implicit assumption that all quantum objects need to have the same dimension. [bring in quantum number when talking about physical things] In theory this isn't necessary either, and it might be possible to have a quantum computer with a mixture of objects of different dimension. Writing algorithms for such a device could allow one to economise on the strengths and weaknesses of each individual number system, potentially requiring even less physical complexity for the same level of computational power. Further, although we won't discuss fault-tolerant computation anywhere else in this thesis, it is worth noting that in order to mitigate noise in real world quantum computers, information-theoretic encoding schemes are used that embed a certain number of `logical' qubits in a larger number of `physical' qubits, so we may one day find quantum computation acting on logically mixed systems, regardless of the quantum number of the physical objects involved.
+While there is a lot of potential in the topic of non-binary quantum computation, and a lot of novelty already described, even this has the implicit assumption that all quantum objects need to have the same dimension. In theory this isn't necessary either, and it might be possible to have a quantum computer with a mixture of objects of different dimension. Writing algorithms for such a device could allow one to economise on the strengths and weaknesses of each individual number system, potentially requiring even less physical complexity for the same level of computational power. Further, although we won't discuss fault-tolerant computation anywhere else in this thesis, it is worth noting that in order to mitigate noise in real world quantum computers, information-theoretic encoding schemes are used that embed a certain number of `logical' qubits in a larger number of `physical' qubits, so we may one day find quantum computation acting on logically mixed systems, regardless of the dimensions of the physical objects involved.
 
-[last paragraph from when this subsection was the intro to chapter 2 literature review and discussion]
-To these ends we shall review some of the literature that makes up the current understanding of quantum computation in ternary and higher forms of logic, as well as what little is currently known about mixed systems with a combination of qubits, qutrits, and higher objects. Of note also are the textbook ``Quantum Computation and Quantum Information''\cite{textbook} and the general audience paper ``Quantum Algorithm Implementations for Beginners''\cite{algos} [not cited anywhere else, remove? though it might come up in ternary arithmetic discussion, or as a supplementary reference for Shor's algorithm] which provide extensive discussion of the foundational aspects of qubit computation. Much of non-binary and mixed logic research is a direct generalization of the techniques collected in these two texts. [maybe stop framing it as a multi-valued logic review now, it's just the background content of our own results... a lot of this is good material for an abstract though]
-
-\subsection{Pauli and Clifford Matrices}
+\subsection{Pauli and Clifford Matrices}\label{pauli}
 A useful family of matrices are the Pauli matrices, which in the $2\times2$ qubit case are the $X$ and $Z$ matrices discussed in previous examples:
 \begin{align*}
 X = \left[\begin{matrix}
@@ -716,17 +692,53 @@ Observe that these matrices do not commute, but that $Z_nX_n = \omega_nX_nZ_n$:
 
 From this it can be seen that all elements of the Pauli group will be of the form $\omega_n^iX_n^jZ_n^k$, giving the Pauli group an order of $n^3$.
 
-This group is an interesting finite group in quantum computation, first brought to attention since $X_2$ and $Z_2$ along with $Y  = iX_2Z_2$ have physical meaning in quantum mechanical description of electron spin. Further, these 3 matrices each transform the state space of a qubit in a very geometrically convenient way, each along a different pair of axes in the Bloch sphere. [either describe the Bloch sphere specifically for this statement, or make this statement more vague] The Pauli group of generalized Pauli matrices provide similar algebraic power, being generated by two gates that represent very simple geometric angles in their corresponding state spaces, simple enough to be the first two gates one implements fault tolerantly, but with different combinations of $X_N$ and $Z_N$ providing complete generality in the combinations of axes one rotates about.
+This group is an interesting finite group in quantum computation, first brought to attention since $X_2$ and $Z_2$ along with $Y  = iX_2Z_2$ have physical meaning in quantum mechanical description of electron spin. Further, these 3 matrices each transform the state space of a qubit in a very geometrically convenient way, each along a different pair of axes in the Bloch sphere. The Pauli group of generalized Pauli matrices provide similar algebraic power, being generated by two gates that represent very simple geometric angles in their corresponding state spaces, simple enough to be the first two gates one implements fault tolerantly, but with different combinations of $X_N$ and $Z_N$ providing complete generality in the combinations of axes one rotates about.
 
 In order to capture the $Y_2$ matrix as well we need to introduce additional scale factors $\omega_{2N}$, which in the $N=2$ case gives $\omega_4 = i$, and $Y_2 = \omega_{4}X_2Z_2$. This gives a group of twice the size called the Weyl-Heisenberg group, denoted
 \[H(n) = \{\omega_{2n}^iX^jZ^k\}.\]
-The normaliser of the Weyl-Heisenberg group is called the Clifford group, and must be at least as powerful as the Pauli group, while also providing, among others, the discrete Fourier transform:
-\[H_n = \frac{1}{\sqrt{n}}\sum_{i,j} \omega_n^{ij}\ket{i}\bra{j}\]
-The Clifford group contains arbitrary scale factors, making it uncountably infinite, but when removing these scale factors it turns out to be another powerful finite group, making its generator a very useful place to start when considering possible elementary gate sets for a quantum computer.
+In a quantum system with one object of dimension $N$, we call the normaliser of the Weyl-Heisenberg group the Clifford group, written $\mathcal{C}$. Since $H(n)$ is generated by $X$, $Z$, and $\omega_{2n}$, we can write
+\[\mathcal{C} = N(H(n)) = \{A\ |\ A \in U(N), AXA^{-1}, AZA^{-1} \in H(n)\}\]
+
+The Clifford group contains arbitrary scale factors, making it uncountably infinite, but when removing these scale factors it turns out to be another powerful finite group, making its generator a very useful place to start when considering possible elementary gate sets for a quantum computer. In a single-qubit system the Clifford group (with scale factors removed) is commonly known to be generated by
+\begin{align*}
+D_2 = \sqrt{Z_2} = \begin{bmatrix}
+1 & 0 \\
+0 & i
+\end{bmatrix}
+&&&
+H_2 = \frac{1}{\sqrt{2}}\begin{bmatrix}
+1 & 1 \\
+1 & -1
+\end{bmatrix},
+\end{align*}
+and in a single-qutrit system it is generated by
+\begin{align*}
+S_3 = \begin{bmatrix}
+1 & 0 & 0 \\
+0 & 1 & 0 \\
+0 & 0 & \omega_3
+\end{bmatrix}
+&&&
+H_3 = \frac{1}{\sqrt{3}}\begin{bmatrix}
+1 & 1 & 1 \\
+1 & \omega_3 & \omega_3^2 \\
+1 & \omega_3^2 & \omega_3
+\end{bmatrix}
+\end{align*}
+
+The matrices $H_2$ and $H_3$ are also called the discrete Fourier transform in two and three dimensions respectively. They can be generalized to arbitrary dimension:
+\[H_N = \frac{1}{\sqrt{N}}\sum_{i,j} \omega_N^{ij}\ket{i}\bra{j}\]
+When we visualise the Pauli matrices as rotations and harmonics of the circle, the discrete Fourier transform actually maps into a basis where $Z_N$ is a rotation and $X_N^{-1}$ is a harmonic. Algebraically this can be written
+\begin{align*}
+H_N^{-1}Z_NH_N = X_N, &&& H_N^{-1}X_NH_N = Z_N^{-1},
+\end{align*}
+which tells us that in general $H_N \in N(H(N))$.
+
+The Clifford group is often easy to implement fault tolerantly, and for example in the Steane code \cite{steane-code} both $H_2$ and $D_2$ can be implemented on a logical qubit by simply applying it to each of the seven physical qubits in the code. Being a group that is easy to implement, easy to algebraically manipulate, and quite wide reaching in its coverage of $U(N)$, the Clifford group comes up very frequently in discussions of quantum computation.
 
 Pauli, Weyl-Heisenberg, and Clifford groups also exist in composite systems. In the Pauli case this group contains arbitrary combinations of $X_{d_i}$ and $Z_{d_i}$ on each object $i$ of the system, so in a system with two objects of dimension $d_1$ and $d_2$ the Pauli group would be
 \[\{\omega_{d_1}^a\omega_{d_2}^b(X_{d_1}^cZ_{d_1}^d\otimes X_{d_2}^eZ_{d_2}^f)\ |\ a, b, c, d, e, f \in \mathbb{Z}\}.\]
-The scale factors $\omega_{d_i}$ are shared, and can be combined into a single term $\omega_{d'}$ where $d'$ is the greatest common divisor of $d_1$ and $d_2$, but the operations $X_{d_1}Z_{d_1}$ and $X_{d_2}Z_{d_2}$ will not combine. The Clifford group of a composite system is simply the normaliser of the corresponding Weyl-Heisenberg group, out of all of the unitaries in $U(N)$. This means that while the Weyl-Heisenberg group only contains Kronecker products, the Clifford group can contain operations acting on dependently multiple objects. In a composite system with two $d$ level objects the operations SUM and SWAP will always be Clifford:
+The scale factors $\omega_{d_i}$ are shared, and can be combined into a single term $\omega_{d'}$ where $d'$ is the greatest common divisor of $d_1$ and $d_2$, but the operations $X_{d_1}Z_{d_1}$ and $X_{d_2}Z_{d_2}$ will not combine. The Clifford group of a composite system, again written $\mathcal{C}$, is simply the normaliser of the corresponding Weyl-Heisenberg group. This means that while the Weyl-Heisenberg group only contains Kronecker products, the Clifford group can contain operations acting on dependently multiple objects. In a composite system with two $d$ level objects the operations SUM and SWAP will always be Clifford:
 \begin{align*}
 	SUM(\ket{i}\ket{j}) = \ket{i}\ket{i+j \mod d} &&& SWAP(\ket{i}\ket{j}) = \ket{j}\ket{i}
 \end{align*}
@@ -751,16 +763,21 @@ Extended linearly this means $SWAP (D_1 \otimes D_2) SWAP$ is the same linear op
 \end{align*}
 Extended linearly this is once again a Weyl-Heisenberg matrix, $X^aZ^{b+f} \otimes X^{e-a}Z^f$.
 
-\subsection{Notation for Mixed Systems}
-[make sure that I am actually using this notation, also maybe throw some references in even though this is mostly standard]
-
+\subsection{Notation for Mixed Systems}\label{notation}
 We have been notating $N \times N$ objects with the $N$ subscript, which distinguishes between objects that perform similar roles in different Hilbert spaces, but in composite systems it is more important to distinguish between operations acting on distinct objects within that system, i.e. to distinguish between $X \otimes I$ and $I \otimes X$. Further, since we will be describing algorithms acting in mixed systems we would like to distinguish between both of these at the same time! In order to prevent ambiguity we adopt strict conventions on which letter is used for different pronumerals, so that for example $X_{d_i}$ is always an operation in the non-composite system, i.e. in $U(d_i)$, whereas $X_i$ is an operation in the composite system, i.e. in $U(d_1d_2\dots d_n)$.
 
 In any quantum system we define $N$ to be the number of computational basis states, and either $n$ or $m+n$ to be the number of individual objects in the composite system, where the first $m$ objects will be somehow distinct from the last $n$. This means the most general operation we could describe in such a system would be an operation in $U(N)$, and such an operation would be denoted $U_N$ to indicate its dimension.
 
 When we want to talk about an individual object within a composite system, we index each object $1$ through to $n$, (or $1$ through to $n+m$) and use variables such as $i$, $j$, and $k$ to represent such an index. We then define $d_i$ to be the dimension of the object indexed by $i$. When the system is a single object we will have $n = 1$, and $N = d_1$, combining the $N$ notation of \cite{tolar-clifford} with the $d$ notation of \cite{multi-valued-logic}.
 
-Now, when indexing computational basis states in a quantum system, we use the integers $0$ through to $N-1$, and variables such as $p$, $q$, and $r$ to represent such indeces. This is particularly useful for the special class of permutation matrices that represent a transposition, where we can write $S_{p,q}$ to represent the matrix that exchanges the computational basis states $\ket{p}$ and $\ket{q}$, while leaving all others unchanged. Usually we will introduce $p$ indirectly, by naming a computational basis state $\ket{p_n}\dots\ket{p_1}$, implicitly defining $p$ to be the integer corresponding to this computational basis state, where of course $\ket{p_i}$ will be a computational basis state in the individual system $\mathbb{C}^{d_i}$. Among other things, this allows us to talk about transpositions acting on a single object by writing $S_{p_i,q_i} \in U(d_i)$. Note that we have reversed the order of $p_1 \dots p_n$, so that $p_n$ is the most significant digit, and $p_1$ is the least significant digit.
+Now, when indexing computational basis states in a quantum system, we use the integers $0$ through to $N-1$, and variables such as $p$, $q$, and $r$ to represent such indeces, except for \autoref{ternary} where we adopt $i$, $j$, $k$, for this purpose, to make it easier to follow the paper \cite{arithmetics}. This is particularly useful for the special class of permutation matrices that represent a transposition, where we can write $S_{p,q}$ to represent the matrix that exchanges the computational basis states $\ket{p}$ and $\ket{q}$, while leaving all others unchanged. Usually we will introduce $p$ indirectly, by naming a computational basis state $\ket{p_n}\dots\ket{p_1}$, implicitly defining $p$ to be the integer corresponding to this computational basis state, where of course $\ket{p_i}$ will be a computational basis state in the individual system $\mathbb{C}^{d_i}$. Note that we have reversed the order of $p_1 \dots p_n$, so that $p_n$ is the most significant digit, and $p_1$ is the least significant digit.
+
+One thing that these $p$ and $p_i$ indeces allow us to do is to notate transpositions acting on a composite system by writing $S_{p,q} \in U(N)$ and transpositions acting on a single object by writing $S_{p_i,q_i} \in U(d_i)$. Transpositions are permutation matrices that swap two computational basis vectors and leave the rest unchanged, so they will be the linear extension of the following actions:
+\[S_{p,q}\ket{r} = \begin{cases}
+\ket{q}, & \text{if\ } r = p, \\
+\ket{p}, & \text{if\ } r = q, \\
+\ket{r}, & \text{otherwise.}
+\end{cases}\]
 
 Next, if we have a unitary matrix $G_{d} \in U(d)$, and some object $i$ with dimension $d_i = d$, then we can define $G_i$ to be this operation $G_d$ applied to the $i$th object, i.e. 
 \[G_i = I_{d_n}\otimes \dots \otimes I_{d_{i-1}} \otimes G_d \otimes I_{d_{i+1}} \otimes \dots \otimes I_{d_n}\]
@@ -794,10 +811,7 @@ Here $d_i = 2$ and $d_i = 3$ are unique, so in fact the notation we have describ
 	p = 5 &&& \implies \ket{p_2}\ket{p_1} = \ket{1}\ket{2} \\
 \end{align*}
 
-[I could talk about $U(2) \subseteq U(6)$ and $U(3) \subseteq U(6)$, giving $U(2)U(3) \subseteq U(6)$, the subgroup of independent operations. Could make chapter 4 a lot easier to talk about?]
-
 \subsection{Conditional Operations}
-[most of these belong in an appendix, ``Appendix B, Quantum Circuits'']
 A very expressive family of operations in composite systems are the controlled operations. If $U_j \in U(d_j)$ is an operation acting on object $j$ of a composite system, then for each $i \neq j$ we would like to define $C_{r_i=q_i}(U_j)$ to be the linear extension of
 \[\ket{r_n}\dots\ket{r_1} \mapsto \begin{cases}
 	\ket{r_n}\dots \ket{r_{j+1}} (U_j\ket{r_j})\ket{r_{j-1}}\dots\ket{r_1}, & \text{if\ } r_i = q_i, \\
@@ -810,7 +824,7 @@ For example a central gate in qubit computation is
 0 & 0 & 0 & 1 \\
 0 & 0 & 1 & 0
 \end{bmatrix},\]
-often called CNOT or XOR due to its interpretation as conditionally negating, or calculating the exclusive OR of two Boolean values. In an operation $C_{r_i = q_i}(U_j)$ we call object $i$ the control object, or the control digit, and object $j$ the target object, or the target digit. In systems where the base is known these can also be called the control qubit and target qubit respectively, or control qutrit and target qutrit. We also call the value $q_i$ the control value. Just as we can say $X_2$ to mean $X_i$ for an arbitrary qubit $i$, we can say $C(U_j)$ to represent $C_{r_i = d_i-1}(X_2)$ an arbitrary control object $i$, with $q_i = d_i - 1$ chosen as a conventional default control value.
+often called CNOT or XOR due to its interpretation as conditionally negating, or calculating the exclusive OR of two Boolean values. In an operation $C_{r_i = q_i}(U_j)$ we call object $i$ the control object, or the control digit, and object $j$ the target object, or the target digit. In systems where the base is known these can also be called the control qubit and target qubit respectively, or control qutrit and target qutrit. We also call the value $q_i$ the control value. Just as we can say $X_2$ to mean $X_i$ for an arbitrary qubit $i$, we can say $C_d(U_j)$ to represent $C_{r_i = d_i-1}(X_2)$ an arbitrary control object $i$ satisfying $d = d_i$, with $q_i = d_i - 1$ chosen as a conventional default control value.
 
 Control operations can be quite complicated to write in this form, but become quite simple in circuit form. We write the qubit CNOT operation as:
 
@@ -869,8 +883,6 @@ A qubit convention that we can generalize is to represent the SWAP operation as:
 	\lstick{$\ket{r_2}$} & \swap{1} & \qw \rstick{$\ket{r_1}$} \\
 	\lstick{$\ket{r_1}$} & \targX{} & \qw \rstick{$\ket{r_2}$}
 \end{quantikz}
-
-[might not use this however...]
 
 \subsection{Multi-control Operations}
 

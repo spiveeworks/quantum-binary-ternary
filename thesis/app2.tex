@@ -1,3 +1,27 @@
 % app2.tex (will be Appendix B)
 
 \chapter[SOURCE CODE]{Source Code}
+
+The following source code was used in the programmatic search in \autoref{prog-search}. It was written from scratch in the C programming language, and avoids using any external programs other than the standard \verb`std*.h` libraries. There are three main \verb`.c` source files, which share three \verb`.h` files for common function definitions. Some explanation behind the design of these programs is given in \autoref{prog-search}, but this code was not designed for convenient use or reuse, and must be modified directly in order to reconfigure its behaviour. It is primarily included for reference and transparency. The source code is also available at\\
+\url{github.com/spiveeworks/quantum-binary-ternary/tree/master/src}
+\\and the data output by a few different configurations of \verb`matgroup.c` can be found at \\
+\url{github.com/spiveeworks/quantum-binary-ternary/tree/master/data}
+
+\section{hashmap.h}
+\lstset{language=c}
+\lstinputlisting{../src/hashmap.h}
+\clearpage
+\section{generator.h}
+\lstinputlisting{../src/generator.h}
+\clearpage
+\section{matrix{\_}quadratic.h}
+\lstinputlisting{../src/matrix_quadratic.h}
+\clearpage
+\section{matgroup.c}
+\lstinputlisting{../src/matgroup.c}
+\clearpage
+\section{permutation.c}
+\lstinputlisting{../src/permutation.c}
+\clearpage
+\section{matorder.c}
+\lstinputlisting{../src/matorder.c}

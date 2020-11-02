@@ -1,9 +1,8 @@
 % chap4.tex (Chapter 4 of the thesis)
 
-\chapter[FINITELY GENERATED UNITARY GROUPS]{FINITELY GENERATED UNITARY GROUPS}
+\chapter[FINITE AND INFINITE GROUPS OF MATRICES]{FINITE AND INFINITE GROUPS OF MATRICES}\label{finite-gen}
 
-\section{Finite Gate Sets in Higher Dimensions}
-In the previous chapter we outlined the Pauli matrices, and defined the related Weyl-Heisenberg and Clifford groups, including the matrix $H$ satisfying $H^{-1}ZH = X$. We saw above that $H$ was one of 3 gates needed for universal computation in a binary quantum computer, but the other two are also directly related to the Pauli matrices. $C(X)$ is of course the controlled version of the $X$ gate, and $T$ when applied four times is equivalent to $Z$:
+In \autoref{pauli} we outlined the Pauli matrices, and defined the related Weyl-Heisenberg and Clifford groups, including the matrix $H_d$ satisfying $H_d^{-1}Z_dH_d = X_d$. In \cite{universal-qubit} we saw that $H$ was one of three gates needed for universal computation in a binary quantum computer, but the other two are also directly related to the Pauli matrices. $C(X)$ is of course the controlled version of the $X$ gate, and $T$ when applied four times is equivalent to $Z$:
 \[
 T^4 = \left[\begin{matrix}
 	1 & 0 \\
@@ -13,27 +12,23 @@ T^4 = \left[\begin{matrix}
 	0 & -1
 \end{matrix}\right] = Z\]
 
-It turns out that generalizing the Pauli matrices to $d$-dimensional quantum objects as we have done previously proves very useful in describing higher dimensional systems as well, and the relationships that different quantum gates have with each other in these systems.
+It is for this reason that we are interested in the Pauli and Clifford groups of other number systems. 
+First of all, the Clifford group formed by taking the normaliser of the Weyl-Heisenberg group lets us generalize the algebraic relationships of $H_2$ to higher dimensions, as well as the algebraic relation $D_2X_2D_2^{-1} = iX_2Z_2 = Y_2$. In \autoref{tolar-cliff} we describe the results of \cite{tolar-clifford}, which describes how the Clifford group will behave in quantum computers with multiple objects of different dimension.
 
-First of all, the Clifford group formed by taking the normaliser of the Weyl-Heisenberg group lets us generalize the algebraic relationships of $H$ as well as $D = T^2$ to higher dimensions, and looking at \cite{tolar-clifford} will tell us how this group will behave in quantum computers with multiple objects of different dimension.
-
-Additionally the $T$ gate, which does not directly appear in the Clifford group, proves essential to the generalization of universal computation to other quantum systems. In the qubit case the produce $TH^{-1}TH$ is an infinite order matrix, which was proven in \cite{pi-over-eight}, so we outline the technique used to show this, since this means that $T$ and $H$ generate [define this] an infinite group, even with scale factors removed, a property that is necessary for universal computation, and that distinguishes $T$ from the rest of the Clifford group. Additionally we discuss a paper \cite{pi-over-eight} which generalizes this gate $T$ to higher dimensions based on other algebraic relationships it has with the Clifford group.
-\subsection{On Clifford Groups}
-The paper \cite{tolar-clifford} describes the Clifford group associated with quantum systems with just a single object, as well as the Clifford group associated with arbitrary composite quantum systems, with multiple objects each of different dimension, and in particular for a system with two objects of different dimension. This last case is of particular interest since, as with the $C(X_2)$ gate used in binary quantum computers, gates that only interact with 1 or 2 objects are often easier to implement than those that interact with more. [and might generate the rest anyway, don't know how to justify that though]
+Additionally the $T$ gate, which does not directly appear in the Clifford group, proves essential to the generalization of universal computation to other quantum systems. In the qubit case $T_2H_2^{-1}T_2H_2$ is an infinite order matrix, which was proven in \cite{universal-qubit}, so in \autoref{infinite-order} we outline the technique used to show this, since this is a significant property for a quantum operation to have, mainly because of its importance in the universality of $T$ and $H$, but also because of the algebraic fact that the Clifford group by itself has no operations like this. This will guide us in \autoref{prog-search} when we investigate different finitely generated groups to see which ones do and do not contain infinite order operations.
+\section{On Clifford Groups}\label{tolar-cliff}
+The paper \cite{tolar-clifford} describes the Clifford group associated with quantum systems with just a single object, as well as the Clifford group associated with arbitrary composite quantum systems, with multiple objects each of different dimension, generalising an earlier paper \cite{tolar-symmetries} which showed the same for composite systems with exactly two objects.
 
 Tolar removes the scalar factors from both the Weyl-Heisenberg group, and the Clifford group, not just by taking the group quotient $G/U(1)$, but also by looking at the group conjugation action, mapping the Weyl-Heisenberg group to itself under the map
-\[\text{Ad}_A(X^jZ^k) = AX^jZ^kA^{-1}\]
-\ [note Tolar uses $\text{Ad}_X$ and uses $Q$ and $P$ for clock and shift respectively] These conjugation maps form a group under function composition, and are isomorphic to the corresponding quotient groups $H(n)/U(1)$ and $N(H(n))/U(1)$. When applied to the Weyl-Heisenberg group associated with a single quantum object of arbitrary dimension, it was shown that $N(H(n))/U(1)$ was isomorphic to
-\[(\mathbb{Z}_n\times\mathbb{Z}_n)\rtimes\text{SL}(2,\mathbb{Z}_n)\]
+\[\text{Ad}_A(X^jZ^k) = AX^jZ^kA^{-1}.\]
+These conjugation maps form a group under function composition, and are isomorphic to the corresponding quotient groups $H(n)/U(1)$ and $N(H(n))/U(1)$. When applied to the Weyl-Heisenberg group associated with a single quantum object of arbitrary dimension, it was shown that $N(H(n))/U(1)$ was isomorphic to
+\[(\mathbb{Z}_N\times\mathbb{Z}_N)\rtimes\text{SL}(2,\mathbb{Z}_N)\]
+This isomorphism by itself is not new, and can be used to generate the Clifford group (up to global phase) with four matrices $X_N$, $Z_N$,  $H_N$, and $D_N$. In the special cases $N=2$ and $N=3$ only two generators are needed, which we displayed in \autoref{pauli}. 
 
-This isomorphism by itself is not new, [can I reference something older then?] and can be used to generate the Clifford group (up to global phase) with the four matrices $X_d$, $Z_d$, $D_d$, and $H_d$, [apparently I'm using $d$ now] defined by:
-[insert definition... maybe put these generators up in preliminaries, with an older reference]
-
-The more significant result of the paper however, was the extension to Clifford groups for arbitrary composite systems. The Weyl-Heisenberg group of a composite system $C^{d_1}\otimes \dots \otimes C^{d_n}$ [have we defined Kronecker products of spaces?] is taken to be the product of Weyl-Heisenberg groups acting on each individual system:
+The more significant result of the paper however, was the extension to Clifford groups for arbitrary composite systems. The Weyl-Heisenberg group of a composite system $C^{d_1}\otimes \dots \otimes C^{d_n}$ is taken to be the product of Weyl-Heisenberg groups acting on each individual system:
 \[H(d_1, \dots, d_n) = \{A_1 \otimes \dots \otimes A_n\ |\ A_i \in H(d_i)\} \cong H(d_1) \times \dots \times H(d_n)\]
-\ [this isn't the notation used in Tolar, it's our own.]
 
-While this composite Weyl-Heisenberg group consists only of Kronecker products, [I want to use the word dependent, need to mention that in the Kronecker product section] its normalizer can contain operations that are not Kronecker products, for example
+While this composite Weyl-Heisenberg group consists only of Kronecker products, its normaliser can contain operations that are not Kronecker products, for example
 \[\text{CNOT} = C(X) = \left[\begin{matrix}
 	1 & 0 & 0 & 0 \\
 	0 & 1 & 0 & 0 \\
@@ -41,83 +36,118 @@ While this composite Weyl-Heisenberg group consists only of Kronecker products, 
 	0 & 0 & 1 & 0
 \end{matrix}\right] \in N(H(2, 2))\]
 
-The Clifford groups of non-mixed composite systems have been explored elsewhere, [have they? where?] but here Tolar showed a number of results for mixed systems, the most important of these for us was that in a composite system $\mathbb{C}^m \otimes \mathbb{C}^n$ with $gcd(m, n) = 1$, the quotient of the Clifford group is simply the direct product of the corresponding single-object Clifford groups:
+While Tolar has shown a number of results for the Clifford groups of mixed systems, the most important of these for us was that in a bipartite system $\mathbb{C}^m \otimes \mathbb{C}^n$ with $gcd(m, n) = 1$, the quotient of the Clifford group is simply the direct product of the corresponding single-object Clifford groups:
 \[N(H(m, n))/U(1) \cong N(H(m))/U(1) \times N(H(n))/U(1) \]
 This means that the Clifford group is \emph{not} capable of acting dependently between quantum objects, making it much less powerful than in non-mixed systems.
 
-The same paper also showed that when $m$ and $n$ have square or cubic divisors in common, that the corresponding Clifford groups are novel in a way unlike any non-mixed quantum system. This is interesting in the broader context of mixed logic, but will not be relevant to our later discussion of $\mathbb{C}^2 \otimes \mathbb{C}^3$.
+Additionally, \cite{tolar-clifford} showed that if $m$ and $n$ have square or cubic divisors in common the corresponding Clifford groups are novel in a way unlike any non-mixed quantum system. This is interesting in the broader context of mixed logic, but will not be relevant to our later discussion of $\mathbb{C}^2 \otimes \mathbb{C}^3$.
 
-This is the only paper we found that looks at quantum systems with objects of differing dimension.
+\section{Infinite-Order Gates}\label{infinite-order}
+In \autoref{analyse-perms} we stated the result of \cite{universal-qubit} that universal computation in binary quantum computers can be achieved with just three distinct gates, and the last step was to decompose unitary operations acting on one qubit, into a sequence of $H$ and $T$ operations. The technique for doing this was the main result of \cite{universal-qubit}, and involved constructing a pair of operations which each rotate the Bloch sphere by irrational portions of a full $2\pi$ rotation, through different orthogonal planes. Irrational portions of a full turn can be iterated to provide arbitrary approximations of any rotation in the respective plane, and so one can approximate any rotation of the Bloch sphere as 3 successive rotations made using just $H$ and $T$.
 
-\subsection{Infinite-Order Gates}
-In our outline of how universal computation is achieved for binary quantum computers, the last step was to decompose unitary operations acting on one qubit, into a sequence of $H$ and $T$ operations. The technique for doing this was described in \cite{universal-qubit}, and involved constructing a pair of operations which each rotate the Bloch sphere by irrational portions of a full $2\pi$ rotation each in a different, orthogonal plane. By iterating one of these rotations, one can approximate any angle in the unit circle, and thus with each of these rotations implemented, one can implement any rotation of the Bloch sphere as 3 successive rotations made using these gates.
+One significant algebraic fact about the Clifford group is that up to scale factors it is finite. Contrasting this we see that any group containing both $T$ and $H$ must not be finite, seeing as they can be used to calculate irrational rotations, i.e.\ infinite order rotations. This means the technique by which these rotations were shown to be irrational/infinite order are of algebraic significance on their own, even before considering the particular application of universal computation. The technique they used for showing these rotations are irrational was to generate an expression for the angle of rotation, $2\pi \theta$ say, then to show that the unit complex number $e^{i2\pi \theta}$ is not a root of unity, i.e. that $\theta$ is rational. This can be done by leveraging the algebraic number theory of cyclotomic polynomials, with the following theorem proven in an appendix of their paper:
 
-One of the facts that makes the Clifford group algebraically and theoretically significant is that up to scale factors it is finite, whereas any group containing both $T$ and $H$ must not be finite, or else the rotations that were generated with them would be finite order, i.e.\ a rational fraction of a $2\pi$ rotation in their respective planes. This means the technique by which these rotations were shown to be irrational/infinite order are significant in both of these contexts, in working out alternate conditions for universal computation in different quantum systems, and in analysing the order of different subgroups of $U(n)$ in search of finite groups.
-
-The technique they use for showing this is to generate an expression for the angle of rotation, $2\pi \theta$ say, then to show that the unit complex number $e^{i2\pi \theta}$ is not a root of unity, i.e. that $\theta$ is rational. This can be done by leveraging the algebraic number theory of cyclotomic polynomials, with the following theorem proven in an appendix of their paper:
-
-[capital T theorem] For any $\theta \in \mathbb{R}$, $\theta$ is rational if and only if $e^{i2\pi \theta}$ is the root of a minimal [vs irreducible?] polynomial with rational coefficients.
+\begin{theorem}[The Cyclotomic/Rational Number Theorem]\label{cyclotomic} For any $\theta \in \mathbb{R}$, $\theta$ is rational if and only if $e^{i2\pi \theta}$ is the root of an irreducible polynomial with rational coefficients.
+\end{theorem}
 
 This analysis works well in the Bloch sphere all unitary matrices will represent a single rotation in some plane, but when dealing with more complicated geometries we can still apply this kind of analysis if we look at the eigenvalues of a given matrix instead. Given a unitary matrix $A$, we already know that its eigenvalues are unit complex numbers $e^{i 2\pi\theta}$, so then
 
-[capital P proposition?] the following are equivalent:
-\begin{itemize}
-	\item $A$ is finite order
-	\item Every eigenvalue of $A$ is finite order under multiplication, i.e.\ is a root of unity
-	\item Every eigenvalue of $A$ is a root of a cyclotomic polynomial
-\end{itemize}
+\begin{prop}Given a unitary matrix $A$ the following are equivalent:
+\begin{enumerate}
+	\item $A$ is finite order,
+	\item Every eigenvalue of $A$ is finite order under multiplication, i.e.\ is a root of unity,
+	\item Every eigenvalue of $A$ is a root of a cyclotomic polynomial.
+\end{enumerate}
+\end{prop}
+\begin{proof}
+	By diagonalising $A$ according to the results described in \autoref{diagonalisable} we can write $A = \sum_i e^{i2\pi\theta_i}\ket{v_i}\bra{v_i}$, where $e^{i2\pi\theta_i}$ is the eigenvalue corresponding to the normalised eigenvector $\ket{v_i}$. Then if 1. is true we have $A^n = I$, which means $A^n\ket{v_i} = e^{2\pi n\theta_i}\ket{v_i} = \ket{v}$, and hence $n\theta_i \in \mathbb{Z}$, and hence $\theta_i \in \mathbb{Q}$, giving 2. In reverse if 2. is true then we can take $n$ to be the greatest common divisor of each $\theta_i$ and raise $A$ to this power to get
+	\[A^n = \left(\sum_i e^{i2\pi\theta_i}\ket{v_i}\bra{v_i}\right)^n = \sum_i e^{i2\pi n \theta_i}\ket{v_i}\bra{v_i} = \sum_i \ket{v_i}\bra{v_i} = I.\]
+	Finally 2. and 3. are equivalent by \autoref{cyclotomic}.
+\end{proof}
+Now the eigenvalues of $A$ will be roots of the characteristic polynomial $det(A - \lambda I)$, so if the characteristic polynomial has rational coefficients then we can work directly with this to show that $A$ is of finite or infinite order. 
 
-Now the eigenvalues of $A$ will be roots of the characteristic polynomial $det(A - \lambda I)$, so if the characteristic polynomial has rational coefficients then we can work directly with this to show that $A$ is of finite or infinite order.
-
-Now $e^{i 2\pi\theta}$ and $e^{-i 2\pi\theta}$ are both eigenvalues of the rotation
+It is interesting to note that $e^{i 2\pi\theta}$ and $e^{-i 2\pi\theta}$ are both eigenvalues of the rotation
 \[R(2\pi \theta) = \left[\begin{matrix}
 	\cos(2\pi\theta) & -\sin(2\pi\theta) \\
 	\sin(\theta) & \cos(\theta)
 \end{matrix}\right]\]
-so in this way \cite{universal-qubit} was already dealing with eigenvalues, and we simply generalize this. That said \cite{universal-qubit} deals with rotations of the Bloch sphere, which means the eigenvalues of the original operation being considered might be different to this. Further, the Bloch sphere is designed to remove global phase factors, and so an operation like $e^{i2\pi\theta}I$ will act trivially on the Bloch sphere, whereas under our eigenvalue analysis this operation might have infinite order despite being trivial in practice. This means that if we want to show that a matrix has infinite order, then we must show that some scalar multiple of it has some eigenvalues which are roots of unity, and others which are not. For example let $\theta$ be irrational, so that the unit complex number $e^{i2\pi\theta}$ is not a root of unity, then
+so in this way \cite{universal-qubit} was already dealing with eigenvalues, and we simply generalize this to rotations in higher dimensional spheres than the Bloch sphere. One significant difference between their use and ours is that the Bloch sphere is designed to remove global phase factors, and so an operation like $e^{i2\pi\theta}I$ will act trivially on the Bloch sphere, whereas under our eigenvalue analysis this operation might have infinite order despite being trivial in practice. This means that if we want to show that a matrix has infinite order up to global phase, then we must show that some scalar multiple of it has some eigenvalues which are roots of unity, and others which are not. For example let $\theta$ be irrational, so that the unit complex number $e^{i2\pi\theta}$ is not a root of unity, then
 \[A = \left[\begin{matrix}
 	e^{i2\pi\theta} & 0 \\
 	0 & e^{-i2\pi\theta}
 \end{matrix}\right]\]
 will be infinite order, but so will any non-zero scalar multiple $\lambda A$, since if $\lambda e^{i2\pi\theta}$ is a root of unity, then $\lambda = e^{i2\pi(\phi - \theta)}$ with $\phi$ rational, meaning that $\lambda e^{-i2\pi\theta}$ still won't be a root of unity, and vice versa.
-\subsection{Qudit versions of the qubit ``pi-over-eight'' gate}
-In searching for a generalization of the $T$ gate from binary to higher dimensions, there are a number of properties that could be used to find such gates. For example one could naively define the family of gates:
-\[T_n = Z_n^{1/4} = \left[\begin{matrix}
-	1 & 0 & 0 & \dots & 0 \\
-	0 & \omega_{4n} & 0 & \dots & 0 \\
-	0 & 0 & \omega_{4n}^2 & \dots & 0 \\
-	\vdots & \vdots & \vdots & \ddots & \vdots \\
-	0 & 0 & 0 & \dots & \omega_{4n}^{n-1} \\
-\end{matrix}\right]\]
 
-This takes the defining property of $T$ and generalizes it, which is exactly what we do to define the rest of the objects defined in this thesis. In this case however, it is much more useful to generalize two other properties that $T$ has, properties which are not unique to $T$, but which are essential for its power in discussions of universal computation. The first property is that $T$ is diagonal. The equation $T^4 = Z$ seems to be a coincidence of low dimension, rather than a general property of the diagonal matrices of interest to us. The second property is that $T$ is in the second level of the Clifford hierarchy, as defined in \cite{clifford-hierarchy}:
+\section{Programmatic Search for Finite Groups}\label{prog-search}
+The Clifford group is a significant set of operations for performing fault tolerant computation in quantum computers, and is particularly interesting in the way that adding a single finite order matrix $T_2$ to it can generate an infinite order group capable of universal computation. Motivated by this we generated groups using various Clifford and non-Clifford operations on the qubit-qutrit system $\mathbb{C}^2 \otimes \mathbb{C}^3$, and found which combinations were finite order and which were infinite order. We saw in \cite{tolar-clifford} that the Clifford group only introduces operations that act dependently between objects when the dimensions of those objects have a common factor, and 2 and 3 do not share a common factor, so the Clifford group in a binary-ternary quantum computer has the same behaviour as two separate Clifford groups, one acting on $\mathbb{C}^2$ and the other on $\mathbb{C}^3$. This means the operations of primary interest to us are the controlled operations discussed in \autoref{analyse-perms}. We consider the ten operations
+\[X_2, Z_2, H_2, D_2, X_3, Z_3, H_3, S_3, C_2(X_3), C_3(X_2),\]
+as elements of $U(6)$, acting on qubit-qutrit pairs $\ket{p}\ket{q}$:
 
-[capital D definition] The Clifford hierarchy is an infinite sequence of sets $\mathcal{C}_i$ where $\mathcal{C}_1$ is the Pauli group, $\mathcal{C}_2$ is the Clifford group, and generalizing this
-\[\mathcal{C}_{i+1} = \{A\ |\ A\mathcal{C}_1A^{-1} \subseteq \mathcal{C}_i\}\]
-Note that only the first two levels of this hierarchy form groups, the rest are simply different sets of unitary matrices.
-[do we have cosets and double cosets?]
+As an example consider the Pauli operations
+\begin{align*}
+X_2 = X_2 \otimes I_3 = \begin{bmatrix}
+0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 \\
+1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 \\
+\end{bmatrix},
+&&&
+X_3 = I_2 \otimes X_3 = \begin{bmatrix}
+0 & 0 & 1 & 0 & 0 & 0 \\
+1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 \\
+0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0
+\end{bmatrix},
+\\
+Z_2 = Z_2 \otimes I_3 = \begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & \omega_2 & 0 & 0 \\
+0 & 0 & 0 & 0 & \omega_2 & 0 \\
+0 & 0 & 0 & 0 & 0 & \omega_2
+\end{bmatrix},
+&&&
+Z_2 = Z_2 \otimes I_3 = \begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & \omega_2 & 0 & 0 \\
+0 & 0 & 0 & 0 & \omega_2 & 0 \\
+0 & 0 & 0 & 0 & 0 & \omega_2
+\end{bmatrix}.
+\end{align*}
 
-We see that for qubits, $T \in \mathcal{C}_3$, and so to generalize $T$ to any prime dimension $p$, the paper \cite{pi-over-eight} finds the full (finite) solution set $\{U_v\}$ satisfying $U_v \in \mathcal{C}_3$, $U_v$ diagonal. Global phase is also removed by assuming that $U_v\ket{0} = \ket{0}$. They also show that this solution set forms a group, analyze this group to determine its structure and minimum number of generators. Additionally they explore the geometric properties of these generalized gates, and use this to argue for the strength of these generalized gates as being optimally resistant to multiple forms of noise in physical implementations.
+Further, the non-Clifford operations $C_2(X_3)$ and $C_3(X_2)$ look like the following:
+\begin{align*}
+C_2(X_3) = \begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 \\
+0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0
+\end{bmatrix}
+&&&
+C_3(X_2) = \begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 \\
+0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0
+\end{bmatrix}
+\end{align*}
 
-When exploring the group theoretic structure of these solution sets, they found that $p = 2$ and $p = 3$ gave groups that were generated by $1$ and $2$ elements respectively, whereas for $p \geq 5$ there were always $3$ generator elements. This also appears to be a coincidence of low dimension akin to the relation $T^4 = Z$. In addition to both of these properties of low dimension, the paper \cite{arithmetics} shows that $P_9 \in \mathcal{C}_3$ along with the rest of the Clifford group $\mathcal{C}_2$ can be used to exactly generate \emph{all} of the permutation matrices in a system made of multiple qutrits, and interestingly $P_9$ can be scaled to satisfy the relation $P_9^3 = Z_3$.
-
-%\chapter[CALCULATION IN BINARY-TERNARY]{Calculation in Binary-Ternary}
-[seems like the chapters we really want are universal computation, finite groups, and then maybe the ternary arithmetic/magic state/fault tolerant stuff?? might be a big restructure, and hides the fact that understanding the background material is not just a means to an end in this document, but an end of this document in itself.]
-
-[explain the context we infer from the previous discussion: interesting work on non-binary computation, esp. ternary, but very small amounts on mixed computation, meaning we ought to start with the absolute basics... maybe also speculate on what the trade-offs of the different number systems seem to be?]
-
-\section{Programmatic Search for Finite Groups}
-Normally the Clifford group is an excellent tool for reasoning about quantum systems, since it is finite, (up to scalar factors [I should be careful about my previous statements about generators of the Clifford group, maybe define what a `finite Clifford group' is]) and cheap to implement, but somehow maximal in that one can add just a single gate to achieve universal computation. We saw in \cite{tolar-clifford}, however, that the Clifford group only introduces operations that act dependently between objects when the dimensions of those objects have a common factor, which 2 and 3 do not share, essentially splitting a mixed binary-ternary quantum computer into two separate computers, with two separate Clifford groups, only able to communicate via non-Clifford operations. There is no reason why this can't be done, but there isn't a clear advantage either, so in this section we will take the generators of the Clifford group,
-\[X_2, Z_2, H_2, D_2, X_3, Z_3, H_3, D_3,\]
-[have I defined $H_d$ and $D_d$?]
 and different combinations of permutation matrix, starting with $C_2(X_3)$ and $C_3(X_2)$, to create different generators of subgroups of $U(6)$. We implement a breadth first search in the groups generated by these sets using the C programming language, and find some combinations which yield finite groups, and others that cannot be fully enumerated without crashing due to integer overflow, which we will present and discuss.
 
-The first group we will discuss is the one generated by removing $H_2$ and $H_3$ from the generator set, and adding both $C_2(X_3)$ and $C_3(X_2)$ in their place. All of these generators sit inside of the generalized symmetric group
-\[\{AB\ |\ A\text{\ diagonal}, A^6 = I, A \in U(6), B \in \mathcal{S}_6\}\]
-[define in general, and prove this is a group, presumably in the groups discussion where we needed examples of normal subgroups anyway]
-which means that they generate some subgroup of this.
+The first group we will discuss is the one generated by removing $H_2$ and $H_3$ from the generator set, and adding both $C_2(X_3)$ and $C_3(X_2)$ in their place. All of these generators sit inside of the generalized symmetric group $S(6,6)$ defined in \autoref{generalised-perm}, and so the group generated by them must also be a subgroup of $S(6,6)$. $S(6, 6)$ has exactly $6!6^6$ elements, making it large but finite.
 
-In fact $X_2$, $X_3$, $C_2(X_3)$ and $C_3(X_2)$ will turn out to generate the whole symmetric group on 6 elements, so having them all would be quite powerful for computation, but now we run into a conjugate problem, which is that our group has a way of doing nontrivial things with entangled states, but no longer any way of creating states other than simple multiples of the computational basis! This generalized permutation group provides essential operations, but isn't much more powerful than the Pauli group without $H_2$ or $H_3$, so our primary focus will be understanding the trade-offs between different combinations of $H_2$, $H_3$, $C_3(X_2)$, and $C_2(X_3)$.
+In fact $X_2$, $X_3$, $C_2(X_3)$ and $C_3(X_2)$ will turn out to generate the whole symmetric group on 6 elements, so having them all would be quite powerful for computation, but now we run into a different problem, which is that our group has a way of doing nontrivial things with entangled states, but no longer any way of creating states other than simple multiples of the computational basis! This generalized permutation group provides essential operations, but isn't much more powerful than the Pauli group without $H_2$ or $H_3$, so our primary focus will be understanding the trade-offs between different combinations of $H_2$, $H_3$, $C_3(X_2)$, and $C_2(X_3)$.
 \subsection{Representing Complex Matrices in C}
 It would be standard to use some algebraic program or package such as Magma to solve this problem, but because our goal is simple enough to implement in a handful of sittings, it was just as easy to implement it from scratch in C, yielding a program that is simple, high performance, and easy to customize. The full source code of this program is given in Appendix C, and was tested using the Tiny C Compiler, but run using the Clang compiler with optimization level 2. We will now outline the techniques used, since they are of independent interest. 
 
@@ -133,7 +163,7 @@ using an array of 32-bit integers, eight signed integers representing the numera
 
 We have a few basic operations to define in Num, the most significant of which are multiplication, and inverses. We implement these algorithms naively, and since these are the most fundamental building blocks of our program, this will lead to very bad performance without optimization, (in fact we found the program runs four times worse, 20 seconds vs 5 seconds) but when the search is going to take numerous seconds anyway, the additional second or two of optimization is less painful than it would be in other projects.
 
-For multiplication in Num, we implement multiplication in $\mathbb{Z}[X, Y, Z]$, [oh no do I have to define field extensions? Might as well throw it in the appendix I guess] iterating 6 variables over the range ${0, 1}$ according to the equality
+For multiplication in Num, we implement multiplication in $\mathbb{Z}[X, Y, Z]$, iterating 6 variables over the range ${0, 1}$ according to the equality
 \begin{align*}
 	\left(\sum_{j,k,l = 0}^1 a_{jkl}X^jY^kZ^l\right)\left(\sum_{j,k,l = 0}^1 b_{jkl}X^jY^kZ^l\right)
 	\\= \sum_{j_1,k_1,l_1=0}^1\sum_{j_2,k_2,l_2=0}^1 a_{j_1k_1l_1}b_{j_2k_2l_2}X^{j_1+j_2}Y^{k_1+k_2}Z^{l_1+l_2}
@@ -154,7 +184,7 @@ In practice we could have stopped earlier, in fact for any root of unity it will
 Next we represent a complex matrix as a $6\times 6$ array of Num, taking a total of 1296 bytes per matrix! Matrix multiplication is defined in the usual way, by setting $c_{ik} = \sum_j a_{ij}b_{jk}$, but reduced matrix multiplication was also defined, where the matrix is scaled so that the first non-zero entry of the matrix is exactly 1. We also represent a permutation in $\mathcal{S}_6$ as 6 bytes, representing a lookup table of a map $\{1\dots 6\} \to \{1 \dots 6\}$.
 
 \subsection{The Search Algorithm}
-We now have an implementation of two groups, $GL(6, \text{Num})$, [define $GL$] and $\mathcal{S}_6$, so now we can implement the search itself. The search has six non-optional parameters:
+We now have an implementation of two groups, $GL(6, \text{Num})$, and $\mathcal{S}_6$, so now we can implement the search itself. The search has six non-optional parameters:
 \begin{enumerate}
 	\item \verb`gen_len` the amount of `letters' in the generator set
 	\item \verb`gen`, the array of letters, each of type \verb`void*`
@@ -163,7 +193,7 @@ We now have an implementation of two groups, $GL(6, \text{Num})$, [define $GL$] 
 	\item \verb`compose`, a binary operation acting on group elements
 	\item \verb`print_elem`, a procedure to display the group element (matrix or permutation) that has been generated
 \end{enumerate}
-The search then generates an array of \verb`PathNode`s, (named after the geometric interpretation of groups as `Cayley graphs' [I could change the source code so that I don't need to explain the weird names!]) which are tuples containing
+The search then generates an array of \verb`PathNode`s, (named after the geometric interpretation of groups as `Cayley graphs') which are tuples containing
 \begin{itemize}
 	\item the word length of the corresponding element generated
 	\item a pointer to an earlier \verb`PathNode`, called the predecessor; may be \verb`NULL`
@@ -183,14 +213,14 @@ The procedure also prints each object as it generates them, for example:
 
 The algorithm itself is a breadth first search, where the array of \verb`PathNode`s is also used as the queue of elements not yet searched. The array is initialized to contain the letters themselves, as words of length 1 with no predecessor, and a pointer \verb`curr` is initialized to the start of the array. Then new group elements are generated via \verb`compose(gen[i], curr->result)`, checked for uniqueness, and if they are unique they are appended to the array. Once \verb`curr` reaches the end of the array, we will have proven that the group is finite, and have enumerated all of its elements.
 
-Checking uniqueness becomes quite slow, the biggest group that was exhaustively generated had 165888 matrix elements, meaning the minimum number of matrix comparisons needed would have been 13759331328, which is like comparing 16 terabytes of data, one kilobyte at a time. In order to overcome this we also implement an open addressed hash map, using a technique called Robin Hood hashing. [quick reference for this I guess!] The hash map takes the \verb`void*` corresponding to the group element in question, and generates a hash by literally shuffling bits around using the XOR and SHIFT operations offered in C. The hash is then used as an offset into an additional array, called the hash table, where another pointer to the group element will be stored. When a new group element is calculated, rather than search for that group element within a whole megabyte of existing elements, we simply calculate its hash, and check if the element we are looking for is in the correct location in the hash table.
+Checking uniqueness becomes quite slow, the biggest group that was exhaustively generated had 165888 matrix elements, meaning the minimum number of matrix comparisons needed would have been 13759331328, which is like comparing 16 terabytes of data, one kilobyte at a time. In order to overcome this we also implement an open addressed hash map, using a technique called Robin Hood hashing \cite{robin-hood}. The hash map takes the \verb`void*` corresponding to the group element in question, and generates a hash by literally shuffling bits around using the XOR and SHIFT operations offered in C. The hash is then used as an offset into an additional array, called the hash table, where another pointer to the group element will be stored. When a new group element is calculated, rather than search for that group element within a whole megabyte of existing elements, we simply calculate its hash, and check if the element we are looking for is in the correct location in the hash table.
 
 Things are complicated when two group elements correspond to the same location in the hash table, which is where the lookup algorithm must `probe' for other locations near the offset associated with the hash, to store the new entries there instead. Robin hood hashing/probing is a small optimization on this concept, allowing entries to be moved again after being written the first time, to make room for other entries that would otherwise end up too far from their original offset; minimizing this `probe distance' from the original offset of a hash entry makes lookups faster, especially as the hash table becomes full. Another technical detail is the fact that since we never remove entries from the hash table, and only run the program once before exiting, we don't need to allocate, reallocate, ore remove entries from the hash table; we simply use a global block of memory, and implement lookup and insert procedures, and we are done.
 
 With this technology in place, all that remains is to wire it together, with definitions for \verb`compose`, and \verb`print_elem`. For permutations, we compose $x$ and $y$ by setting \verb`xy[i] = x[y[i]]`, and for matrices we multiply, and divide out the first non-zero scale factor, essentially implementing the quotient group $U(6)/U(1)$. We also check the order of the matrix, as a simple heuristic for detecting infinite order groups; If we can calculate the order without causing an integer overflow then we continue generating the group, but if any of the 324 integers in our matrix representation are above some threshold, we assume the order is infinite, represented by \verb`-1`, and print this fact, to indicate that the search is unlikely to terminate. We actually continue regardless of the order, since it might be worth knowing which words of similar size have infinite order as well.
 
 \subsection{Results}
-Call the six generators of the Clifford group other than $H_2$ and $H_3$ the reduced generator set $R$. [we haven't defined generators at all!] Then $\langle R, H_2, H_3 \rangle$ is a finite Clifford group, and $\langle R, C_2(X_3), C_3(X_2) \rangle$ is a subgroup of the generalized symmetric group and therefore finite as described previously, but additionally, $\langle R, H_2, C_3(X_2)\rangle$ and $\langle R, H_3, C_2(X_3)\rangle$ are finite. [suddenly realizing that the orbits of these groups would be easier to analyze than the groups themselves, since the orbits implicitly quotient out permutations on the computational basis, and by removing global phase matrices will have no effect on their eigenvectors as well]
+Call the six generators of the Clifford group other than $H_2$ and $H_3$ the reduced generator set $R$. Then $\langle R, H_2, H_3 \rangle$ is a finite Clifford group, and $\langle R, C_2(X_3), C_3(X_2) \rangle$ is a subgroup of the generalized symmetric group and therefore finite as described previously, but additionally, $\langle R, H_2, C_3(X_2)\rangle$ and $\langle R, H_3, C_2(X_3)\rangle$ are finite.
 
 The last two generators we could consider, $\langle R, H_2, C_2(X_3)\rangle$, and $\langle R, H_3, C_3(X_2)\rangle$, both trigger an integer overflow when calculating the order of the products $C_2(X_3)H_2$, and $C_3(X_2)H_3$.
 
@@ -248,24 +278,6 @@ For a $6\times6$ matrix this seems fairly innocuous, and the other doesn't look 
 	\\&=
 	\frac{1}{\sqrt{3}}
 	\begin{bmatrix}
-		1&0&0&0&0&0\\
-		0&1&0&0&0&0\\ 
-		0&0&0&0&0&1\\ 
-		0&0&0&1&0&0\\ 
-		0&0&0&0&1&0\\ 
-		0&0&1&0&0&0
-	\end{bmatrix}
-	\begin{bmatrix}
-		1&1&1&0&0&0\\ 
-		1&\frac{-1 +\sqrt{3}i}{2}&\frac{-1 -\sqrt{3}i}{2}&0&0&0\\ 
-		1&\frac{-1 -\sqrt{3}i}{2}&\frac{-1 +\sqrt{3}i}{2}&0&0&0\\ 
-		0&0&0&1&1&1\\ 
-		0&0&0&1&\frac{-1 +\sqrt{3}i}{2}&\frac{-1 -\sqrt{3}i}{2}\\ 
-		0&0&0&1&\frac{-1 -\sqrt{3}i}{2}&\frac{-1 +\sqrt{3}i}{2}
-	\end{bmatrix}
-	\\&=
-	\frac{1}{\sqrt{3}}
-	\begin{bmatrix}
 		1&1&1&0&0&0\\ 
 		1&\omega_3&\omega_3^2&0&0&0\\
 		0&0&0&1&\omega_3^2&\omega_3\\ 
@@ -274,7 +286,6 @@ For a $6\times6$ matrix this seems fairly innocuous, and the other doesn't look 
 		1&\omega_3^2&\omega_3&0&0&0
 	\end{bmatrix}
 \end{align*}
-[keeping the middle entry for now for Symbolab]
 
 But if we raise the simpler of these to the fourth power, it becomes quite chaotic:
 \[\left(C_2(X_3)H_2\right)^4 =
@@ -289,11 +300,11 @@ But if we raise the simpler of these to the fourth power, it becomes quite chaot
 \end{bmatrix}
 \]
 
-The second power is $C_2(X_3)H_2C_2(X_3)H_2$, which resembles the infinite order term from \cite{universal-qubit}, a non-Clifford matrix, times the Fourier transform of that matrix, [I haven't explained why I call it the Fourier transform of the matrix] and when we ask Wolfram Mathematica for its characteristic polynomial we get
+The second power is $C_2(X_3)H_2C_2(X_3)H_2$, which resembles the infinite order term from \cite{universal-qubit}, a non-Clifford matrix, times the Fourier transform of that matrix, and when we ask Wolfram Mathematica for its characteristic polynomial we get
 \[1/4 (\lambda - 1)^2 (4 \lambda^4 + 2 \lambda^3 - 3 \lambda^2 + 2 \lambda + 4)\]
 This rational polynomial has an irreducible factor that is cyclotomic and another that is non-cyclotomic, which by the reasoning used in \cite{universal-qubit} tells us that as we expected, one of its eigenvalues is a root of unity, and another is not, meaning no scale multiple of this matrix is finite order, and so $\langle R, H_2, C_2(X_3) \rangle$ really is an infinite group. Further $C_2(X_3)H_2$ is also infinite order, since two of its eigenvalues will square to roots of unity, and are therefore also roots of unity, whereas the other four will square to non-roots of unity, and are therefore also not roots of unity.
 
-Inspired by this, we could calculate
+Inspired by this, we calculate
 \[C_3(X_2) H_3^{-1} C_3(X_2) H_3 =
 \frac{1}{3} \begin{bmatrix}
 	2 & \omega_6 & \omega_6^2 & 1 & \omega_6^4 & \omega_6^5 \\
@@ -302,36 +313,86 @@ Inspired by this, we could calculate
 	1 & \omega_6^4 & \omega_6^5 & 2 & \omega_6 & \omega_6^2 \\
 	\omega_6^5 & 1 & \omega_6^4 & \omega_6^2 & 2 & \omega_6 \\
 	\omega_6 & \omega_6^2 & 2 & \omega_6^4 & \omega_6^5 & 1
-\end{bmatrix}
+\end{bmatrix},
 \]
-[a. I still need Mathematica up before I can get a polynomial for this b. this doesn't necessarily have the novelty of the $H_2$ case? I don't know the geometry]
-
-There are 720 different permutations in $\mathcal{S}_6$, 12 of which are already in the Clifford group, and we have shown manually that one of the remaining 708 is infinite order when multiplied with $H_2$. It is quite difficult to prove that a matrix is infinite order using this method, especially when it isn't sparse the way $H_2$ is, and often the characteristic polynomial has $\sqrt{2}$ or $\sqrt{3}$ coefficients which would require deeper number theory than we have presented here, so we return now to the search for matrices that we can prove are finite order. We can write another C program extending the existing codebase to exhaustively generate all $6^6$ tables of integers, and generate matrices for the $720$ that are permutations. Then we attempt to calculate the order of $P H_2$ and $P H_3$, and report when either or both have a finite order that we could calculate. Other than the 12 Clifford permutations, the only $P$ for which both $P H_2$ and $P H_3$ were finite order were the 12 matrices of the form
+but can only conjecture that this is infinite order, given the complexity of dense, non-rational characteristic polynomials. Further, there are 720 different permutations in $\mathcal{S}_6$, 12 of which are already in the Clifford group, and we have shown manually that one of the remaining 708 is infinite order when multiplied with $H_2$. It is quite difficult to prove that a matrix is infinite order using this method, especially when it isn't sparse the way $H_2$ is, and often the characteristic polynomial has $\sqrt{2}$ or $\sqrt{3}$ coefficients which would require deeper number theory than we have presented here, so we return now to the search for matrices that we can prove are finite order. We can write another C program extending the existing codebase to exhaustively generate all $6^6$ tables of integers, and generate matrices for the $720$ that are permutations. Then we attempt to calculate the order of $P H_2$ and $P H_3$, and report when either or both have a finite order that we could calculate. Other than the 12 Clifford permutations, the only $P$ for which both $P H_2$ and $P H_3$ were finite order were the 12 matrices of the form
 \[X_2^a C_2(S_{p,q}) X_2^b\text{\ where\ }a, b \in \{0, 1\}, p, q \in \{0, 1, 2\}, p \neq q.\]
-This seems promising, but in fact such $P$ will still have $\langle P, H_2, H_3\rangle$ infinite order, since $P H_3^2 = P S_{1,2}$ will not be in the above form, meaning $\langle P, H_2, H_3 \rangle$ is still infinite order, and so the only time where $\langle P, H_2, H_3 \rangle$ can be finite is if $P \in \mathcal{C}_2$ anyway, meaning $P$ is simply the Kronecker product of a qubit operation and a qutrit operation. [need to emphasise this a little more, maybe just theorem it, something I'm going to do anyway]
+This seems promising, but in fact such $P$ will still have $\langle P, H_2, H_3\rangle$ infinite order, since $P H_3^2 = P S_{1,2}$ will not be in the above form, meaning $\langle P, H_2, H_3 \rangle$ is still infinite order, and so the only time where $\langle P, H_2, H_3 \rangle$ can be finite is if $P \in \mathcal{C}_2$ anyway, meaning $P$ is simply the Kronecker product of a qubit operation and a qutrit operation.
 
 The final result of this program is that we can use it to check that
 \[\langle X_2, C_3(X_2), X_3, C_2(X_3) \rangle = \mathcal{S}_6,\]
 This is how we know that
 \[C_2(S_{p,q}) \in \langle X_2, C_3(X_2), X_3, C_2(X_3) \rangle\]
-which is where we found the word for $C_2(S_{p,q})$ given in \ref{}. Additionally since we have $C_2(X_3) = C_2(S_{0,1})X_3C_2(S_{0,1})X_3$, we can infer that
+which is where we found the word for $C_2(S_{p,q})$ given in \autoref{analyse-perms}. Additionally since we have $C_2(X_3) = C_2(S_{0,1})X_3C_2(S_{0,1})X_3$, we can infer that
 \[\langle X_2, C_3(X_2), X_3, C_2(S_{0,1})\rangle = \mathcal{S}_6\]
 also. These results are interesting but it is important not to forget about the qubit-qubit and qutrit-qutrit control gates which were essential for universal computation, which are concealed by this myopic discussion of $U(6)$.
 
 \subsection{Non-Clifford States}
-[I should be talking about magic states sooner as a part of fault tolerance computation and as a motivation for having finite gate sets, I could write some stuff about the following circuits but I need to know what I've actually set up at this point]
+The primary motivation for the result of \cite{universal-qubit}, that $H, T, C_2(X_2)$ is universal, was that all three of these operations can be implemented fault tolerantly. $H$ and $C_2(X)$ had known fault tolerant implementations known prior to this, but the algorithm presented to implement $T$ was done in two steps, the first was to fault tolerantly develop an approximation of the same state $\frac{1}{\sqrt{2}}(\ket{0} + \omega_8\ket{1})$ that would be produced by $TH\ket{0}$, and the second step was to use this \emph{state} in a $C_2(X_2)$ gate in order to simulate a $T$ gate. If we use the $T$ operation directly this will look like:
 
 \begin{quantikz}
-	\lstick{qubit $\ket{0}$} & \gate{H} & \gate{T} & \targ{} & \qw \rstick{$\ket{0}+\omega_4\ket{1}$}\\
-	\lstick{qubit $\ket{\phi}$} & \qw & \qw & \phase{0}\vqw{-1} & \qw \rstick{$\omega_4^3T\ket{\phi}$}
+	\lstick{qubit $\ket{\phi}$} & \qw & \qw & \phase{1}\vqw{1} & \qw & \qw \rstick{$T\ket{\phi}$ or $\omega_8^{-1}D_2^{-1}T\ket{\phi}$} \\
+	\lstick{qubit $\ket{0}$} & \gate{H} & \gate{T} & \targ{} & \meter{0/1} & \qw \rstick{$\ket{0}$ or $\ket{1}$}
 \end{quantikz}
+
+If $\ket{\phi} = a\ket{0} + b\ket{1}$ then after the control operation we will have the state
+\begin{align*}
+\frac{1}{\sqrt{2}}C_2(X_2)(\ket{\phi}\otimes (\ket{0} + \omega_8\ket{1}))
+&= \frac{1}{\sqrt{2}}C_2(X_2)(a\ket{0}\ket{0} + a\omega_8\ket{0}\ket{1} + b\ket{1}\ket{0} + b\omega_8\ket{1}\ket{1})
+\\&= \frac{1}{\sqrt{2}}(a\ket{0}\ket{0} + a\omega_8\ket{0}\ket{1} + b\ket{1}\ket{1} + b\omega_8\ket{1}\ket{0})
+\end{align*}
+If we measure $\ket{0}$ in the second qubit then we get
+\[a\ket{0} + b\omega_8\ket{1}\]
+in the first qubit, which is $T\ket{\phi}$. On the other hand if we measure $\ket{1}$ then we get
+\[a\omega_8\ket{0} + b\ket{1},\]
+and so if we measure $\ket{1}$ we might also be able to conditionally apply $D_2 = \sqrt{Z}$ to get
+\[a\omega_8\ket{0} + b\omega_4\ket{1} = \omega_8(a\ket{0} + b\omega_8\ket{1}),\]
+which is also $T\ket{\phi}$ up to global phase.
+
+This is a powerful technique that has been generalised to many other fault tolerant gate implementations, including the $P_9$ operation presented in \cite{arithmetics} which we discussed in \autoref{supermetaplectic}. The key insight is that even if you can only perform Clifford operations fault tolerantly, and measure fault tolerantly, then you can still produce the effects of non-Clifford operations by generating non-Clifford states such as the $\frac{1}{\sqrt{2}}(\ket{0} + \omega_8\ket{1})$ state shown above. Our operations $C_2(X_3)$ and $C_3(X_2)$ are not Clifford, and as such can produce numerous non-Clifford states, including states that resemble the qubit $\ket{+}$ state, but in a qutrit instead:
+\begin{align*}
+\ket{+_{p,q}} = \frac{1}{\sqrt{2}}(\ket{p} + \ket{q})
+&&&
+\ket{-_{p,q}} = \frac{1}{\sqrt{2}}(\ket{p} - \ket{q})
+\end{align*}
+
+First using $C_3(X_2)$ we can produce these states using the circuit
 
 \begin{quantikz}
 	\lstick{qubit $\ket{0}$} & \gate{H_2} & \phase{1} \vqw{1} & \gate{H_2} & \meter{0/1} & \qw\rstick{$\ket{0}$ or $\ket{1}$}\\
 	\lstick{qutrit $\ket{0}$} & \qw & \targ{} & \qw & \qw & \qw \rstick{$\ket{+_{0,1}}$ or $\ket{-_{0,1}}$}
 \end{quantikz}
 
+Then using $C_2(X_3)$ (or $C_2(S_{0,1})$) we can produce these states using the circuit
+
 \begin{quantikz}
 	\lstick{qubit $\ket{0}$} & \qw & \targ{} & \meter{0/1} & \qw \rstick{$\ket{0}$ or $\ket{1}$} \\
 	\lstick{qutrit $\ket{0}$} & \gate{H_3} & \phase{2} \vqw{-1} & \qw & \qw \rstick{$\ket{+_{0,1}}$ or $\ket{2}$}
 \end{quantikz}
+
+Using these or other such non-Clifford states it may become possible for $C_2(X_3)$ or $C_3(X_2)$ to implement each other, but since neither of these operations is Clifford it is hard to say whether this is of any use in fault tolerant contexts specifically. The embedded qubit states may also be interesting for purely ternary calculations, if the $C_2(X_3)$ or $C_3(X_2)$ operations were to be made available fault tolerantly by future research. In all of these cases there is novelty to be explored in these embedded qubit states, and even more motivation to explore coding schemes and fault tolerant operations for mixed quantum systems.
+
+\chapter{Conclusion}\label{conclusion}
+Quantum computation is a computational paradigm that is still rich with novelty, and while the simplicity and familiarity of binary computation has produced significant results thus far, there are many natural yet unexplored techniques currently being developed for ternary and higher computational systems. In particular mixed-logic that utilises binary and ternary quantum data at the same time, while even less familiar, appears to be just as novel and worth exploring. We have given an introduction to quantum computation from elementary linear algebra up to quantum computation in both binary and non-binary forms. We now summarise the original results we found in the preceding chapters.
+
+In \autoref{ternary} we generalised the theoretical results of \cite{arithmetics}, finding that existing algorithms for ternary arithmetic already utilise binary quantum data, and wrote very simple mixed-logic quantum circuits that perform the same calculations while storing this binary data directly within qubits instead of qutrits. We found that in addition to the known properties of the two algorithms considered, one involved fewer qubit-qutrit gates than the other, a new dimension to consider when looking at mixed logic algorithms. Further we briefly discussed techniques that had been used to represent certain qutrit gates as polynomials, which we found do not generalise to mixed contexts in any straight-forward way.
+
+In \autoref{universality} we generalised the foundational techniques presented in \cite{cnot-decomposition, textbook}, in order to achieve universal computation by implementing arbitrary unitary operations with circuits consisting of basic gates that act on one or two quantum objects at a time. We found that having a qubit available simplifies the argument of this very abstract technique, compared to systems that have qutrits or higher, but no qubits, in line with the intuition that qubits are simple and familiar, while qutrits are more novel and potentially powerful. We and also found that the increased diversity of available gates in ternary and higher logic systems required deeper understanding of the universality argument itself, resulting in a proof that is significantly more efficient than the one it was based on, even asymptotically, and even in quantum computers that are purely binary.
+
+Both of these inquiries demonstrated that mixed binary-ternary quantum logic is capable of exploiting the power and novelty of ternary quantum logic and the simplicity and familiarity of binary quantum logic simultaneously. Additionally the basic gates that were used in both of these constructions prompted a programmatic search in \autoref{finite-gen} for finitely generated groups with different combinations of single-object and multiple-object gates, where we found equivalences between increment and transposition based ternary logic, and also found that the discrete Fourier transform and the mixed-logic controlled increment have strange behaviour when composed. Regardless of whether the control object is the qubit or the qutrit, the Fourier transform can be applied to the target object to get a finite order operation, but when applied to the control object, the resulting operation is infinite order and produces a variety of novel quantum states in the qubit-qutrit system. This hints at the existence of a very rich variety of unexplored techniques both using these peculiar compositions of gates, and using the resulting quantum states.
+
+Overall we found that mixed logic does seem to combine the strengths of both binary and ternary quantum logic when it comes to algorithm design, and found significant unexplored potential in terms of the basic gates it offers. We now summarise the many questions directly prompted by this research.
+
+\section{Questions for Future Research}
+
+Given how young and novel the field of non-binary quantum computation is, there are numerous distinct topics that are brought into attention by the foundational research done in this thesis. Of primary interest are
+\begin{enumerate}
+	\item further algorithm design using basic mixed logic gates,
+	\item designs of concrete quantum computers capable of performing mixed logic,
+	\item smaller gate sets capable of universal computation in a mixed quantum computer,
+	\item schemes for encoding binary, non-binary and mixed data on binary, non-binary and mixed quantum computers,
+	\item fault tolerant implementation of mixed-logic gates,
+	\item algebraic and geometric exploration of the strange way that even the simplest mixed-logic gates behave, as compared to the the simple cyclic behaviour available in basic non-mixed logic gates,
+	\item an investigation into more ways of injecting qubit data into qutrit systems, and the quantum information and quantum computation implications of this, including exploration of the consequences this might have if mixed-logic gates can be implemented fault tolerantly.
+\end{enumerate}
+

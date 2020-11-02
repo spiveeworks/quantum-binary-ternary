@@ -17,14 +17,33 @@
 % Declare overall type of document (use 11pt report class on A4 paper).
 \documentclass[12pt,a4paper]{report}
 
+\usepackage{hyperref}
+\usepackage{listings}
+
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{amsthm}
+
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{prop}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{define}{Definition}[chapter]
+
+\renewcommand\qedsymbol{$\square$}
+
+\def\chapterautorefname{Chapter}
+\def\sectionautorefname{Section}
+\def\subsectionautorefname{Section}
+\def\defineautorefname{Definition}
+\def\theoremautorefname{Theorem}
+\def\propautorefname{Proposition}
 
 \usepackage{tikz}
 \usetikzlibrary{quantikz}
 
-\renewcommand\thesection{}
-\renewcommand\thesubsection{}
+%\renewcommand\thesection{}
+%\renewcommand\thesubsection{}
 
 % went the whole year without tikz, had to uncomment this when I started using it, worked without any further modification!
 %\newcommand{\bra}[1]{\langle #1 |}
@@ -33,6 +52,8 @@
 
 \newcommand{\ord}[1]{\left| #1 \right|}
 \newcommand{\norm}[1]{\left\Vert #1 \right\Vert}
+
+\DeclareMathOperator{\vecspan}{span}
 
 % Include the style file which contains all the required formatting
 % information that is set out in the Research Higher Degrees Resource

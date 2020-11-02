@@ -1,20 +1,548 @@
 % app1.tex (will be Appendix A)
 
-\chapter[AXIOMATA]{Axiomata}
+\chapter[OTHER DEFINITIONS AND PROPOSITIONS]{Other Definitions and Propositions}\label{formalities}
 
-\section{Group Quotients, Normal Subgroups, Normalisers}
-[perhaps an example of a group and its normalizer, group isomorphisms, and semidirect products. excessive definition stuff can go in axiomata appendix]
+\section{Algebraic Structures}
 
-Given an equivalence relation $\sim$ on a set $S$ it is often useful to consider equivalence classes, the subsets $[x] = \{y\ |\ x \sim y\}$, since these will be equal exactly when their representatives are equivalent, i.e. $[x] = [y] \iff x \sim y$. The set of all such equivalence classes is called the set quotient, and is written $S/\sim$. It provides a concrete object with the same structural properties that would come from `identifying' $x$ with $y$ whenever $x \sim y$. If $S$ is actually a group $G$ then its group operation sometimes induces an operation in the set quotient $[x][y] = [xy]$, but if this is well defined then we immediately find $[e]$ is a subgroup of $S$:
-\[e \sim x \sim y \implies [e] = [e][e] = [x][y] = [xy] \implies e \sim xy\]
-\[e \sim x \implies [x^{-1}] = [e][x^{-1}] = [x][x^{-1}] = [xx^{-1}] = [e] \implies e \sim x^{-1}\]
-Further if $x \in [e]$ and $z \in S$ then $zxz^{-1} \in [e]$ as well:
-\[e \sim x \implies [z][x][z^{-1}] = [z][e][z^{-1}] = [e] \implies e \sim zxz^{-1}\]
+The definitions and propositions in this section and also in \autoref{finite-dim} are assumed knowledge, and are thus not explained in great detail, but are given anyway, so as to make this thesis more complete and less ambiguous.
 
-In general if a subgroup $H$ of $G$ satisfies this condition, that for any $h \in H$ and $g \in G$, $ghg^{-1} \in H$, then $H$ is said to be a normal subgroup of $G$. It turns out that not only is the equivalence class $[e]$ a normal subgroup, but whenever $H$ is a normal subgroup of $G$, the equivalence relation $x \sim y \iff xy^{-1} \in H$ gives a well defined group operation on the set quotient $G/\sim$. We call this group the group quotient $G/H$. When available, this is a powerful tool for understanding the structure of groups, since the group quotient $G/H$ may have convenient algebraic properties emerging from its corresponding equivalence relation.
+\begin{define}[Binary Operation] A \emph{binary operation} is a map of the form $A \times B \to C$, where $A$, $B$, and $C$, are some sets.
+\\In particular, when we say $\cdot$ is a \emph{binary operation on $A$} we mean that it is a map of the form $A \times A \to A$. We write $x \cdot y$ infix to mean the image of $(x, y)$ under the map.
+\end{define}
+
+\begin{define}[Associativity] A binary operation $\cdot$ on a set $A$ is \emph{associative} if, for every $a, b, c \in A$, $a \cdot (b \cdot c) = (a \cdot b) \cdot c$.
+\end{define}
+
+The point of associativity, of course, is to identify $a \cdot (b \cdot c)$ with $(a \cdot b) \cdot c$, writing both $a \cdot b \cdot c$.
+
+\begin{define}[Commutativity] A binary operation $\cdot$ on a set $A$ is \emph{commutative} if, for every $a, b \in A$, $a \cdot b = b \cdot a$.
+\end{define}
+
+\begin{define}[Identity] Given a binary operation $\cdot$ on a set $A$ we say that $e \in A$ is an \emph{identity} if, for every $a \in A$, $a \cdot e = e \cdot a = a$.
+\end{define}
+
+\begin{prop}[Uniqueness of Identities] If $e_1$ and $e_2$ are identities of a binary operation $\cdot$ on $A$, then $e_1 = e_2$.
+\end{prop}
+\begin{proof}
+By definition of $e_2$, $e_1 = e_1\cdot e_2$, then by definition of $e_1$, $e_1\cdot e_2 = e_2$. By transitivity this gives $e_1 = e_2$.
+\end{proof}
+
+This proposition tells us that when a set has an identity, it follows that it has only one identity, which we can give a name. We will not dwell on any other foundational propositions of abstract algebra like this.
+
+\begin{define}[Group] A pair $(A, \cdot)$ is a \emph{group} if $\cdot$ is an associative binary operation on $A$, with some identity $e$, and, for every $a \in A$ there is a unique inverse $y$, satisfying $x\cdot y = y \cdot x = e$. If $\cdot$ is commutative then $(A, \cdot)$ is said to be a \emph{commutative group}, or an \emph{Abelian group}.
+\end{define}
+
+\begin{define}
+	Given a positive integer $n$, the \emph{symmetric group} $\mathcal{S}_n$ is the set of bijections, or \emph{permutations}, that map $\{0,1,\dots,n-1\}\to\{0,1,\dots,n-1\}$.
+\end{define}
+\begin{prop}
+	For any positive integer $n$, $(\mathcal{S}_n, \circ)$ is in fact a group.
+\end{prop}
+\begin{proof}
+	Function composition $\circ$ is always associative.\\
+	Define id to be the map $i \mapsto i$. Then $x \circ \text{id} = \text{id} \circ x = x$, giving us an identity element.\\
+	Finally since $x \in \mathcal{S}_n$ is bijective, we can use the function inverse $y = x^{-1}$ to get $xy = yx = \text{id}$.
+\end{proof}
+
+From this point on if we talk about a set $A$ which has only one relevant way of being interpreted as a group, or more generally has only one way of being interpreted as an algebraic structure $(A, \alpha_1, \dots, \alpha_n)$, then we will treat $A$ as if it is itself the group, etc. For example if we talk about the group $\mathbb{Z}$, we mean $(\mathbb{Z}, +)$, not any other group which happens to be well defined.
+
+\begin{define}[Induced operations] Given a set $A$ which is a subset of a set $B$, and a binary operation $\cdot: B \times B \to B$, we say that $\cdot$ \emph{induces a binary operation in $A$} if for every $a_1, a_2 \in A$, the product $a_1 \cdot a_2$ is also in $A$.
+\end{define}
+The induced operation being referred to in this phrase is $\cdot$ with the restricted domain $\cdot|_A: A \times A \to B$, since it will now be a well defined operation on $A$ in that $\cdot|_A: A \times A \to A$.
+
+\begin{define}[Subgroups] Given a group $(B, \cdot)$, or more generally just a binary operation $\cdot$ on a set $B$, and a set $A$ which is a subset of $B$, we say that $A$ is a \emph{subgroup} of $B$ under $\cdot$, if $\cdot$ induces a binary operation on $A$ and this binary operation forms a group $(A, \cdot)$.
+\end{define}
+
+\begin{define}[Distributivity] A binary operation $\cdot$ on a set $A$ is said to \emph{distribute over} a binary operation $+$ on the same set $A$, if for every $a, b, c \in A$, the identities
+\[a \cdot (b + c) = a\cdot b +a\cdot c,\]
+and
+\[(b + c) \cdot a = b \cdot a + c \cdot a\]
+both hold. More generally if $\cdot$ is a binary operation $A \times B \to C$, and $+_A, +_B, +_C$ are binary operations on $A$, $B$, and $C$ respectively, then $\cdot$ \emph{distributes over} these $+$ operations if for every $a_1, a_2 \in A$, $b_1, b_2 \in B$, the identities
+\[a_1 \cdot (b_1 +_B b_2) = a_1 \cdot b_1 +_C a_2 \cdot b_2,\]
+and
+\[(a_1+_A a_2)\cdot b_1 = a_1 \cdot b_1 +_C a_2 \cdot b_1\]
+both hold.
+\end{define}
+
+A simple example of a distributive operation is multiplication $\mathbb{R} \times \mathbb{R} \to \mathbb{R}$, distributing over addition. An example of the more general distributive operator $A \times B \to C$ is matrix multiplication, taking an $l \times m$ matrix and an $m \times n$ matrix, and producing an $l \times n$ matrix.
+
+\begin{define}[Additivity, Multiplicativity] To aid intuition, and to guide notation, when $\cdot: A \times B \to C$ distributes over $+_A, +_B, +_C$, and these binary operations form commutative groups $(A, +_A)$, $(B, +_B)$, $(C, +_C)$, then we call these groups \emph{additive}, and call $\cdot$ \emph{multiplicative}.
+\end{define}
+
+We denote binary operations as $+$ whenever it is obvious that they form an additive group, and omit subscripts such as $+_A$ whenever clear. We also denote the identity of an additive group as $0$, and the inverse of $x$ as $-x$. We can then extend summation notation to the additive groups, writing $a_1 + a_2 + \dots + a_n$ as $\sum_{i=1}^n a_n$. Further if $\cdot$ is an associative binary operation on $A$, and is multiplicative, or simply \emph{not} additive, then we can write products $a_1 \cdot a_2 \cdot \dots \cdot c_n$ as $a_1a_2 \dots a_n$, or even $\prod_{i=1}^n a_i$. Further, if $(A, \cdot)$ is in fact a group, then we can write the inverses of $x$ as $x^{-1}$.
+
+\begin{prop}Given an additive group $(A, +)$, summations can be swapped in the sense that
+	\[\sum_i\sum_j a_{ij} = \sum_j\sum_i a_{ij}\]
+\end{prop}
+This can be proven using induction, but when you unpack the notation these two sums are clearly just reordered versions of each other. This allows us to identify these two sums, and optionally combine the quantifiers as $\sum_{i,j} a_{ij}$.
+
+\begin{prop}Given a multiplicative operation $\cdot: A \times B \to C$, distribution can be generalized to
+\[(\sum_i a_i)\cdot (\sum_j b_j) = \sum_{i,j} a_ib_j\]
+\end{prop}
+This is once again proven inductively.
+
+One important special case of multiplicative operations are rings:
+\begin{define}[Rings] A triple $(R, \cdot, +)$ is said to be a \emph{ring} if $(R, +)$ is a commutative group, $\cdot$ is an associative binary operation $R \times R \to R$, and $\cdot$ distributes over $+$.
+\end{define}
+Clearly whenever $(R, \cdot, +)$ is a ring, then $\cdot$ will be multiplicative and $(R, +)$ will be an additive group, and so all rings inherit the notation of additive identities 0 and additive inverses $-x$.
+
+\begin{define}[Field, Multiplicative group] A ring $(F, \cdot, +)$ is said to be a \emph{field} if $\cdot$ is commutative and $F \backslash \{0\}$ is a subgroup of $F$ under $\cdot$. In this case we call $(F\backslash\{0\}, \cdot)$ the \emph{multiplicative group} of $F$, which will of course be a commutative group.
+\end{define}
+
+Central examples of fields include $\mathbb{Q}$, $\mathbb{R}$, and $\mathbb{C}$. In all of these examples, the identity of the corresponding multiplicative group is 1, so just as we denote all additive identities as 0, we will denote the multiplicative identity of any field $F$ as 1.
+
+\begin{define}[Subfield] Given a field $(F, \cdot, +)$, and a set $A$ which is a subset of $F$, $A$ is said to be a \emph{subfield} of $F$ under $\cdot$ and $+$ if $\cdot$ and $+$ both induce binary operations on $A$ and $(A, \cdot, +)$ is a field.
+\end{define}
+
+\begin{define}[Linear Groups]
+	Given a field $(F, \cdot, +)$, and a positive integer $n$, the \emph{general linear group} $GL(n, F)$ is the set of $n \times n$ matrices with determinant not equal to 0. The \emph{special linear group} $SL(n, F)$ is the set of $n \times n$ matrices with determinant equal to 1.
+\end{define}
+
+\begin{prop}
+	The general linear group $GL(n, F)$ is in fact a group under matrix multiplication, and the special linear group $SL(n, F)$ is a subgroup of this.
+\end{prop}
+This follows from the multiplicative property of the determinant.
+
+Related to fields are another important case of a multiplicative operation, the vector space:
+\begin{define}[Vector Space] Given a field $(F, \cdot_F, +_F)$, a triple $(V, \cdot_V, +_V)$ is said to be a \emph{vector space over the field $F$} if all of the following hold:
+\begin{itemize}
+	\item $(V, +_V)$ is a commutative group,
+	\item $\cdot_V: F \times V \to V$ distributes over $+_F$ and $+_V$
+	\item for any $a, b \in F$, $v \in V$, the identity $a \cdot_V (b \cdot_V v) = (a \cdot_F b) \cdot_V v$
+	\item for any $v \in V$, $1 \cdot_V v = v$.
+\end{itemize}
+We also refer to elements of $V$ as \emph{vectors}, elements of $F$ as \emph{scalars}, and products of the form $a\cdot_V v$ as \emph{scalar multiplication}.
+\end{define}
+Since $\cdot_F$ and $\cdot_V$ are `associative' in the above sense, we can write $abv$ or more broadly $a_1a_2\dots a_nv$ without ambiguity, once again identifying all of the possible interpretations of these expressions with each other. Further, since $\cdot_V$ and $\cdot_F$ are of different types, and $+_V$ and $+_V$ are also of different types, we drop all of these subscripts without ambiguity.
+
+\begin{prop}
+For any non-negative integer $n$, and field $(F, \cdot, +)$, the set of column vectors $F^n$ forms a vector space.
+\end{prop}
+Specifically, $F^n$ is the set
+\[\left\{\begin{bmatrix}a_0\\a_1\\\vdots\\a_{n-1}\end{bmatrix}\ \middle|\ a_i \in F\right\},\]
+and vector addition and scalar multiplication are defined in the usual way
+\[\begin{bmatrix}
+	a_0 \\ a_1 \\ \vdots \\ a_{n-1}
+\end{bmatrix} + \begin{bmatrix}
+b_0 \\ b_1 \\ \vdots \\ b_{n-1}
+\end{bmatrix} = \begin{bmatrix}
+a_0 + b_0 \\ a_1 + b_1 \\ \vdots \\ a_{n-1} + b_{n-1}
+\end{bmatrix}\]
+\[
+a\begin{bmatrix}
+	b_0 \\ b_1 \\ \vdots \\ b_{n-1}
+\end{bmatrix} = \cdot \begin{bmatrix}
+	a b_0 \\ a b_1 \\ \vdots \\ a b_{n-1}
+\end{bmatrix}.
+\]
+Proving that these operations have the required properties is a simple matter of applying the field properties of $F$ coordinate-wise to each of the elements of the column vectors defined by these operations. Note also that $F^0$ will be the set of empty column vectors, but since we inherit the language of additive groups, we can denote this as vector space as the trivial group $\{0\}$.
+
+\section{Finite Dimensional Vector Spaces}\label{finite-dim}
+For all of the following definitions suppose that $(F, \cdot, +)$ is an arbitrary field, and $(V, \cdot, +)$ is an arbitrary vector space over $F$.
+\begin{define}
+Given a finite set of vectors $S = \{u_0, \dots, u_{n-1}\}$ with $u_i \in V$, and a set of scalars $a_0, \dots, a_{n-1}$, the sum
+\[v = \sum_i a_i u_i.\]
+is said to be a \emph{linear combination} of $u_0, \dots u_{n-1}$. Then the \emph{span} of $S$ is the set of all such linear combinations, written $\vecspan S$ or $\vecspan \{u_0, \dots, u_{n-1}\}$. If $\vecspan S = V$ then $S$ is said to be \emph{spanning}.
+\end{define}
+
+\begin{define}
+A finite set of vectors $S = \{u_0, \dots, u_{n-1}\}$ is said to be \emph{linearly independent} if the only linear combination of its elements
+\[v = \sum_i a_i u_i.\]
+with $v = 0$ is the trivial $0 = a_0 = a_1 = \dots = a_{n-1}$. If $S$ is both spanning and linearly independent, then $S$ is said to be a \emph{basis} of $V$.
+\end{define}
+
+\begin{prop}
+	If $S = \{u_i\}$ is linearly independent, and two linear combinations $\sum_i a_iu_i$ and $\sum_i b_iu_i$ are equal, then each $a_i$ is equal to the corresponding $b_i$.
+\end{prop}
+\begin{proof}
+	We have
+	\[\sum_i a_iu_i = \sum_i b_iu_i,\]
+	and so by subtracting one side from the other,
+	\[\sum_i a_iu_i-b_iu_ = 0.\]
+	Now $S$ is linearly independent, so since this linear combination is $0$, it must be the trivial linear combination
+	\[(a_i - b_i) = 0 \forall i,\]
+	but undoing the subtraction gives
+	\[a_i = b_i \forall i.\]
+\end{proof}
+
+Now, if every linear combination of a set of vectors will be the unique such linear combination, then we can extract the corresponding scalars in a well defined way:
+
+\begin{define}
+If $S$ is a finite set of vectors $\{u_0, \dots, u_{n-1}\}$, then the \emph{coordinates} of a vector $v \in \vecspan S$ are the unique scalars $a_i$ that give
+\[v = \sum_i a_i u_i.\]
+In particular if $S$ is a basis of $V$ then every vector $v \in V$ will have unique coordinates.
+\end{define}
+
+A crucial example of all of the above concepts is $F^n$, with the following basis:
+\begin{define}\label{canonical-basis}
+	The \emph{canonical basis} of the set of column vectors $F^n$ is the set of vectors $u_i$, whose $i$th entry is 1 and the rest are 0.\footnote{Later in \autoref{dirac} these will be written $\ket{i}$}
+	\[u_0 = \begin{bmatrix}
+		1 \\ 0 \\ \vdots \\ 0
+	\end{bmatrix}, u_1 = \begin{bmatrix}
+		0 \\ 1 \\ \vdots \\ 0
+	\end{bmatrix}, u_{n-1} = \dots, \begin{bmatrix}
+		0 \\ 0 \\ \vdots \\ 1
+	\end{bmatrix}\]
+\end{define}
+
+\begin{prop}
+	The canonical basis of $F^n$ is in fact a basis of $F^n$.
+\end{prop}
+\begin{proof}
+	We can prove $\{u_i\}$ is spanning by reading the coordinates directly out of $v \in F^n$:
+	\[v = \begin{bmatrix}
+		a_0 \\ a_1 \\ \vdots \\ a_{n-1}
+	\end{bmatrix} = \sum_i a_i u_i.\]
+	Then since this formula is arbitrary in the scalars $a_i$, we can read it in reverse to see that every linear combination of $u_i$ will be of the form
+	\[v = \sum_i a_i u_i = \begin{bmatrix}
+		a_0 \\ a_1 \\ \vdots \\ a_{n-1}
+	\end{bmatrix},\]
+	so if $v = 0$, then
+	\[\begin{bmatrix}
+		0 \\ 0 \\ \vdots \\ 0
+	\end{bmatrix} = \begin{bmatrix}
+		a_0 \\ a_1 \\ \vdots \\ a_{n-1}
+	\end{bmatrix},\]
+	meaning $a_i$ are all 0 and the linear combination was in fact trivial. This means $\{u_i\}$ is linearly independent, and spanning, which by definition makes it a basis of $F^n$.
+\end{proof}
+
+Bases tell us something very important about the structure of $V$, which first becomes apparent in the following fact:
+\begin{prop}[Dimension Theorem for Finite Vector Spaces]
+	Whenever finite sets $S_1$ and $S_2$ are both bases of $V$, they must have the same size.
+\end{prop}
+
+\begin{define}
+	When $V$ has at least one finite set $S = \{u_0,\dots,u_{n-1}\}$ that is a basis for $V$, we say that $V$ is \emph{finite-dimensional}, and define the \emph{dimension} $\dim(V)$ to be the unique size of any basis of $V$. Since this includes $S$ this means $\dim(V) = \ord{S}$.
+\end{define}
+
+\section{Inner Products, Hilbert Spaces}\label{inner-products}
+An important operation in the geometry of vectors is the inner product, which simultaneously indicates the magnitude of vectors, and the angle that different vectors take to each other. While vector spaces are easy to generalize to any field $F$, for inner products we require specific operations defined on $\mathbb{C}$, which restricts generality a lot. Note that we write the complex conjugate of $a \in \mathbb{C}$ as $a^*$.
+
+\begin{define}
+	Given a vector space $V$ over a subfield $\mathbb{F}$ of $\mathbb{C}$, a map $(,): V \times V \to F$ is called an \emph{inner product} if for every $u, v, w \in V$, and every $a, b \in \mathbb{F}$, the following identities hold:
+	\begin{itemize}
+		\item conjugate symmetry: $(u, v) = (v, u)^*$ (where $a^*$ is the complex conjugate of $a$)
+		\item right linearity: $(u, av+bw) = a(u, v) + b(u, w)$
+		\item positive definite: $(v, v)$ real, and strictly positive whenever $v \neq 0$
+	\end{itemize}
+	We also say that $(V, \cdot, +, (,))$ is an \emph{inner product space} under $\mathbb{F}$.
+\end{define}
+
+\begin{prop}
+	Every inner product $(,)$ is left conjugate linear, i.e.\ for every $u, v, w \in V$, and every $a, b \in \mathbb{F}$ the identity
+	\[(au+bv,w) = a^*(u,w) + b^*(v,w)\]
+\end{prop}
+\begin{proof}
+	\begin{align*}
+		(au+bv,w)
+		&= (w,au+bv)^*
+		\\&= (a(w,u)+b(w,v))^*
+		\\&= a^*(w,u)^*+b^*(w,v)^*
+		\\&= a^*(u,w)+b^*(v,w)
+	\end{align*}
+\end{proof}
+
+\begin{prop}
+	If for every scalar $a \in \mathbb{F}$ we have $a^* \in \mathbb{F}$, then the following map is an inner product in $\mathbb{F}^n$:
+\[
+\left(
+\left[\begin{matrix} a_0\\a_1\\\vdots\\a_n\end{matrix}\right]
+,
+\left[\begin{matrix} b_0\\b_1\\\vdots\\b_n\end{matrix}\right]
+\right)
+=
+\left[\begin{matrix} a_0^*&a_1^*&\cdots&a_n^*\end{matrix}\right]
+\left[\begin{matrix} b_0\\b_1\\\vdots\\b_n\end{matrix}\right]
+= \sum_{i=0}^{n-1} a_i^*b_i
+\]
+\end{prop}
+Once again, this is straight-forward to prove using the algebraic properties of $\mathbb{C}$. This is not the only inner product one can define for $\mathbb{F}^n$, but it is the one we will be using.
+
+\begin{define}[Norm]
+	Given an inner product space $(V, \cdot, + , (,))$ over a field $\mathbb{F}$, the \emph{norm} or \emph{length} of a vector $v \in V$ is the non-negative real number
+	\[\norm{v} = \sqrt{(v,v)}.\]
+\end{define}
+
+\begin{prop}\label{orthog-zero}
+	For any vector $v$ in an inner product space $V$, the inner product with zero is $(v, 0) = 0$.
+\end{prop}
+\begin{proof}
+	By basic group arithmetic we have $0 = 0 + 0$, which means
+	\begin{align*}
+		(v, 0)
+		&= (v, 0+0)
+		&= (v,0)+(v,0),
+	\end{align*}
+	solving for $(v,0)$ gives $(v,0) = 0$.
+\end{proof}
+
+\begin{prop}\label{norm-zero}
+	 The length of a vector $v$ in an inner product space $V$ is 0 if an only if the vector is itself 0.
+\end{prop}
+\begin{proof}
+	We have $\norm{0} = \sqrt{(0,0)} = 0$ by \autoref{orthog-zero}. and inversely we have $\norm{v} = \sqrt{(v,v)} > 0$ whenever $v \neq 0$.
+\end{proof}
+
+\begin{define}[Orthogonality, Orthonormality]
+	In an inner product space $(V, \cdot, +, (,))$ over a field $\mathbb{F}$, we say that a pair of non-zero vectors $u_0, u_1 \in V$ are \emph{orthogonal} if $(u,v) = 0$, and we say that a set of non-zero vectors $u_0, \dots u_k \in V$ are \emph{orthogonal} if every distinct pair of vectors is orthogonal. Further we say this set is orthonormal if every vector in the set has length 1.
+\end{define}
+
+\begin{prop}\label{orthog-independent}
+	If a set $S$ of non-zero vectors $u_0,\dots,u_k \subset V$ is orthogonal then $S$ is also linearly independent.
+\end{prop}
+\begin{proof}
+	Suppose that $v$ is a linear combination $\sum_i a_iu_i$. Then for each $0 \leq j \leq k$,
+	\begin{align*}
+		(u_j,v)
+		&= \left(u_j,\sum_i a_iu_i\right)
+		\\&= \sum_i a_i\left(u_j,u_i\right)
+		\\&= 0 + 0 + \dots + 0 + a_j\left(u_j,u_j\right) + 0 + \dots + 0
+		\\&= a_j\norm{u_j}^2
+	\end{align*}
+	If we let $v = 0$ then by \autoref{orthog-zero} we get $0 = a_j\norm{u_j}^2$, and by \autoref{norm-zero} we know that $\norm{u_j}^2$ is non-zero, so every $a_j$ will be zero.
+\end{proof}
+
+The converse does not hold, but we can always use the Gram–Schmidt process to construct an orthonormal set from a linearly independent set:
+
+\begin{prop}[Gram–Schmidt]
+	For every finite dimensional vector space $(V, \cdot, +)$ over the field $\mathbb{R}$ or $\mathbb{C}$ with inner product $(,)$, there is a basis which is orthonormal in the inner product space $(V, \cdot, +, (,))$.
+\end{prop}
+This process leads to great generality in ones discussion of inner product spaces in the abstract, but in practice many inner product spaces already have an obvious orthonormal basis, one that may be more algebraically convenient than one that comes out of the Gram-Schmidt process anyway.
+
+\begin{prop}\label{coords-inner-product}
+	In an inner product space $(V, \cdot, +, (,))$ over the field $\mathbb{F}$ with orthonormal basis $S={u_0, \dots, u_{n-1}}$, the inner products $(u_i, v)$ will be exactly the coordinates of $v$ in the basis $S$, meaning $v = \sum_{i=0}^{n-1} (u_i,v)u_i$.
+\end{prop}
+\begin{proof}
+	Let the coordinates of $v$ be $a_i$, so that
+	\[v = \sum_{i=0}^{n-1}a_iv.\]
+	Then calculate $(u_i, v)$:
+	\begin{align*}
+		(u_i, v)
+		&= \left(u_i, \sum_j a_ju_j\right)
+		\\&= \sum_j a_j\left(u_i, u_j\right)
+		\\&= 0 + \dots + 0 + a_i\left(u_i, u_i\right) + 0 + \dots + 0
+		\\&= a_i\norm{u_i}^2
+		\\&= a_i
+	\end{align*}
+\end{proof}
+
+\begin{define}
+	A map between two inner product spaces, $\phi: U \to V$ is said to \emph{preserve inner products} if for every $u_1, u_2 \in U$, $(u_1, u_2) = (\phi(u_1), \phi(u_2))$.
+\end{define}
+
+Such maps essentially show that $U$ exists embedded inside of $V$. If they are surjective then they show that $U$ is structurally equivalent to $V$.
+
+\begin{prop}\label{vectors-tuples}
+	Given an inner product space $(V, \cdot, +, (,))$ over a field $\mathbb{F}$ with an orthonormal basis $S = {u_0, u_1, \dots, u_{n-1}}$, the following map $\phi:V \to \mathbb{F}^n$ preserves inner products:
+	\[\phi(v) = \left[\begin{matrix}
+		(u_0, v)\\
+		(u_1, v)\\
+		\cdots\\
+		(u_n, v)
+	\end{matrix}\right]\]
+\end{prop}
+\begin{proof}
+	From \autoref{coords-inner-product} we have $u = \sum_i (u_i, u)$ and $v = \sum_j (u_i, v)$, which gives
+	\begin{align*}
+		(u, v)
+		&= \left(\sum_{i=0}(u_i, u)u_i, \sum_{j=0} (u_i,v)u_i\right)
+		\\&= \sum_{i=0}(u_i, u)^*\left(u_i, \sum_{j=0} (u_j, v)u_j\right)
+		\\&= \sum_{i=0}(u_i, u)^*\sum_{j=0} (u_j, v)\left(u_i, u_j\right)
+		\\&= \sum_{i=0}(u_i, u)^*\left(0 + \dots + 0 + (u_i, v)\left(u_i, u_i\right) + 0 + \dots + 0\right)
+		\\&= \sum_{i=0}(u_i, u)^*(u_i, v)
+		\\&= \left(
+		\left[\begin{matrix}
+			(u_0, u)\\
+			(u_1, u)\\
+			\cdots\\
+			(u_n, u)
+		\end{matrix}\right]
+		,
+		\left[\begin{matrix}
+			(u_0, v)\\
+			(u_1, v)\\
+			\cdots\\
+			(u_n, v)
+		\end{matrix}\right]
+		\right)
+		\\&= (\phi(u), \phi(v))
+	\end{align*}
+\end{proof}
+
+\begin{define}[Hilbert Spaces]
+	In an inner product space $V$, an infinite sequence of vectors $v_i$ is said to be \emph{Cauchy} if for every $\epsilon > 0$, no matter how small, there is some $N$ after which any $n, m > N$ will satisfy $\norm{v_n - v_m} < \epsilon$. The sequence is said to be convergent if there is some vector $v \in V$ so that again, for every $\epsilon > 0$ there is an $N$ after which any $n > N$ will satisfy $\norm{v_n - v} < \epsilon$. If every Cauchy sequence in $V$ is convergent then $(V, \cdot, +, (,))$ is said to be a \emph{complete} inner product space, also known as a \emph{Hilbert} space.
+\end{define}
+
+\begin{prop}
+	For every non-negative integer $n$, the inner product spaces $\mathbb{R}^n$ and $\mathbb{C}^n$ are complete.
+\end{prop}
+The proof amounts to showing that a Cauchy sequence in either of these spaces is coordinate-wise Cauchy, then finding a limit of each of these coordinates using the completeness of $\mathbb{R}$.
+
+\section{Group Definitions}
+
+\begin{define}
+	A relation $\sim$ between elements of a set $S$ is called an \emph{equivalence relation} if it satisfies the following three properties, for any $a, b, c \in S$:
+	\begin{enumerate}
+		\item Reflexivity: $a ~ a$,
+		\item Symmetry: $a ~ b \iff b ~ a$,
+		\item Transitivity: $a ~ b, b ~ c \implies a ~ c$.
+	\end{enumerate}
+\end{define}
+
+Equivalence relations are a powerful way of identifying different elements of a set with each other. The set quotient is an even more powerful way of exhibiting the structure of the equivalence relation as a concrete set:
+
+\begin{define}[Set Quotient]
+	Given an equivalence relation $\sim$ on a set $S$, and an element $x \in S$, the \emph{equivalence class} of $x$ is the subset of $S$ written
+	\[[x] = \{y\ |\ x \sim y\}\]
+	The \emph{set quotient} of $S$ with respect to $\sim$ is the set of equivalence classes:
+	\[S/\sim = \{[x]\ |\ x \in S\}\]
+\end{define}
+
+\begin{prop}
+	For any equivalence relation $\sim$ on a set $S$, $S/\sim$ partitions $S$.
+\end{prop}
+
+\begin{prop}
+	In an equivalence relation $\sim$ on a set $S$, any two elements $x, y \in S$ will satisfy $x ~ y$ exactly when $[x] = [y]$.
+\end{prop}
+
+Sometimes set quotients of algebraic structures will themselves have an algebraic structure.
+\begin{define}
+	Given an equivalence relation $\sim$ on a group $G$, we say that $\sim$ \emph{induces a quotient group} if the binary operation
+	\[[x]\cdot[y] \mapsto [xy]\]
+	is well defined.
+\end{define}
+
+\begin{prop}
+	If $\sim$ induces a quotient group on $G$ then $(G/\sim, \cdot)$ is in fact a group.
+\end{prop}
+\begin{proof}
+We have associativity by $([x][y])[z] = [xyz] = [x]([y][z])$.\\
+We have an identity by $[e][x] = [x][e] = [x]$.\\
+We have inverses by $[x][x^{-1}] = [xx^{-1}] = [e]$.
+\end{proof}
+
+\begin{define}
+	A subgroup $H$ of a group $G$ is said to be a \emph{normal subgroup} if, for every $x \in H$, $z \in G$, the group product $xzx^{-1} \in G$.
+\end{define}
+
+\begin{prop}
+	If an equivalence relation $\sim$ induces a quotient group on $G$ then the equivalence class $[e]$ is a normal subgroup.
+\end{prop}
+\begin{proof}
+	First, suppose that $e~x$ and $e~y$, then 
+	\[[e] = [e][e] = [x][y] = [xy],\]
+	meaning $e ~ xy$ as well, so the binary operation of $G$ is induced in $[e]$.
+	
+	Now by reflexivity we have $e ~ e$, which gives the identity element $e \in [e]$, and if $e ~ x$ then
+	\[[x^{-1}] = [e][x^{-1}] = [x][x^{-1}] = [xx^{-1}] = [e],\]
+	meaning $e ~ x^{-1}$, which gives inverses $x^{-1}$ in $[e]$. This makes $[e]$ a subgroup of $G$.
+	
+Finally, given $x \in [e]$ and $z \in S$ then
+\[[zxz^{-1}] = [z][x][z^{-1}] = [z][e][z^{-1}] = [zez^{-1}] = [e],\]
+meaning $zxz^{-1} \in [e]$ as well.
+\end{proof}
+
+This result actually characterizes quotient groups in the following sense:
+\begin{prop}\label{normal-equiv}
+	If $H$ is a normal subgroup of $G$ then the equivalence relation
+	\[x ~ y \iff xy^{-1} \in H\]
+	induces a quotient group in $G$.
+\end{prop}
+
+\begin{define}
+	If $H$ is a normal subgroup of $G$ then the \emph{group quotient} $G/H$ is the quotient group $G/\sim$ induced by the equivalence relation given in \autoref{normal-equiv}.
+\end{define}
+These group quotients are a powerful tool for understanding the structure of groups, since they may have convenient algebraic properties emerging from the corresponding equivalence relation.
 
 As an example of a normal subgroup, take $G \subset GL(n, \mathbb{R})$ to be any group formed by matrix multiplication, and $H$ to be the set of scalars in $G$, that is the set $\{\lambda I\ |\ \lambda \in \mathbb{C}\} \cap G$. Since scalars are commutative, it is straight-forward that $g\lambda I g^{-1} = \lambda gg^{-1} = \lambda I \in H$.
 
-The subgroup relation and the normal subgroup relation can be thought of as a partial order, and are often written as $\leq$ and $\trianglelefteq$ respectively, since both are transitive, reflexive, and anti-symmetric. While these relations are each transitive, we must be careful when mixing them; if $H$ is a normal subgroup of $N$, and $N$ is a subgroup of $G$, $H$ is not necessarily a normal subgroup of $G$, which is surprising when stated more succinctly as ``$H$ is normal in $N$ but is not normal in $G$''.
+\begin{define}[Cosets]
+	Given a subgroup $H$ of a group $G$, and elements $g_1, g_2 \in G$, we define the \emph{two-sided coset} $g_1Hg_2$ to be the set
+	\[\{g_1hg_2\ |\ h \in H\}.\]
+	When $g_1 = e$ we say that $eHg_2 = Hg_2$ is a \emph{right coset} of $H$, and when $g_2 = e$ we say that $g_1He = g_1H$ is a \emph{left coset} of $H$.
+\end{define}
 
-With this subtlety in mind we can find exactly such a group $N$, given any subgroup $H$ of $G$. We call this the normaliser of $H$ with respect to $G$, defined as the set $N_G(H) = \{g\ |\ g \in G,\ gHg^{-1} \subseteq H\}$. This is the maximal such $N$, any other $N'$ with $H$ normal will sit inside $N_G(H)$. Clearly the group quotient $N_G(H)/H$ will exist for any subgroup $H$ of $G$, which will be useless in the case that $N_G(H) = H$, but otherwise can be an interesting group, and can even inform interesting structure about the normaliser itself, making normalisers a useful and novel tool for exploratory algebraic work.
+\begin{prop}
+	If $H$ is a normal subgroup of $G$, and $g \in G$, then every left coset $gH$ is equal to the corresponding right coset $Hg$, and the group quotient $G/H$ consistes exactly of these cosets of $H$.
+\end{prop}
+
+As an example of a group with a normal subgroup, consider the following:
+\begin{define}[Generalised Symmetric Group]\label{generalised-perm}
+	For each pair of positive integers $m, n$, define $S(m, n)$ to be the set of unitary matrices $P\in U(n)$ satisfying
+	\[Pu_i = e^{\frac{i2\pi r_i}{m}}u_{\sigma(i)}\]
+	for every canonical basis $u_i$, where $\sigma$ is some permutation in $\mathcal{S}_n$, and $r_0,\dots,r_{n-1}$ are some set of integers.
+\end{define}
+
+\begin{prop}
+	For any positive integers $m, n$, $S(m, n)$ is a subgroup of $U(n)$.
+\end{prop}
+\begin{proof}
+	Clearly $I \in S(m, n)$ by setting $\sigma = \text{id}$, $r_i = 0$.
+	\\If $P_1 \in S(m, n)$ via $\sigma_1$ and $r_i$, and $P_2 \in S(m, n)$ via $\sigma_2$ and $s_i$, then
+	\[P_1P_2u_i = e^{\frac{i2\pi s_i}{m}}P_1u_{\sigma_2(i)} = e^{\frac{i2\pi (r_{\sigma_2(i)} + s_i)}{m}}u_{\sigma_1(\sigma_2(i))},\]
+	so set $r'_i = r_{\sigma_2(i)} + s_i$, and $\sigma = \sigma_1 \circ \sigma_2$, giving $P_1P_2 \in S(m, n)$. Additionally if we take the equation
+	\[P_1u_i = e^{\frac{i2\pi r_i}{m}}u_{\sigma_1(i)},\]
+	and rearrange, we get
+	\[P_1^{-1}u_{\sigma_1(i)} = e^{\frac{-i2\pi r_i}{m}}u_i\]
+	So set $r'_i = -r_{\sigma^{-1}_1(i)}$, and $\sigma = \sigma_1^{-1}$ to get $P_1^{-1} \in S(m, n)$.
+\end{proof}
+
+\begin{prop}
+	The set $\Delta(m, n)$ of diagonal matrices in $S(m, n)$ form a normal subgroup of $S(m, n)$.
+\end{prop}
+\begin{proof}
+	If $P_1, P_2 \in S(m, n)$ are diagonal, then $\sigma_1 = \sigma_2 = \text{id}$, so by the above formulas we get $\sigma = \sigma_1\circ \sigma_2 = \text{id}$ or $\sigma = \sigma_1^{-1} = \text{id}$, giving $P_1P_2$ and $P_1^{-1}$ diagonal. This tells us that $\Delta(m, n)$ is a subgroup of $S(m, n)$.
+	
+	Further if $P$ is some other matrix in $S(m, n)$ via $\sigma$ and $q_i$, then
+	\begin{align*}
+		P^{-1}P_1Pu_i
+		&= e^{\frac{i2\pi(q_i)}{m}}P^{-1}P_1u_{\sigma_i}
+		\\&= e^{\frac{i2\pi(q_i+r_{\sigma(i)})}{m}}P^{-1}u_{\sigma_i}
+		\\&= e^{\frac{i2\pi(r_{\sigma(i)})}{m}}u_i,
+	\end{align*}
+so $\Delta(m, n)$ is normal.
+\end{proof}
+
+If $H$ is a normal subgroup of $N$ and $N$ is a subgroup of $G$, we might say ``$H$ is normal in $N$'' and ``$N$ is in $G$''. Despite this terminology, $H$ is not necessarily a normal subgroup in $G$. With this subtlety in mind we can find exactly such a group $N$, given any subgroup $H$ of $G$.
+\begin{define}
+Given a subgroup $H$ of a group $G$, the \emph{normaliser} of $H$, written $N_G(H)$ or simply $N(H)$ is the set
+\[\{g\ |\ g \in G,\ ghg^{-1} \in H \forall h \in H\}.\]
+\end{define}
+\begin{prop}
+	Given a subgroup $H$ of a group $G$, the normaliser $N_G(H)$ is the maximal subgroup of $G$ with $H$ as a normal subgroup.
+\end{prop}
+
+We can also define equivalence classes \emph{between} groups, based on whether they have the same structure under group multiplication.
+\begin{define}
+	Given two groups $G_1$ and $G_2$, a \emph{homomorphism} is a map $\phi: G_1 \to G_2$ satisfying $\phi(x)\phi(y) = \phi(xy)$, for any $x, y \in G_1$. If $\phi$ is bijective then it is also called an \emph{isomorphism}, and if there is at least one such isomorphism then $G_1$ and $G_2$ are said to be \emph{isomorphic}, represented infix as $G_1 \cong G_2$.
+\end{define}
+
+\begin{prop}\label{inj-hom-thm}
+	If $\phi$ is a homomorphism between $G_1$ and $G_2$, then the image $\phi(G_1)$ is a subgroup of $G_2$, and if $\phi$ is injective then $G_1 \cong \phi(G_1)$.
+\end{prop}
+
+\begin{define}
+	If $F$ is a field and $n$ is a positive integer, then a matrix $P \in GL(n, F)$ is said to be a \emph{permutation matrix} if there is a permutation $\sigma \in \mathcal{S}_n$ so that
+	\[Pu_i = u_{\sigma(i)},\]
+	where $u_i$ is any of the $n$ canonical basis vectors defined in \autoref{canonical-basis}.
+\end{define}
+
+By \autoref{inj-hom-thm} the set of permutation matrices form a group isomorphic to the symmetric group $\mathcal{S}_n$, which allows us to identify these two groups, treating $\mathcal{S}_n$ as a subgroup of $GL(n, F)$.
+
+\begin{define}
+	If $G$ is a group and $\phi$ is an isomorphism from $G$ to itself, then $\phi$ is said to be an \emph{automorphism}. The set of automorphisms is written Aut$(G)$.
+\end{define}
+\begin{prop}
+	For any group $G$, $(Aut(G), \circ)$ is a group.
+\end{prop}
+\begin{define}
+	Given a group $(G_1, \cdot)$, and a subgroup $G_2$ of $Aut(G)$, the \emph{semi-direct product} $G_1 \rtimes G_2$ is the group $(G_1 \times G_2, \cdot)$ with the following product:
+	\[(g_1, f_1)\cdot (g_2, f_2) = (g_1 \cdot f_1(g_2), f_1 \circ f_2)\]
+\end{define}
+
+\begin{define}
+	We say that a subgroup $H$ of a group $G$ is \emph{generated by} a set $S \subset H$, if every $h \in H$ is of the form
+	\[h = \prod_{i=1}^k s_i,\]
+	for some choice of $k$ and $s_1,\dots,s_k$, where each $s_i$ is either an element of $S$ or the inverse of an element of $S$. Clearly the set of elements of $G$ of this form is a subgroup of $G$, which we call \emph{the subgroup generated by} $S$, and denote $\langle S \rangle$. If $S$ is a finite set $\{s_1,\dots,s_n\}$ then we can also write $\langle s_1,\dots,s_n\rangle$ directly, and say that any group $H$ generated by such a set is \emph{finitely generated}.
+\end{define}
