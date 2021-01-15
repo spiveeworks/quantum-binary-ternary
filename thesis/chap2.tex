@@ -6,7 +6,7 @@ The QArC Group at Microsoft have written a number of papers describing logic in 
 The first algorithm laid out in \cite{arithmetics} was a reversible algorithm for adding the ternary expansion of two integers, a simple generalization of an operation fundamental to computation in integers. In order to implement addition in some base $d$ one must implement the sum of three digits $a_i + b_i + c_i$ to get a number between $0$ and $3d-3$, a number which is itself represented as two separate digits,
 \[c_{i+1} = \left\lfloor \frac{a_i + b_i + c_i}{d} \right\rfloor, \text{\ and\ }
 \]\[s_i = a_i + b_i + c_i \mod d.\]
-$s_i$ is easily implemented as a pair of SUM operations, which is significantly simpler than $c_{i+1}$ which is an almost arbitrary map $\{0,\dots,d-1\}^3 \to \{0,\dots,d-1\}$. A significant simplification made in \cite{arithmetics} is to note that when $d=3$, the only way $c_{i+1}$ can be 2 is if all $a_i$, $b_i$, and $c_i$ before it are also 2. Since $c_0$ is assumed to be 0 this means $c_i$ is always either 0 or 1, meaning we only need to implement a map from $\{0,1,2\}^2\times\{0,1\} \to \{0, 1\}$. Then with careful analysis of the required map they presented the following circuit:
+$s_i$ is easily implemented as a pair of SUM operations, which is significantly simpler than $c_{i+1}$ which is an almost arbitrary map $\{0,\dots,d-1\}^3 \to \{0,\dots,d-1\}$. A significant simplification made in \cite{arithmetics} is to note that when $d=3$, the only way $c_{i+1}$ can be 2 is if all $a_i$, $b_i$, and $c_i$ before it are also 2. Since $c_0$ is assumed to be 0 this means $c_i$ is always either 0 or 1, meaning we only need to implement a map from $\{0,1,2\}^2\times\{0,1\} \to \{0, 1\}$. Then with careful analysis of the required map they present a circuit that is sufficient for the computation needed.
 
 \begin{quantikz}
 	\lstick{$c_i$} & \qw & \qw & \octrl{2} & \octrl{2} & \gate{S_{0,1}} & \swap{1} & \qw & \qw \rstick ? \\
@@ -16,7 +16,7 @@ $s_i$ is easily implemented as a pair of SUM operations, which is significantly 
 
 This carry circuit is then used to add two $m$-qutrit integers by composing it $m$ times, calculating $c_m$, which is written into a separate output register $s_m$. Then since these carry operations are reversible, they are reversed one by one, overwriting $b_i$ with each $s_i$ in the process. Note that $c_{i+1}$ is swapped with the $b_i$ register once it is calculated, making presentation cleaner later on, and also simulating the fact that qutrits in a physical quantum computer may not be able to interact with each other arbitrarily, they might only be able to interact with adjacent qutrits in some physical layout. They do all of this while only requiring two SWAP operations, which considered significantly cheaper in fault tolerant contexts since they are Clifford operations, unlike the $S_{00,22}$ or $C(S_{0,1})$ operations.
 
-We note that the core of this improvement was to treat $c_i$ like a qubit! This suggests that the whole algorithm for ternary arithmetic will map very cleanly into a mixed quantum computer. If we modify the carry circuit so that $c_i$ actually is a qubit, we get the following circuit:
+We note that the core of this improvement was to treat $c_i$ like a qubit! This suggests that the whole algorithm for ternary arithmetic will map very cleanly into a mixed quantum computer. If we modify the carry circuit so that $c_i$ actually is a qubit, we get a similar looking circuit.
 
 \begin{quantikz}
 	\lstick{$c_i$} & \qw & \qw & \phase{1} \vqw{2} & \targ{} & \qw \rstick{$c_{i+1}$} \\
@@ -24,7 +24,7 @@ We note that the core of this improvement was to treat $c_i$ like a qubit! This 
 	\lstick{$b_i$} & \qw & \targ{} & \gate{X_3^{-1}} & \phase{0} \vqw{-2} & \qw \rstick ?\\
 \end{quantikz}
 
-The pair of Clifford SUM operations become a single non-Clifford\footnote{One can compute $C(X)X^jZ^kC(X^{-1})$ as we did in \autoref{pauli}, but we will see in \autoref{tolar-cliff} that \emph{no} operation that acts dependently on a qubit-qutrit pair can be Clifford.} controlled decrement, the inverse of a controlled increment. Further the controlled transposition simply becomes a controlled increment mod 2. Finally we cannot swap $c_{i+1}$ with $b_i$ since one is a qubit and the other is a qutrit. We see very clearly that this algorithm would be very sensitive to connectivity between qubits and qutrits if implemented in a mixed system. We have turned a carry operation with two non-Clifford operations into one with three non-Clifford operations. In addition to this, the calculation $s_i = a_i + b_i + c_i \mod 3$ becomes
+The pair of Clifford SUM operations become a single non-Clifford\footnote{One can compute $C(X)X^jZ^kC(X^{-1})$ as we did in \autoref{pauli}, but we will see in \autoref{tolar-cliff} that \emph{no} operation that acts dependently on a qubit-qutrit pair can be Clifford.} controlled decrement, the inverse of a controlled increment. Further the controlled transposition simply becomes a controlled increment mod 2. Finally we cannot swap $c_{i+1}$ with $b_i$ since one is a qubit and the other is a qutrit. We see very clearly that this algorithm would be very sensitive to connectivity between qubits and qutrits if implemented in a mixed system. We have turned a carry operation with two non-Clifford operations into one with three non-Clifford operations. In addition to this, the calculation $s_i = a_i + b_i + c_i \mod 3$ receives a slight modification.
 
 \begin{quantikz}
 	\lstick{$c_i$} & \qw & \phase{1} \vqw{2} & \qw \rstick{$c_{i}$} \\
@@ -37,15 +37,15 @@ This means that in total to add two $m$-qutrit integers we have gone from $2m$ n
 \section{Ternary Addition With Minimal Depth}
 The second algorithm presented by \cite{arithmetics} aims to parallelise the calculation of the carry trits by observing three cases of $a_i + b_i + c_i$:
 \begin{itemize}
-	\item $a_i = b_i = 0 \implies c_{i+1} = 0$, denoted $C[i, i+1] = 0$
-	\item $a_i + b_i = 1 \implies c_{i+1} = c_i$, denoted $C[i, i+1] = 2$
-	\item $a_i + b_i \geq 2 \implies c_{i+1} = 1$, denoted $C[i, i+1] = 1$
+	\item $a_i = b_i = 0 \implies c_{i+1} = 0$, denoted $C[i, i+1] = 0$,
+	\item $a_i + b_i = 1 \implies c_{i+1} = c_i$, denoted $C[i, i+1] = 2$,
+	\item $a_i + b_i \geq 2 \implies c_{i+1} = 1$, denoted $C[i, i+1] = 1$.
 \end{itemize}
 These three cases can be calculated up front and stored in trit registers, without knowing any carry digits. This allows the calculations to be done in parallel requiring $m$ Clifford gates, but only taking the amount of time required to compute one or two of these calculations in sequence.
 
 Next a merge algorithm is defined, if $C[i, j] = C[j, k] = 2$ then $c_i = c_j = c_k$, so $C[i, k] = 2$ also. In fact whenever $C[j, k] = 2$ we will have $C[i, k] = C[i, j]$. On the other hand, if $C[j, k] \neq 2$ then $c_k$ will be equal to $C[j, k]$ itself, either 0 or 1, and in either case $C[i, k]$ is simply $C[j, k]$. This calculation of $C[i,k]$ in terms of $C[i, j]$ and $C[j, k]$ is another classical operation, which can be implemented as a permutation. Now different combinations of $C[i, k]$ are merged in $\left\lfloor \log l \right\rfloor + \left\lfloor \log \frac{n}{3} \right\rceil + 2$ parallel `layers', requiring $3l - 2\omega(l) - 2\left\lfloor \log l \right\rfloor - 1$ non-Clifford operations across all of these layers, where $\omega(l)$ is the number of 1s in the binary expansion of $l$. The algorithm far from minimizes width however, taking $l - \omega(l) - \left\lfloor \log l \right\rfloor$ additional qutrits on top of the $2l$ needed for the input of the algorithm.
 
-Here a key feature of the algorithm is to observe that $C[i, j]$ is intrinsically ternary, but interestingly the addition of two binary integers would have the same three carry cases, so if we can implement the base case $C[i, i+1]$ as yielding a qutrit based on two qubits, then we would have turned another ternary arithmetic algorithm into a mixed algorithm, but this time using qutrit carry information to add a series of qubits! Let $a_i, b_i \in \{0, 1\}$, then $c_{i+1}$ will be 1 if $a_i = b_i = 1$, 0 if $a_i = b_i = 0$, and $c_{i}$ if $a_i \neq b_i$. This can be implemented as follows
+Here a key feature of the algorithm is to observe that $C[i, j]$ is intrinsically ternary, but interestingly the addition of two binary integers would have the same three carry cases, so if we can implement the base case $C[i, i+1]$ as yielding a qutrit based on two qubits, then we would have turned another ternary arithmetic algorithm into a mixed algorithm, but this time using qutrit carry information to add a series of qubits! Let $a_i, b_i \in \{0, 1\}$, then $c_{i+1}$ will be 1 if $a_i = b_i = 1$, 0 if $a_i = b_i = 0$, and $c_{i}$ if $a_i \neq b_i$. This can be implemented with a simple circuit inspired by the same calculation in the pure qutrit case in \cite{arithmetics}.
 
 \begin{quantikz}
 \lstick{0} & \targ{} & \targ{} & \gate{S_{1,2}} & \qw \rstick{$C[i,i+1]$} \\
@@ -55,7 +55,7 @@ Here a key feature of the algorithm is to observe that $C[i, j]$ is intrinsicall
 
 Here $S_{1,2}$ is a potentially cheap Clifford operation that allows us to calculate $C[i, i+1]$ in terms of $a_i + b_i$. This is much like the $S_{0,1}$ used in the original $C[i, i+1]$ circuit in \cite{arithmetics}. Much like the SWAP operations in their previous carry gates, Clifford operations are being used liberally to turn quantities that are easy to calculate into quantities that are more convenient to design algorithms for. The next step of the algorithm is to merge the different qutrit quantities $C[i, k]$, which is unchanged since there are no qubits involved.
 
-Now in order to calculate the resulting qubits we must obviously diverge from \cite{arithmetics} once more. A key component of their algorithm was to calculate $C[0, 1]$ separately, since $c_0 = 0$ we can replace the $C[0, 1] = 2$ case with $C[0, 1] = 0$, which is another binary quantity. $C[0, 1]$ is 1 if both $a_0$ and $b_0$ are 1, which is implemented with a single Toffoli gate $C_{a_0 = 1, b_0 = 1}(X_{C[0, 1]})$. Now since we have eliminated the $C[0, 1] = 2$ case, what we are really calculating is $c_1$. Next $\cite{arithmetics}$ would have used the merging formula to calculate each $c_k$ implicitly by merging $C[0, j] = c_j$ with $C[j, k]$. Since we want $c_k$ to be a qubit we will replace these specific merges with our own circuit:
+Now in order to calculate the resulting qubits we must obviously diverge from \cite{arithmetics} once more. A key component of their algorithm was to calculate $C[0, 1]$ separately, since $c_0 = 0$ we can replace the $C[0, 1] = 2$ case with $C[0, 1] = 0$, which is another binary quantity. $C[0, 1]$ is 1 if both $a_0$ and $b_0$ are 1, which is implemented with a single Toffoli gate $C_{a_0 = 1, b_0 = 1}(X_{C[0, 1]})$. Now since we have eliminated the $C[0, 1] = 2$ case, what we are really calculating is $c_1$. Next $\cite{arithmetics}$ would have used the merging formula to calculate each $c_k$ implicitly by merging $C[0, j] = c_j$ with $C[j, k]$. Since we want $c_k$ to be a qubit we will replace these specific merges with our own circuit.
 
 \begin{quantikz}
 \lstick{$c_j$} & \qw & \phase{1} \vqw{1} & \qw \rstick{$c_j$} \\
@@ -80,15 +80,15 @@ In the above discussion and related papers the QArC group have paid particular a
 0 & 0 & -1 & \\
 \end{bmatrix}.\]
 
-In \cite{arithmetics} an alternative fault tolerant gate set was proposed, using $P_9$ in place of $Y$, the principal gate satisfying $P_9^3 = Z_3$:
+In \cite{arithmetics} an alternative fault tolerant gate set was proposed, using $P_9$ in place of $Y$, the simplest gate satisfying $P_9^3 = Z_3$, in matrix form
 \[P_9 = \begin{pmatrix}
 1 & 0 & 0 \\
 0 & \omega_9 & 0 \\
 0 & 0 & \omega_9^2 \\
-\end{pmatrix}\]
+\end{pmatrix}.\]
 Both gate sets can be used to approximate any unitary $U \in U(3^n)$, but \cite{arithmetics} showed that this latter gate set can exactly implement any permutation matrix. They refer to this latter gate set as the ``supermetaplectic basis'', which seems to refer to this increase in power when dealing with permutation matrices.
 
-In order to show that this generator set exactly implements the permutation matrices in $U\left(3^n\right)$, i.e. all of $\mathcal{S}_{N}$, they decompose these matrices in 3 steps.
+In order to show that this generator set exactly implements the permutation matrices in $U\left(3^n\right)$, i.e. all of $\mathcal{S}_{N}$, they decompose these matrices in 3 steps:
 \begin{enumerate}
 	\item It seems to have been taken implicitly that with an implementation of $C_{i_1 = 2}(X)$, other permutations acting on more than 2 qutrits can be decomposed in a manner similar to the qubit process described previously.
 	\item Various permutations acting on 2 or 3 qutrits that are not in $\mathcal{C}_2$ were shown to be pairwise equivalent, including arbitrary transpositions of pairs of states.
@@ -96,9 +96,9 @@ In order to show that this generator set exactly implements the permutation matr
 \end{enumerate}
 
 Both of these explicit steps were derived through analysis of the permutation and diagonal matrices as polynomial expressions, first interpreting permutation matrices as acting on the computational basis, e.g.
-\[C_{i_1=0}(X)(\ket{i}\ket{j}) = \ket{i}\ket{j+1-i^2 \mod 3}\]
+\[C_{i_1=0}(X)(\ket{i}\ket{j}) = \ket{i}\ket{j+1-i^2 \mod 3}.\]
 then interpreting diagonal matrices as acting on the phase factors of the computational basis, e.g.
-\[C_{i_1=0}(Z)(\ket{i}\ket{j}) = \omega_{3}^{j(1-i^2)}\ket{i}\ket{j}\]
+\[C_{i_1=0}(Z)(\ket{i}\ket{j}) = \omega_{3}^{j(1-i^2)}\ket{i}\ket{j}.\]
 This allows us to compose permutation matrices and diagonal matrices respectively, and simplify the resulting polynomials mod 3. This technique is clearly powerful, given its success in proving the above claims in \cite{arithmetics}, but unfortunately when we try to do this in a mixed system, we get terms evaluated mod 3, nested inside terms evaluated mod 2, and vice versa. For example in a system with a qubit and a qutrit we could write
 \[X_3\ket{i}\ket{j} = \ket{i}\ket{j+1\mod 3}.\]
 Further, by using a control value of 1 we can leverage that $2 \mod 2 = 0$ and write

@@ -2,7 +2,7 @@
 
 \chapter[FINITE AND INFINITE GROUPS OF MATRICES]{FINITE AND INFINITE GROUPS OF MATRICES}\label{finite-gen}
 
-In \autoref{pauli} we outlined the Pauli matrices, and defined the related Weyl-Heisenberg and Clifford groups, including the matrix $H_d$ satisfying $H_d^{-1}Z_dH_d = X_d$. In \cite{universal-qubit} we saw that $H$ was one of three gates needed for universal computation in a binary quantum computer, but the other two are also directly related to the Pauli matrices. $C(X)$ is of course the controlled version of the $X$ gate, and $T$ when applied four times is equivalent to $Z$:
+In \autoref{pauli} we outlined the Pauli matrices, and defined the related Weyl-Heisenberg and Clifford groups, including the matrix $H_d$ satisfying $H_d^{-1}Z_dH_d = X_d$. In \cite{universal-qubit} we saw that $H$ was one of three gates needed for universal computation in a binary quantum computer, but the other two are also directly related to the Pauli matrices. $C(X)$ is of course the controlled version of the $X$ gate, and $T$ when applied four times is equivalent to $Z$.
 \[
 T^4 = \left[\begin{matrix}
 	1 & 0 \\
@@ -10,7 +10,7 @@ T^4 = \left[\begin{matrix}
 \end{matrix}\right]^4 = \left[\begin{matrix}
 	1 & 0 \\
 	0 & -1
-\end{matrix}\right] = Z\]
+\end{matrix}\right] = Z.\]
 
 It is for this reason that we are interested in the Pauli and Clifford groups of other number systems. 
 First of all, the Clifford group formed by taking the normaliser of the Weyl-Heisenberg group lets us generalize the algebraic relationships of $H_2$ to higher dimensions, as well as the algebraic relation $D_2X_2D_2^{-1} = iX_2Z_2 = Y_2$. In \autoref{tolar-cliff} we describe the results of \cite{tolar-clifford}, which describes how the Clifford group will behave in quantum computers with multiple objects of different dimension.
@@ -22,11 +22,11 @@ The paper \cite{tolar-clifford} describes the Clifford group associated with qua
 Tolar removes the scalar factors from both the Weyl-Heisenberg group, and the Clifford group, not just by taking the group quotient $G/U(1)$, but also by looking at the group conjugation action, mapping the Weyl-Heisenberg group to itself under the map
 \[\text{Ad}_A(X^jZ^k) = AX^jZ^kA^{-1}.\]
 These conjugation maps form a group under function composition, and are isomorphic to the corresponding quotient groups $H(n)/U(1)$ and $N(H(n))/U(1)$. When applied to the Weyl-Heisenberg group associated with a single quantum object of arbitrary dimension, it was shown that $N(H(n))/U(1)$ was isomorphic to
-\[(\mathbb{Z}_N\times\mathbb{Z}_N)\rtimes\text{SL}(2,\mathbb{Z}_N)\]
+\[(\mathbb{Z}_N\times\mathbb{Z}_N)\rtimes\text{SL}(2,\mathbb{Z}_N).\]
 This isomorphism by itself is not new, and can be used to generate the Clifford group (up to global phase) with four matrices $X_N$, $Z_N$,  $H_N$, and $D_N$. In the special cases $N=2$ and $N=3$ only two generators are needed, which we displayed in \autoref{pauli}. 
 
-The more significant result of the paper however, was the extension to Clifford groups for arbitrary composite systems. The Weyl-Heisenberg group of a composite system $C^{d_1}\otimes \dots \otimes C^{d_n}$ is taken to be the product of Weyl-Heisenberg groups acting on each individual system:
-\[H(d_1, \dots, d_n) = \{A_1 \otimes \dots \otimes A_n\ |\ A_i \in H(d_i)\} \cong H(d_1) \times \dots \times H(d_n)\]
+The more significant result of the paper however, was the extension to Clifford groups for arbitrary composite systems. The Weyl-Heisenberg group of a composite system $C^{d_1}\otimes \dots \otimes C^{d_n}$ is taken to be the product of Weyl-Heisenberg groups acting on each individual system, written
+\[H(d_1, \dots, d_n) = \{A_1 \otimes \dots \otimes A_n\ |\ A_i \in H(d_i)\} \cong H(d_1) \times \dots \times H(d_n).\]
 
 While this composite Weyl-Heisenberg group consists only of Kronecker products, its normaliser can contain operations that are not Kronecker products, for example
 \[\text{CNOT} = C(X) = \left[\begin{matrix}
@@ -50,7 +50,7 @@ One significant algebraic fact about the Clifford group is that up to scale fact
 \begin{theorem}[The Cyclotomic/Rational Number Theorem]\label{cyclotomic} For any $\theta \in \mathbb{R}$, $\theta$ is rational if and only if $e^{i2\pi \theta}$ is the root of an irreducible polynomial with rational coefficients.
 \end{theorem}
 
-This analysis works well in the Bloch sphere all unitary matrices will represent a single rotation in some plane, but when dealing with more complicated geometries we can still apply this kind of analysis if we look at the eigenvalues of a given matrix instead. Given a unitary matrix $A$, we already know that its eigenvalues are unit complex numbers $e^{i 2\pi\theta}$, so then
+This analysis works well in the Bloch sphere all unitary matrices will represent a single rotation in some plane, and when dealing with more complicated geometries we can still apply this kind of analysis if we look at the eigenvalues of a given matrix instead. Given a unitary matrix $A$, we already know that its eigenvalues are unit complex numbers $e^{i 2\pi\theta}$, so we characterise as follows.
 
 \begin{prop}Given a unitary matrix $A$ the following are equivalent:
 \begin{enumerate}
@@ -70,7 +70,7 @@ It is interesting to note that $e^{i 2\pi\theta}$ and $e^{-i 2\pi\theta}$ are bo
 \[R(2\pi \theta) = \left[\begin{matrix}
 	\cos(2\pi\theta) & -\sin(2\pi\theta) \\
 	\sin(\theta) & \cos(\theta)
-\end{matrix}\right]\]
+\end{matrix}\right],\]
 so in this way \cite{universal-qubit} was already dealing with eigenvalues, and we simply generalize this to rotations in higher dimensional spheres than the Bloch sphere. One significant difference between their use and ours is that the Bloch sphere is designed to remove global phase factors, and so an operation like $e^{i2\pi\theta}I$ will act trivially on the Bloch sphere, whereas under our eigenvalue analysis this operation might have infinite order despite being trivial in practice. This means that if we want to show that a matrix has infinite order up to global phase, then we must show that some scalar multiple of it has some eigenvalues which are roots of unity, and others which are not. For example let $\theta$ be irrational, so that the unit complex number $e^{i2\pi\theta}$ is not a root of unity, then
 \[A = \left[\begin{matrix}
 	e^{i2\pi\theta} & 0 \\
@@ -81,7 +81,7 @@ will be infinite order, but so will any non-zero scalar multiple $\lambda A$, si
 \section{Programmatic Search for Finite Groups}\label{prog-search}
 The Clifford group is a significant set of operations for performing fault tolerant computation in quantum computers, and is particularly interesting in the way that adding a single finite order matrix $T_2$ to it can generate an infinite order group capable of universal computation. Motivated by this we generated groups using various Clifford and non-Clifford operations on the qubit-qutrit system $\mathbb{C}^2 \otimes \mathbb{C}^3$, and found which combinations were finite order and which were infinite order. We saw in \cite{tolar-clifford} that the Clifford group only introduces operations that act dependently between objects when the dimensions of those objects have a common factor, and 2 and 3 do not share a common factor, so the Clifford group in a binary-ternary quantum computer has the same behaviour as two separate Clifford groups, one acting on $\mathbb{C}^2$ and the other on $\mathbb{C}^3$. This means the operations of primary interest to us are the controlled operations discussed in \autoref{analyse-perms}. We consider the ten operations
 \[X_2, Z_2, H_2, D_2, X_3, Z_3, H_3, S_3, C_2(X_3), C_3(X_2),\]
-as elements of $U(6)$, acting on qubit-qutrit pairs $\ket{p}\ket{q}$:
+as elements of $U(6)$, acting on qubit-qutrit pairs $\ket{p}\ket{q}$.
 
 As an example consider the Pauli operations
 \begin{align*}
@@ -152,53 +152,53 @@ In fact $X_2$, $X_3$, $C_2(X_3)$ and $C_3(X_2)$ will turn out to generate the wh
 It would be standard to use some algebraic program or package such as Magma to solve this problem, but because our goal is simple enough to implement in a handful of sittings, it was just as easy to implement it from scratch in C, yielding a program that is simple, high performance, and easy to customize. The full source code of this program is given in Appendix C, and was tested using the Tiny C Compiler, but run using the Clang compiler with optimization level 2. We will now outline the techniques used, since they are of independent interest. 
 
 The first obstacle in not using an algebraic package is the exact representation of numbers whose binary expansion never terminates or repeats, for example the sixth root of unity
-\[\omega_6 = e^{\frac{i\pi}{3}} = \frac{\sqrt{3}}{2} + \frac{1}{2}i\]
+\[\omega_6 = e^{\frac{i\pi}{3}} = \frac{\sqrt{3}}{2} + \frac{1}{2}i.\]
 To solve this we aim to represent the field extension
 \begin{align*}
 	\text{Num} = \mathbb{Q}[\sqrt{-1}, \sqrt{2}, \sqrt{3}]
 	&= \left\{ \sum_{j,k,l = 0}^1 n_{jkl}\ i^j\left(\sqrt{2}\right)^k\left(\sqrt{3}\right)^l
 	\ \middle|\ n_{jkl} \in \mathbb{Q}\right\}
 \end{align*}
-using an array of 32-bit integers, eight signed integers representing the numerator in $\mathbb{Z}[\dots]$, and one unsigned ineger for the denominator.
+using an array of 32-bit integers, eight signed integers representing the numerator in $\mathbb{Z}[\dots]$, and one unsigned integer for the denominator.
 
 We have a few basic operations to define in Num, the most significant of which are multiplication, and inverses. We implement these algorithms naively, and since these are the most fundamental building blocks of our program, this will lead to very bad performance without optimization, (in fact we found the program runs four times worse, 20 seconds vs 5 seconds) but when the search is going to take numerous seconds anyway, the additional second or two of optimization is less painful than it would be in other projects.
 
 For multiplication in Num, we implement multiplication in $\mathbb{Z}[X, Y, Z]$, iterating 6 variables over the range ${0, 1}$ according to the equality
 \begin{align*}
 	\left(\sum_{j,k,l = 0}^1 a_{jkl}X^jY^kZ^l\right)\left(\sum_{j,k,l = 0}^1 b_{jkl}X^jY^kZ^l\right)
-	\\= \sum_{j_1,k_1,l_1=0}^1\sum_{j_2,k_2,l_2=0}^1 a_{j_1k_1l_1}b_{j_2k_2l_2}X^{j_1+j_2}Y^{k_1+k_2}Z^{l_1+l_2}
+	\\= \sum_{j_1,k_1,l_1=0}^1\sum_{j_2,k_2,l_2=0}^1 a_{j_1k_1l_1}b_{j_2k_2l_2}X^{j_1+j_2}Y^{k_1+k_2}Z^{l_1+l_2},
 \end{align*}
-, then we make three reductions, according to the rules $x^2 = -1$, $y^2 = 2$, and $z^2 = 3$, returning us to Num. When calculating the product of two elements of Num we generally also divide out any common factors of the nine integers in our representation, so that each number has a unique 36 byte representation in memory.
+then we make three reductions, according to the rules $x^2 = -1$, $y^2 = 2$, and $z^2 = 3$, returning us to Num. When calculating the product of two elements of Num we generally also divide out any common factors of the nine integers in our representation, so that each number has a unique 36 byte representation in memory.
 
-To calculate the inverse of $a \in \text{Num}$, we set $x_0 = a$ and $y_0 = 1$, make repeated modifications of the form $x_{j+1} = x_jc_j$, $y_{j+1} = y_jc_j$. In this way we eventually get $x_k = 1$, while preserving the identity $x_j = ay_j$, meaning $y_k = a^{-1}$. We set $c_0$ to the denominator of $x_0$ so that $x_1 \in \mathbb{Z}[i, \sqrt{2}, \sqrt{3}]$, then remove each radical by setting $c_k$ to the conjugate of $x_k$. That is $c_1$ is $x_1$ but with $i$ replaced by $-i$, so that $x_2 \in \mathbb{Z}[\sqrt{2}, \sqrt{3}]$. Repeating for $\sqrt{2}$ gives $x_3 \in \mathbb{Z}[\sqrt{3}]$, and then repeating for $\sqrt{3}$ gives $x_4 \in \mathbb{Z}$. Now we can set $c_4 = 1/x_4$ to get $x_5 = 1$ and hence $y_5 = a^{-1}$. For example if $a = \omega_{6} = (\sqrt{3} + i)/2$, then the process looks like this:
+To calculate the inverse of $a \in \text{Num}$, we set $x_0 = a$ and $y_0 = 1$, make repeated modifications of the form $x_{j+1} = x_jc_j$, $y_{j+1} = y_jc_j$. In this way we eventually get $x_k = 1$, while preserving the identity $x_j = ay_j$, meaning $y_k = a^{-1}$. We set $c_0$ to the denominator of $x_0$ so that $x_1 \in \mathbb{Z}[i, \sqrt{2}, \sqrt{3}]$, then remove each radical by setting $c_k$ to the conjugate of $x_k$. That is $c_1$ is $x_1$ but with $i$ replaced by $-i$, so that $x_2 \in \mathbb{Z}[\sqrt{2}, \sqrt{3}]$. Repeating for $\sqrt{2}$ gives $x_3 \in \mathbb{Z}[\sqrt{3}]$, and then repeating for $\sqrt{3}$ gives $x_4 \in \mathbb{Z}$. Now we can set $c_4 = 1/x_4$ to get $x_5 = 1$ and hence $y_5 = a^{-1}$. For example if $a = \omega_{6} = (\sqrt{3} + i)/2$, then the process looks like
 \begin{align*}
-	x_0 &= (\sqrt{3} + i)/2 & y_0 &= 1 & c_0 &= 2 \\
-	x_1 &= \sqrt{3} + i & y_1 &= 2 & c_1 &= \sqrt{3}-i \\
-	x_2 &= 4 & y_2 &= 2\sqrt{3}-2i & c_2 &= 4 \\
-	x_3 &= 16 & y_3 &= 8\sqrt{3}-8i & c_3 &= 16 \\
-	x_4 &= 256 & y_4 &= 128\sqrt{3}-128i & c_4 &= 1/256 \\
-	x_5 &= 1 & y_5 &= (\sqrt{3}-i)/2 & \\
+	x_0 &= (\sqrt{3} + i)/2 & y_0 &= 1 & c_0 &= 2, \\
+	x_1 &= \sqrt{3} + i & y_1 &= 2 & c_1 &= \sqrt{3}-i, \\
+	x_2 &= 4 & y_2 &= 2\sqrt{3}-2i & c_2 &= 4, \\
+	x_3 &= 16 & y_3 &= 8\sqrt{3}-8i & c_3 &= 16, \\
+	x_4 &= 256 & y_4 &= 128\sqrt{3}-128i & c_4 &= 1/256, \\
+	x_5 &= 1 & y_5 &= (\sqrt{3}-i)/2. & \\
 \end{align*}
-In practice we could have stopped earlier, in fact for any root of unity it will be enough to multiply by the complex conjugate, but checking for these conditions for early termination is very likely to be slower for a CPU than to simply finish the calculation as we have above.
+In practice we could have stopped earlier, and in fact for any root of unity it will be enough to multiply by the complex conjugate, but checking for these conditions of early termination is very likely to be slower for a CPU than to simply finish the calculation as we have above.
 
-Next we represent a complex matrix as a $6\times 6$ array of Num, taking a total of 1296 bytes per matrix! Matrix multiplication is defined in the usual way, by setting $c_{ik} = \sum_j a_{ij}b_{jk}$, but reduced matrix multiplication was also defined, where the matrix is scaled so that the first non-zero entry of the matrix is exactly 1. We also represent a permutation in $\mathcal{S}_6$ as 6 bytes, representing a lookup table of a map $\{1\dots 6\} \to \{1 \dots 6\}$.
+Next we represent a complex matrix as a $6\times 6$ array of Num, taking a total of 1296 bytes per matrix. Matrix multiplication is defined in the usual way, by setting $c_{ik} = \sum_j a_{ij}b_{jk}$, but reduced/coset matrix multiplication was also defined, where the matrix is scaled so that the first non-zero entry of the matrix is exactly 1, giving a consistent representative for each coset in $U(6)/U(1)$. We also represent a permutation in $\mathcal{S}_6$ as 6 bytes, representing a lookup table of a map $\{1\dots 6\} \to \{1 \dots 6\}$.
 
 \subsection{The Search Algorithm}
 We now have an implementation of two groups, $GL(6, \text{Num})$, and $\mathcal{S}_6$, so now we can implement the search itself. The search has six non-optional parameters:
-\begin{enumerate}
-	\item \verb`gen_len` the amount of `letters' in the generator set
-	\item \verb`gen`, the array of letters, each of type \verb`void*`
-	\item \verb`names`, string data to print when describing new words that were found
-	\item \verb`elem_size`, the size in memory of an element of the group
-	\item \verb`compose`, a binary operation acting on group elements
-	\item \verb`print_elem`, a procedure to display the group element (matrix or permutation) that has been generated
-\end{enumerate}
-The search then generates an array of \verb`PathNode`s, (named after the geometric interpretation of groups as `Cayley graphs') which are tuples containing
 \begin{itemize}
-	\item the word length of the corresponding element generated
-	\item a pointer to an earlier \verb`PathNode`, called the predecessor; may be \verb`NULL`
-	\item the leftmost letter of the word, which when added to the predecessor gives the current word in question
-	\item a \verb`void*` pointer to the unique group element that was found, called \verb`result`
+	\item \verb`gen_len` the amount of `letters' in the generator set,
+	\item \verb`gen`, the array of letters, each of type \verb`void*`,
+	\item \verb`names`, string data to print when describing new words that were found,
+	\item \verb`elem_size`, the size in memory of an element of the group,
+	\item \verb`compose`, a binary operation acting on group elements,
+	\item \verb`print_elem`, a procedure to display the group element (matrix or permutation) that has been generated.
+\end{itemize}
+The search then generates an array of \verb`PathNode`s, (named after the geometric interpretation of groups as `Cayley graphs') which are tuples containing:
+\begin{itemize}
+	\item the word length of the corresponding element generated,
+	\item a pointer to an earlier \verb`PathNode`, called the predecessor; may be \verb`NULL`,
+	\item the leftmost letter of the word, which when added to the predecessor gives the current word in question,
+	\item a \verb`void*` pointer to the unique group element that was found, called \verb`result`.
 \end{itemize}
 The procedure also prints each object as it generates them, for example:
 \begin{verbatim}
@@ -224,7 +224,7 @@ Call the six generators of the Clifford group other than $H_2$ and $H_3$ the red
 
 The last two generators we could consider, $\langle R, H_2, C_2(X_3)\rangle$, and $\langle R, H_3, C_3(X_2)\rangle$, both trigger an integer overflow when calculating the order of the products $C_2(X_3)H_2$, and $C_3(X_2)H_3$.
 
-The exact values of these matrices are
+The exact value of the former product is
 \begin{align*}
 	C_2(X_3)H_2 &=
 	\frac{1}{\sqrt{2}}
@@ -253,7 +253,7 @@ The exact values of these matrices are
 		0&0&1&0&0&-1\\ 
 		1&0&0&-1&0&0\\ 
 		0&1&0&0&-1&0
-	\end{bmatrix}
+	\end{bmatrix}.
 \end{align*}
 For a $6\times6$ matrix this seems fairly innocuous, and the other doesn't look much worse
 \begin{align*}
@@ -284,10 +284,10 @@ For a $6\times6$ matrix this seems fairly innocuous, and the other doesn't look 
 		0&0&0&1&1&1\\ 
 		0&0&0&1&\omega_3&\omega_3^2\\
 		1&\omega_3^2&\omega_3&0&0&0
-	\end{bmatrix}
+	\end{bmatrix},
 \end{align*}
 
-But if we raise the simpler of these to the fourth power, it becomes quite chaotic:
+but if we raise the simpler of these to the fourth power, it becomes quite chaotic.
 \[\left(C_2(X_3)H_2\right)^4 =
 \frac{1}{4}
 \begin{bmatrix}
@@ -297,11 +297,11 @@ But if we raise the simpler of these to the fourth power, it becomes quite chaot
 	-1&1&0&3&-1&2\\ 
 	0&-1&1&2&3&-1\\ 
 	1&0&-1&-1&2&3
-\end{bmatrix}
+\end{bmatrix}.
 \]
 
-The second power is $C_2(X_3)H_2C_2(X_3)H_2$, which resembles the infinite order term from \cite{universal-qubit}, a non-Clifford matrix, times the Fourier transform of that matrix, and when we ask Wolfram Mathematica for its characteristic polynomial we get
-\[1/4 (\lambda - 1)^2 (4 \lambda^4 + 2 \lambda^3 - 3 \lambda^2 + 2 \lambda + 4)\]
+The second power is $C_2(X_3)H_2C_2(X_3)H_2$, which resembles the infinite order term from \cite{universal-qubit}, in that it is a non-Clifford matrix, times the Fourier transform of that matrix; when we ask Wolfram Mathematica for its characteristic polynomial we get
+\[1/4 (\lambda - 1)^2 (4 \lambda^4 + 2 \lambda^3 - 3 \lambda^2 + 2 \lambda + 4).\]
 This rational polynomial has an irreducible factor that is cyclotomic and another that is non-cyclotomic, which by the reasoning used in \cite{universal-qubit} tells us that as we expected, one of its eigenvalues is a root of unity, and another is not, meaning no scale multiple of this matrix is finite order, and so $\langle R, H_2, C_2(X_3) \rangle$ really is an infinite group. Further $C_2(X_3)H_2$ is also infinite order, since two of its eigenvalues will square to roots of unity, and are therefore also roots of unity, whereas the other four will square to non-roots of unity, and are therefore also not roots of unity.
 
 Inspired by this, we calculate
@@ -328,7 +328,7 @@ which is where we found the word for $C_2(S_{p,q})$ given in \autoref{analyse-pe
 also. These results are interesting but it is important not to forget about the qubit-qubit and qutrit-qutrit control gates which were essential for universal computation, which are concealed by this myopic discussion of $U(6)$.
 
 \subsection{Non-Clifford States}
-The primary motivation for the result of \cite{universal-qubit}, that $H, T, C_2(X_2)$ is universal, was that all three of these operations can be implemented fault tolerantly. $H$ and $C_2(X)$ had known fault tolerant implementations known prior to this, but the algorithm presented to implement $T$ was done in two steps, the first was to fault tolerantly develop an approximation of the same state $\frac{1}{\sqrt{2}}(\ket{0} + \omega_8\ket{1})$ that would be produced by $TH\ket{0}$, and the second step was to use this \emph{state} in a $C_2(X_2)$ gate in order to simulate a $T$ gate. If we use the $T$ operation directly this will look like:
+The primary motivation for the result of \cite{universal-qubit}, that $H, T, C_2(X_2)$ is universal, was that all three of these operations can be implemented fault tolerantly. $H$ and $C_2(X)$ had known fault tolerant implementations known prior to this, but the algorithm presented to implement $T$ was done in two steps, the first was to fault tolerantly develop an approximation of the same state $\frac{1}{\sqrt{2}}(\ket{0} + \omega_8\ket{1})$ that would be produced by $TH\ket{0}$, and the second step was to use this \emph{state} in a $C_2(X_2)$ gate in order to simulate a $T$ gate. If we use the $T$ operation directly we can draw a diagram demonstrating most of how this is done.
 
 \begin{quantikz}
 	\lstick{qubit $\ket{\phi}$} & \qw & \qw & \phase{1}\vqw{1} & \qw & \qw \rstick{$T\ket{\phi}$ or $\omega_8^{-1}D_2^{-1}T\ket{\phi}$} \\
@@ -337,33 +337,33 @@ The primary motivation for the result of \cite{universal-qubit}, that $H, T, C_2
 
 If $\ket{\phi} = a\ket{0} + b\ket{1}$ then after the control operation we will have the state
 \begin{align*}
-\frac{1}{\sqrt{2}}C_2(X_2)(\ket{\phi}\otimes (\ket{0} + \omega_8\ket{1}))
-&= \frac{1}{\sqrt{2}}C_2(X_2)(a\ket{0}\ket{0} + a\omega_8\ket{0}\ket{1} + b\ket{1}\ket{0} + b\omega_8\ket{1}\ket{1})
-\\&= \frac{1}{\sqrt{2}}(a\ket{0}\ket{0} + a\omega_8\ket{0}\ket{1} + b\ket{1}\ket{1} + b\omega_8\ket{1}\ket{0})
+&\frac{1}{\sqrt{2}}C_2(X_2)(\ket{\phi}\otimes (\ket{0} + \omega_8\ket{1}))
+\\&= \frac{1}{\sqrt{2}}C_2(X_2)(a\ket{0}\ket{0} + a\omega_8\ket{0}\ket{1} + b\ket{1}\ket{0} + b\omega_8\ket{1}\ket{1})
+\\&= \frac{1}{\sqrt{2}}(a\ket{0}\ket{0} + a\omega_8\ket{0}\ket{1} + b\ket{1}\ket{1} + b\omega_8\ket{1}\ket{0}).
 \end{align*}
 If we measure $\ket{0}$ in the second qubit then we get
-\[a\ket{0} + b\omega_8\ket{1}\]
+$a\ket{0} + b\omega_8\ket{1}$
 in the first qubit, which is $T\ket{\phi}$. On the other hand if we measure $\ket{1}$ then we get
-\[a\omega_8\ket{0} + b\ket{1},\]
+$a\omega_8\ket{0} + b\ket{1},$
 and so if we measure $\ket{1}$ we might also be able to conditionally apply $D_2 = \sqrt{Z}$ to get
 \[a\omega_8\ket{0} + b\omega_4\ket{1} = \omega_8(a\ket{0} + b\omega_8\ket{1}),\]
 which is also $T\ket{\phi}$ up to global phase.
 
-This is a powerful technique that has been generalised to many other fault tolerant gate implementations, including the $P_9$ operation presented in \cite{arithmetics} which we discussed in \autoref{supermetaplectic}. The key insight is that even if you can only perform Clifford operations fault tolerantly, and measure fault tolerantly, then you can still produce the effects of non-Clifford operations by generating non-Clifford states such as the $\frac{1}{\sqrt{2}}(\ket{0} + \omega_8\ket{1})$ state shown above. Our operations $C_2(X_3)$ and $C_3(X_2)$ are not Clifford, and as such can produce numerous non-Clifford states, including states that resemble the qubit $\ket{+}$ state, but in a qutrit instead:
+This is a powerful technique that has been generalised to many other fault tolerant gate implementations, including the $P_9$ operation presented in \cite{arithmetics} which we discussed in \autoref{supermetaplectic}. The key insight is that even if you can only perform Clifford operations fault tolerantly, and measure fault tolerantly, then you can still produce the effects of non-Clifford operations by generating non-Clifford states such as the $\frac{1}{\sqrt{2}}(\ket{0} + \omega_8\ket{1})$ state shown above. Our operations $C_2(X_3)$ and $C_3(X_2)$ are not Clifford, and as such can produce numerous non-Clifford states, including states that resemble the qubit $\ket{+}$ state, but in a qutrit instead, which we notate as
 \begin{align*}
-\ket{+_{p,q}} = \frac{1}{\sqrt{2}}(\ket{p} + \ket{q})
+\ket{+_{p,q}} = \frac{1}{\sqrt{2}}(\ket{p} + \ket{q}),
 &&&
-\ket{-_{p,q}} = \frac{1}{\sqrt{2}}(\ket{p} - \ket{q})
+\ket{-_{p,q}} = \frac{1}{\sqrt{2}}(\ket{p} - \ket{q}).
 \end{align*}
 
-First using $C_3(X_2)$ we can produce these states using the circuit
+First, we present a circuit to consistently produce states of this form using $C_3(X_2)$.
 
 \begin{quantikz}
 	\lstick{qubit $\ket{0}$} & \gate{H_2} & \phase{1} \vqw{1} & \gate{H_2} & \meter{0/1} & \qw\rstick{$\ket{0}$ or $\ket{1}$}\\
 	\lstick{qutrit $\ket{0}$} & \qw & \targ{} & \qw & \qw & \qw \rstick{$\ket{+_{0,1}}$ or $\ket{-_{0,1}}$}
 \end{quantikz}
 
-Then using $C_2(X_3)$ (or $C_2(S_{0,1})$) we can produce these states using the circuit
+Then, using $C_2(X_3)$ (or $C_2(S_{0,1})$) we can produce these states with probability $2/3$, using a different circuit.
 
 \begin{quantikz}
 	\lstick{qubit $\ket{0}$} & \qw & \targ{} & \meter{0/1} & \qw \rstick{$\ket{0}$ or $\ket{1}$} \\

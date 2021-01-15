@@ -46,7 +46,7 @@ This proposition tells us that when a set has an identity, it follows that it ha
 
 From this point on if we talk about a set $A$ which has only one relevant way of being interpreted as a group, or more generally has only one way of being interpreted as an algebraic structure $(A, \alpha_1, \dots, \alpha_n)$, then we will treat $A$ as if it is itself the group, etc. For example if we talk about the group $\mathbb{Z}$, we mean $(\mathbb{Z}, +)$, not any other group which happens to be well defined.
 
-\begin{define}[Induced operations] Given a set $A$ which is a subset of a set $B$, and a binary operation $\cdot: B \times B \to B$, we say that $\cdot$ \emph{induces a binary operation in $A$} if for every $a_1, a_2 \in A$, the product $a_1 \cdot a_2$ is also in $A$.
+\begin{define}\label{induced-subgroup}[Induced operations] Given a set $A$ which is a subset of a set $B$, and a binary operation $\cdot: B \times B \to B$, we say that $\cdot$ \emph{induces a binary operation in $A$} if for every $a_1, a_2 \in A$, the product $a_1 \cdot a_2$ is also in $A$.
 \end{define}
 The induced operation being referred to in this phrase is $\cdot$ with the restricted domain $\cdot|_A: A \times A \to B$, since it will now be a well defined operation on $A$ in that $\cdot|_A: A \times A \to A$.
 
@@ -81,7 +81,7 @@ This can be proven using induction, but when you unpack the notation these two s
 \end{prop}
 This is once again proven inductively.
 
-One important special case of multiplicative operations are rings:
+One important special case of multiplicative operations is that of rings.
 \begin{define}[Rings] A triple $(R, \cdot, +)$ is said to be a \emph{ring} if $(R, +)$ is a commutative group, $\cdot$ is an associative binary operation $R \times R \to R$, and $\cdot$ distributes over $+$.
 \end{define}
 Clearly whenever $(R, \cdot, +)$ is a ring, then $\cdot$ will be multiplicative and $(R, +)$ will be an additive group, and so all rings inherit the notation of additive identities 0 and additive inverses $-x$.
@@ -103,7 +103,7 @@ Central examples of fields include $\mathbb{Q}$, $\mathbb{R}$, and $\mathbb{C}$.
 \end{prop}
 This follows from the multiplicative property of the determinant.
 
-Related to fields are another important case of a multiplicative operation, the vector space:
+Related to fields are another important case of a multiplicative operation, the vector space.
 \begin{define}[Vector Space] Given a field $(F, \cdot_F, +_F)$, a triple $(V, \cdot_V, +_V)$ is said to be a \emph{vector space over the field $F$} if all of the following hold:
 \begin{itemize}
 	\item $(V, +_V)$ is a commutative group,
@@ -165,7 +165,7 @@ with $v = 0$ is the trivial $0 = a_0 = a_1 = \dots = a_{n-1}$. If $S$ is both sp
 	\[a_i = b_i \forall i.\]
 \end{proof}
 
-Now, if every linear combination of a set of vectors will be the unique such linear combination, then we can extract the corresponding scalars in a well defined way:
+Now, if every linear combination of a set of vectors will be the unique such linear combination, then we can extract the corresponding scalars in a well defined way.
 
 \begin{define}
 If $S$ is a finite set of vectors $\{u_0, \dots, u_{n-1}\}$, then the \emph{coordinates} of a vector $v \in \vecspan S$ are the unique scalars $a_i$ that give
@@ -173,7 +173,7 @@ If $S$ is a finite set of vectors $\{u_0, \dots, u_{n-1}\}$, then the \emph{coor
 In particular if $S$ is a basis of $V$ then every vector $v \in V$ will have unique coordinates.
 \end{define}
 
-A crucial example of all of the above concepts is $F^n$, with the following basis:
+A crucial example of all of the above concepts is $F^n$, equipped with a simple and natural basis.
 \begin{define}\label{canonical-basis}
 	The \emph{canonical basis} of the set of column vectors $F^n$ is the set of vectors $u_i$, whose $i$th entry is 1 and the rest are 0.\footnote{Later in \autoref{dirac} these will be written $\ket{i}$}
 	\[u_0 = \begin{bmatrix}
@@ -189,7 +189,7 @@ A crucial example of all of the above concepts is $F^n$, with the following basi
 	The canonical basis of $F^n$ is in fact a basis of $F^n$.
 \end{prop}
 \begin{proof}
-	We can prove $\{u_i\}$ is spanning by reading the coordinates directly out of $v \in F^n$:
+	We can prove $\{u_i\}$ is spanning by reading the coordinates directly out of $v \in F^n$,
 	\[v = \begin{bmatrix}
 		a_0 \\ a_1 \\ \vdots \\ a_{n-1}
 	\end{bmatrix} = \sum_i a_i u_i.\]
@@ -206,7 +206,7 @@ A crucial example of all of the above concepts is $F^n$, with the following basi
 	meaning $a_i$ are all 0 and the linear combination was in fact trivial. This means $\{u_i\}$ is linearly independent, and spanning, which by definition makes it a basis of $F^n$.
 \end{proof}
 
-Bases tell us something very important about the structure of $V$, which first becomes apparent in the following fact:
+Bases tell us something very important about the structure of $V$, as evidenced by an established fact about bases of vector spaces.
 \begin{prop}[Dimension Theorem for Finite Vector Spaces]
 	Whenever finite sets $S_1$ and $S_2$ are both bases of $V$, they must have the same size.
 \end{prop}
@@ -221,16 +221,16 @@ An important operation in the geometry of vectors is the inner product, which si
 \begin{define}
 	Given a vector space $V$ over a subfield $\mathbb{F}$ of $\mathbb{C}$, a map $(,): V \times V \to F$ is called an \emph{inner product} if for every $u, v, w \in V$, and every $a, b \in \mathbb{F}$, the following identities hold:
 	\begin{itemize}
-		\item conjugate symmetry: $(u, v) = (v, u)^*$ (where $a^*$ is the complex conjugate of $a$)
-		\item right linearity: $(u, av+bw) = a(u, v) + b(u, w)$
-		\item positive definite: $(v, v)$ real, and strictly positive whenever $v \neq 0$
+		\item conjugate symmetry: $(u, v) = (v, u)^*$ (where $a^*$ is the complex conjugate of $a$),
+		\item right linearity: $(u, av+bw) = a(u, v) + b(u, w)$,
+		\item positive definite: $(v, v)$ real, and strictly positive whenever $v \neq 0$.
 	\end{itemize}
 	We also say that $(V, \cdot, +, (,))$ is an \emph{inner product space} under $\mathbb{F}$.
 \end{define}
 
 \begin{prop}
 	Every inner product $(,)$ is left conjugate linear, i.e.\ for every $u, v, w \in V$, and every $a, b \in \mathbb{F}$ the identity
-	\[(au+bv,w) = a^*(u,w) + b^*(v,w)\]
+	\[(au+bv,w) = a^*(u,w) + b^*(v,w).\]
 \end{prop}
 \begin{proof}
 	\begin{align*}
@@ -238,12 +238,12 @@ An important operation in the geometry of vectors is the inner product, which si
 		&= (w,au+bv)^*
 		\\&= (a(w,u)+b(w,v))^*
 		\\&= a^*(w,u)^*+b^*(w,v)^*
-		\\&= a^*(u,w)+b^*(v,w)
+		\\&= a^*(u,w)+b^*(v,w).
 	\end{align*}
 \end{proof}
 
 \begin{prop}
-	If for every scalar $a \in \mathbb{F}$ we have $a^* \in \mathbb{F}$, then the following map is an inner product in $\mathbb{F}^n$:
+	If for every scalar $a \in \mathbb{F}$ we have $a^* \in \mathbb{F}$, then the map
 \[
 \left(
 \left[\begin{matrix} a_0\\a_1\\\vdots\\a_n\end{matrix}\right]
@@ -255,6 +255,7 @@ An important operation in the geometry of vectors is the inner product, which si
 \left[\begin{matrix} b_0\\b_1\\\vdots\\b_n\end{matrix}\right]
 = \sum_{i=0}^{n-1} a_i^*b_i
 \]
+is an inner product in $\mathbb{F}^n$.
 \end{prop}
 Once again, this is straight-forward to prove using the algebraic properties of $\mathbb{C}$. This is not the only inner product one can define for $\mathbb{F}^n$, but it is the one we will be using.
 
@@ -302,7 +303,7 @@ Once again, this is straight-forward to prove using the algebraic properties of 
 	If we let $v = 0$ then by \autoref{orthog-zero} we get $0 = a_j\norm{u_j}^2$, and by \autoref{norm-zero} we know that $\norm{u_j}^2$ is non-zero, so every $a_j$ will be zero.
 \end{proof}
 
-The converse does not hold, but we can always use the Gram–Schmidt process to construct an orthonormal set from a linearly independent set:
+The converse does not hold, but we can always use the Gram–Schmidt process to construct an orthonormal set from a linearly independent set.
 
 \begin{prop}[Gram–Schmidt]
 	For every finite dimensional vector space $(V, \cdot, +)$ over the field $\mathbb{R}$ or $\mathbb{C}$ with inner product $(,)$, there is a basis which is orthonormal in the inner product space $(V, \cdot, +, (,))$.
@@ -315,14 +316,14 @@ This process leads to great generality in ones discussion of inner product space
 \begin{proof}
 	Let the coordinates of $v$ be $a_i$, so that
 	\[v = \sum_{i=0}^{n-1}a_iv.\]
-	Then calculate $(u_i, v)$:
+	Then calculate
 	\begin{align*}
 		(u_i, v)
 		&= \left(u_i, \sum_j a_ju_j\right)
 		\\&= \sum_j a_j\left(u_i, u_j\right)
 		\\&= 0 + \dots + 0 + a_i\left(u_i, u_i\right) + 0 + \dots + 0
 		\\&= a_i\norm{u_i}^2
-		\\&= a_i
+		\\&= a_i.
 	\end{align*}
 \end{proof}
 
@@ -333,13 +334,14 @@ This process leads to great generality in ones discussion of inner product space
 Such maps essentially show that $U$ exists embedded inside of $V$. If they are surjective then they show that $U$ is structurally equivalent to $V$.
 
 \begin{prop}\label{vectors-tuples}
-	Given an inner product space $(V, \cdot, +, (,))$ over a field $\mathbb{F}$ with an orthonormal basis $S = {u_0, u_1, \dots, u_{n-1}}$, the following map $\phi:V \to \mathbb{F}^n$ preserves inner products:
+	Given an inner product space $(V, \cdot, +, (,))$ over a field $\mathbb{F}$ with an orthonormal basis $S = {u_0, u_1, \dots, u_{n-1}}$, the map $\phi:V \to \mathbb{F}^n$, 
 	\[\phi(v) = \left[\begin{matrix}
 		(u_0, v)\\
 		(u_1, v)\\
 		\cdots\\
 		(u_n, v)
 	\end{matrix}\right]\]
+preserves inner products.
 \end{prop}
 \begin{proof}
 	From \autoref{coords-inner-product} we have $u = \sum_i (u_i, u)$ and $v = \sum_j (u_i, v)$, which gives
@@ -382,20 +384,20 @@ The proof amounts to showing that a Cauchy sequence in either of these spaces is
 
 \begin{define}
 	A relation $\sim$ between elements of a set $S$ is called an \emph{equivalence relation} if it satisfies the following three properties, for any $a, b, c \in S$:
-	\begin{enumerate}
-		\item Reflexivity: $a ~ a$,
-		\item Symmetry: $a ~ b \iff b ~ a$,
-		\item Transitivity: $a ~ b, b ~ c \implies a ~ c$.
-	\end{enumerate}
+	\begin{itemize}
+		\item Reflexivity: $a \sim a$,
+		\item Symmetry: $a \sim b \iff b \sim a$,
+		\item Transitivity: $a \sim b, b \sim c \implies a \sim c$.
+	\end{itemize}
 \end{define}
 
-Equivalence relations are a powerful way of identifying different elements of a set with each other. The set quotient is an even more powerful way of exhibiting the structure of the equivalence relation as a concrete set:
+Equivalence relations are a powerful way of identifying different elements of a set with each other. The set quotient is an even more powerful way of exhibiting the structure of the equivalence relation as a concrete set.
 
 \begin{define}[Set Quotient]
 	Given an equivalence relation $\sim$ on a set $S$, and an element $x \in S$, the \emph{equivalence class} of $x$ is the subset of $S$ written
 	\[[x] = \{y\ |\ x \sim y\}\]
-	The \emph{set quotient} of $S$ with respect to $\sim$ is the set of equivalence classes:
-	\[S/\sim = \{[x]\ |\ x \in S\}\]
+	The \emph{set quotient} of $S$ with respect to $\sim$ is the set of equivalence classes
+	\[S/\sim \ = \{[x]\ |\ x \in S\}.\]
 \end{define}
 
 \begin{prop}
@@ -403,18 +405,18 @@ Equivalence relations are a powerful way of identifying different elements of a 
 \end{prop}
 
 \begin{prop}
-	In an equivalence relation $\sim$ on a set $S$, any two elements $x, y \in S$ will satisfy $x ~ y$ exactly when $[x] = [y]$.
+	In an equivalence relation $\sim$ on a set $S$, any two elements $x, y \in S$ will satisfy $x \sim y$ exactly when $[x] = [y]$.
 \end{prop}
 
 Sometimes set quotients of algebraic structures will themselves have an algebraic structure.
 \begin{define}
-	Given an equivalence relation $\sim$ on a group $G$, we say that $\sim$ \emph{induces a quotient group} if the binary operation
+	Given an equivalence relation $\sim$ on a group $G$, we say that $G$ \emph{induces a binary operation on $G/\sim$} if the binary operation
 	\[[x]\cdot[y] \mapsto [xy]\]
-	is well defined.
+	is well defined, i.e. if this product does not depend on the choice of $x$ and $y$, so that whenever $x' \in [x]$ and $y' \in [y]$ we have $[xy] = [x'y']$.
 \end{define}
 
 \begin{prop}
-	If $\sim$ induces a quotient group on $G$ then $(G/\sim, \cdot)$ is in fact a group.
+	If a group $G$ induces a binary operation on $G/\sim$, then $(G/\sim, \cdot)$ is also a group.
 \end{prop}
 \begin{proof}
 We have associativity by $([x][y])[z] = [xyz] = [x]([y][z])$.\\
@@ -426,36 +428,62 @@ We have inverses by $[x][x^{-1}] = [xx^{-1}] = [e]$.
 	A subgroup $H$ of a group $G$ is said to be a \emph{normal subgroup} if, for every $x \in H$, $z \in G$, the group product $xzx^{-1} \in G$.
 \end{define}
 
+As an example of a normal subgroup, take $G$ to be any subgroup of $GL(n, \mathbb{R})$, and $H$ to be the set of `scalars' in $G$, that is the set $\{\lambda I\ |\ \lambda \in \mathbb{C}\} \cap G$. Since scalars are commutative, it is straight-forward that $g\lambda I g^{-1} = \lambda gg^{-1} = \lambda I \in H$.
+
 \begin{prop}
-	If an equivalence relation $\sim$ induces a quotient group on $G$ then the equivalence class $[e]$ is a normal subgroup.
+	If a group $G$ induces a binary operation on some set quotient $G/\sim$, then the equivalence class $[e]$ is a normal subgroup.
 \end{prop}
 \begin{proof}
-	First, suppose that $e~x$ and $e~y$, then 
+	First, suppose that $e\sim x$ and $e\sim y$, then 
 	\[[e] = [e][e] = [x][y] = [xy],\]
-	meaning $e ~ xy$ as well, so the binary operation of $G$ is induced in $[e]$.
+	meaning $e \sim xy$ as well, so the binary operation of $G$ is induced (in the sense of \autoref{induced-subgroup}) in $[e]$.
 	
-	Now by reflexivity we have $e ~ e$, which gives the identity element $e \in [e]$, and if $e ~ x$ then
+	Now by reflexivity we have $e \sim e$, which gives the identity element $e \in [e]$, and if $e \sim x$ then
 	\[[x^{-1}] = [e][x^{-1}] = [x][x^{-1}] = [xx^{-1}] = [e],\]
-	meaning $e ~ x^{-1}$, which gives inverses $x^{-1}$ in $[e]$. This makes $[e]$ a subgroup of $G$.
+	meaning $e \sim x^{-1}$, which gives inverses $x^{-1}$ in $[e]$. This makes $[e]$ a subgroup of $G$.
 	
 Finally, given $x \in [e]$ and $z \in S$ then
 \[[zxz^{-1}] = [z][x][z^{-1}] = [z][e][z^{-1}] = [zez^{-1}] = [e],\]
-meaning $zxz^{-1} \in [e]$ as well.
+meaning $zxz^{-1} \in [e]$ as well, making $[e]$ normal.
 \end{proof}
 
-This result actually characterizes quotient groups in the following sense:
-\begin{prop}\label{normal-equiv}
-	If $H$ is a normal subgroup of $G$ then the equivalence relation
-	\[x ~ y \iff xy^{-1} \in H\]
-	induces a quotient group in $G$.
+Not only is $[e] \in G/\sim$ a normal subgroup of $G$, but this set allows us to characterize $\sim$ even further. In group theory one can write any equation $g_1=g_2$ as $g_1g_2^{-1} = e$, which in the set quotient $G/\sim$ becomes $[xy^{-1}] = [e]$, i.e. $xy^{-1} \sim e$. We now draw this out formally, in terms of $[e]$ as a set.
+\begin{prop}
+	If a group $G$ induces a binary operation on some set quotient $G/\sim$, and $x, y \in G$, then $x \sim y$ exactly when $xy^{-1} \in [e]$.
 \end{prop}
+\begin{proof}
+	If we have $x \sim y$, then equivalently $[x] = [y]$, which we can now manipulate algebraically. Clearly $[x][y^{-1}] = [y][y^{-1}]$, meaning $[xy^{-1}] = [e]$, and hence $xy^{-1} \sim e$. By symmetry we have $e \sim xy^{-1}$, and so $xy^{-1} \in [e]$.
+	
+	Conversely if $xy^{-1} \in [e]$, then $[xy^{-1}] = [e]$, and in much the same way
+	\[[x] = [xy^{-1}y] = [xy^{-1}][y] = [e][y] = [y],\]
+	giving $x \sim y$.
+\end{proof}
 
+This result motivates us to reverse the formulation we have given, by constructing a set quotient out of a normal subgroup rather than constructing a normal subgroup out of a set quotient. First we must check that we have an equivalence relation.
+\begin{prop}\label{normal-equiv}
+	If $H$ is a normal subgroup of the group $G$, or in fact just a subgroup of $G$, then $x \sim y \iff xy^{-1} \in H$ is an equivalence relation.
+\end{prop}
+\begin{proof}
+	$xx^{-1} = e \in H$ gives reflexivity.\\
+	If $xy^{-1} \in H$ then its inverse $yx^{-1}$ will be in $H$ as well, giving symmetry.\\
+	If $xy{-1}, yz^{-1} \in H$, then their product $xz^{-1}$ will be as well, giving transitivity.
+\end{proof}
+
+Now if $H$ is in fact normal, we can induce a binary operation.
+\begin{prop}
+	If $H$ is a normal subgroup of $G$ then $G$ induces a binary operation on the set quotient $G/\sim$ given by the equivalence relation
+	\[x \sim y \iff xy^{-1} \in H\].
+\end{prop}
+\begin{proof}
+	Suppose that $x' \in [x]$ and $y' \in [y]$, i.e. that $xx'^{-1} \in H$ and $yy'^{-1} \in H$. We would like to show that $[xy] = [x'y']$.
+	
+	Since $H$ is normal, and $yy'^{-1}$ is in $H$, $x'\left(yy'^{-1}\right)x'^{-1}$ will be in $H$ as well. Now the product of $xx'^{-1}$ with this will be $xyy'^{-1}x'^{-1}$, which must be in $H$ also. This is exactly $xy\left(x'y'\right)^{-1}$, meaning $xy \sim x'y'$, and so $[xy] = [x'y']$ as required.
+\end{proof}
+
+We have now characterised a special case of set quotients directly in terms of the concepts of group theory. Given the foundational power of set quotients, it might be little surprise that this characterisation we have presented is the basis of many other group theoretic concepts and techniques, and as such is given a name and taken as the standard way of building a group out of a set quotient.
 \begin{define}
-	If $H$ is a normal subgroup of $G$ then the \emph{group quotient} $G/H$ is the quotient group $G/\sim$ induced by the equivalence relation given in \autoref{normal-equiv}.
+	If $H$ is a normal subgroup of $G$ then the \emph{quotient group} $G/H$ is the group $(G/\sim, \cdot)$, where $\sim$ is the equivalence relation given in \autoref{normal-equiv}, and $\cdot$ is the binary operation induced by $G$ on $G/\sim$.
 \end{define}
-These group quotients are a powerful tool for understanding the structure of groups, since they may have convenient algebraic properties emerging from the corresponding equivalence relation.
-
-As an example of a normal subgroup, take $G \subset GL(n, \mathbb{R})$ to be any group formed by matrix multiplication, and $H$ to be the set of scalars in $G$, that is the set $\{\lambda I\ |\ \lambda \in \mathbb{C}\} \cap G$. Since scalars are commutative, it is straight-forward that $g\lambda I g^{-1} = \lambda gg^{-1} = \lambda I \in H$.
 
 \begin{define}[Cosets]
 	Given a subgroup $H$ of a group $G$, and elements $g_1, g_2 \in G$, we define the \emph{two-sided coset} $g_1Hg_2$ to be the set
@@ -467,10 +495,10 @@ As an example of a normal subgroup, take $G \subset GL(n, \mathbb{R})$ to be any
 	If $H$ is a normal subgroup of $G$, and $g \in G$, then every left coset $gH$ is equal to the corresponding right coset $Hg$, and the group quotient $G/H$ consistes exactly of these cosets of $H$.
 \end{prop}
 
-As an example of a group with a normal subgroup, consider the following:
+As an example of a group with a normal subgroup, consider the following finite group generalising the set of permutation matrices:
 \begin{define}[Generalised Symmetric Group]\label{generalised-perm}
 	For each pair of positive integers $m, n$, define $S(m, n)$ to be the set of unitary matrices $P\in U(n)$ satisfying
-	\[Pu_i = e^{\frac{i2\pi r_i}{m}}u_{\sigma(i)}\]
+	\[Pu_i = \exp\left(\frac{i2\pi r_i}{m}\right)u_{\sigma(i)}\]
 	for every canonical basis $u_i$, where $\sigma$ is some permutation in $\mathcal{S}_n$, and $r_0,\dots,r_{n-1}$ are some set of integers.
 \end{define}
 
@@ -480,11 +508,11 @@ As an example of a group with a normal subgroup, consider the following:
 \begin{proof}
 	Clearly $I \in S(m, n)$ by setting $\sigma = \text{id}$, $r_i = 0$.
 	\\If $P_1 \in S(m, n)$ via $\sigma_1$ and $r_i$, and $P_2 \in S(m, n)$ via $\sigma_2$ and $s_i$, then
-	\[P_1P_2u_i = e^{\frac{i2\pi s_i}{m}}P_1u_{\sigma_2(i)} = e^{\frac{i2\pi (r_{\sigma_2(i)} + s_i)}{m}}u_{\sigma_1(\sigma_2(i))},\]
+	\[P_1P_2u_i = \exp\left(\frac{i2\pi s_i}{m}\right)P_1u_{\sigma_2(i)} = \exp\left(\frac{i2\pi (r_{\sigma_2(i)} + s_i)}{m}\right)u_{\sigma_1(\sigma_2(i))},\]
 	so set $r'_i = r_{\sigma_2(i)} + s_i$, and $\sigma = \sigma_1 \circ \sigma_2$, giving $P_1P_2 \in S(m, n)$. Additionally if we take the equation
-	\[P_1u_i = e^{\frac{i2\pi r_i}{m}}u_{\sigma_1(i)},\]
+	\[P_1u_i = \exp\left(\frac{i2\pi r_i}{m}\right)u_{\sigma_1(i)},\]
 	and rearrange, we get
-	\[P_1^{-1}u_{\sigma_1(i)} = e^{\frac{-i2\pi r_i}{m}}u_i\]
+	\[P_1^{-1}u_{\sigma_1(i)} = \exp\left(\frac{-i2\pi r_i}{m}\right)u_i\]
 	So set $r'_i = -r_{\sigma^{-1}_1(i)}$, and $\sigma = \sigma_1^{-1}$ to get $P_1^{-1} \in S(m, n)$.
 \end{proof}
 
@@ -494,15 +522,17 @@ As an example of a group with a normal subgroup, consider the following:
 \begin{proof}
 	If $P_1, P_2 \in S(m, n)$ are diagonal, then $\sigma_1 = \sigma_2 = \text{id}$, so by the above formulas we get $\sigma = \sigma_1\circ \sigma_2 = \text{id}$ or $\sigma = \sigma_1^{-1} = \text{id}$, giving $P_1P_2$ and $P_1^{-1}$ diagonal. This tells us that $\Delta(m, n)$ is a subgroup of $S(m, n)$.
 	
-	Further if $P$ is some other matrix in $S(m, n)$ via $\sigma$ and $q_i$, then
+	Further if $P$ is some other matrix in $S(m, n)$ via $\sigma$ and $q_i$, and $u_i$ is a canonical basis vector in $\mathbb{C}^n$, then
 	\begin{align*}
 		P^{-1}P_1Pu_i
-		&= e^{\frac{i2\pi(q_i)}{m}}P^{-1}P_1u_{\sigma_i}
-		\\&= e^{\frac{i2\pi(q_i+r_{\sigma(i)})}{m}}P^{-1}u_{\sigma_i}
-		\\&= e^{\frac{i2\pi(r_{\sigma(i)})}{m}}u_i,
+		&= \exp\left(\frac{i2\pi\left(q_i\right)}{m}\right)P^{-1}P_1u_{\sigma(i)}
+		\\&= \exp\left(\frac{i2\pi\left(q_i+r_{\sigma(i)}\right)}{m}\right)P^{-1}u_{\sigma(i)}
+		\\&= \exp\left(\frac{i2\pi\left(r_{\sigma(i)}\right)}{m}\right)u_i,
 	\end{align*}
-so $\Delta(m, n)$ is normal.
+clearly a diagonal matrix, so $\Delta(m, n)$ is normal.
 \end{proof}
+
+This group also contains $\mathcal{S}_n$ as a subgroup, of course, but this will not be normal.
 
 If $H$ is a normal subgroup of $N$ and $N$ is a subgroup of $G$, we might say ``$H$ is normal in $N$'' and ``$N$ is in $G$''. Despite this terminology, $H$ is not necessarily a normal subgroup in $G$. With this subtlety in mind we can find exactly such a group $N$, given any subgroup $H$ of $G$.
 \begin{define}
@@ -513,10 +543,20 @@ Given a subgroup $H$ of a group $G$, the \emph{normaliser} of $H$, written $N_G(
 	Given a subgroup $H$ of a group $G$, the normaliser $N_G(H)$ is the maximal subgroup of $G$ with $H$ as a normal subgroup.
 \end{prop}
 
+As an example, consider the normaliser of $\mathcal{S}_n$ in the generalised symmetric group.
+
+\begin{prop}
+	The normaliser $N_{S(m, n)}(\mathcal{S}_n)$, containing $\mathcal{S}_n$ and contained in $S(m, n)$, is exactly the set of scalar multiples of permutation matrices, \[\{\exp\left(\frac{i2\pi s}{m}\right)P\ |\ s \in \mathbb{Z}, P \in \mathcal{S}_n\}.\]
+\end{prop}
+
 We can also define equivalence classes \emph{between} groups, based on whether they have the same structure under group multiplication.
 \begin{define}
 	Given two groups $G_1$ and $G_2$, a \emph{homomorphism} is a map $\phi: G_1 \to G_2$ satisfying $\phi(x)\phi(y) = \phi(xy)$, for any $x, y \in G_1$. If $\phi$ is bijective then it is also called an \emph{isomorphism}, and if there is at least one such isomorphism then $G_1$ and $G_2$ are said to be \emph{isomorphic}, represented infix as $G_1 \cong G_2$.
 \end{define}
+
+\begin{prop}
+	The relation $\cong$ between groups, of being isomorphic, is an equivalence relation.
+\end{prop}
 
 \begin{prop}\label{inj-hom-thm}
 	If $\phi$ is a homomorphism between $G_1$ and $G_2$, then the image $\phi(G_1)$ is a subgroup of $G_2$, and if $\phi$ is injective then $G_1 \cong \phi(G_1)$.
@@ -537,8 +577,8 @@ By \autoref{inj-hom-thm} the set of permutation matrices form a group isomorphic
 	For any group $G$, $(Aut(G), \circ)$ is a group.
 \end{prop}
 \begin{define}
-	Given a group $(G_1, \cdot)$, and a subgroup $G_2$ of $Aut(G)$, the \emph{semi-direct product} $G_1 \rtimes G_2$ is the group $(G_1 \times G_2, \cdot)$ with the following product:
-	\[(g_1, f_1)\cdot (g_2, f_2) = (g_1 \cdot f_1(g_2), f_1 \circ f_2)\]
+	Given a group $(G_1, \cdot)$, and a subgroup $G_2$ of $Aut(G)$, the \emph{semi-direct product} $G_1 \rtimes G_2$ is the group $(G_1 \times G_2, \cdot)$ with the product
+	\[(g_1, f_1)\cdot (g_2, f_2) = (g_1 \cdot f_1(g_2), f_1 \circ f_2).\]
 \end{define}
 
 \begin{define}
