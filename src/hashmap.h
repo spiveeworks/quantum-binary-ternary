@@ -28,11 +28,16 @@ uint64_t hash_calc(void *val_v, size_t size) {
     return (result + (result >> 32U)) % TABLE_LEN;
 }
 
+// Robin Hood Hashing: swap new_hash with curr_hash if new_hash has been
+// probing from a (cyclically) smaller index than curr_hash
 #define swap_cond(ind, curr_hash, new_hash) (((new_hash)+TABLE_LEN-(ind)-1)%TABLE_LEN < ((curr_hash)+TABLE_LEN-(ind)-1)%TABLE_LEN)
 
 void* hash_lookup(void *key, size_t key_size) {
     uint64_t hash = hash_calc(key, key_size);
     size_t index = hash % TABLE_LEN;
+    
+    // probe until either we find the correct key, or we find a node that
+    // would have been replaced by Robin Hood Hashing 
     while (true) {
         if (table[index].key == NULL || swap_cond(index, table[index].hash, hash)) {
             return NULL;
@@ -51,6 +56,7 @@ void hash_insert(void *key, size_t key_size, void *val) {
     new_node.val = val;
     size_t index = new_node.hash;
     bool done = false;
+    // rearrange nodes according to Robin Hood Hashing
     while (!done) {
         if (table[index].key == NULL) {
             table[index] = new_node;
